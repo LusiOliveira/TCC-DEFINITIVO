@@ -1,0 +1,926 @@
+/* Variáveis de Cores para facilitar a manutenção */
+:root {
+    --primary-color: #059669;
+    --secondary-color: #10B981;
+    --accent-color: #F59E0B;
+    --hover-blue: #1E40AF;
+    --bg-light: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-light: #6B7280;
+    --white: #FFFFFF;
+}
+
+/* Rolagem suave nos links âncora (#inicio, #mapa-coleta, etc.) */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--white);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Navegação Fixa */
+header {
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 1rem 5%;
+    gap: 1rem;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-self: start;
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    justify-self: center;
+}
+
+.nav-links a {
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+header .btn-nav {
+    justify-self: end;
+}
+
+/* Material Symbols (ícone do Cadastre-se) */
+.material-symbols-outlined {
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+}
+
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #2374AF;
+    color: var(--white);
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+
+.btn-nav__icon {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.btn-nav:hover {
+    background-color: var(--hover-blue);
+    color: var(--white);
+}
+
+/* Espaçamento para o header fixo */
+main {
+    padding-top: 80px;
+}
+
+/* Faixa do carrossel: degradê de cima para baixo (verde → branco) */
+.hero-section {
+    background: linear-gradient(to bottom, #10B981 0%, #ffffff 100%);
+    padding: 2rem 0 2.5rem;
+    width: 100%;
+}
+
+/* Seção Hero em formato outdoor/carrossel */
+.hero-slider {
+    position: relative;
+    width: min(94%, 1280px);
+    margin: 0 auto;
+    border-radius: 18px;
+    overflow: hidden;
+    background: transparent;
+    box-shadow: 0 10px 28px rgba(31, 41, 55, 0.12);
+}
+
+.hero-track {
+    position: relative;
+    min-height: 430px;
+    background: transparent;
+}
+
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 3rem 3.5rem;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 0;
+    /* Troca instantânea: sem crossfade que deixava o fundo claro aparecer */
+    transition: none;
+}
+
+.hero-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+}
+
+.hero-content {
+    max-width: 620px;
+    color: var(--white);
+}
+
+.hero-content h1,
+.hero-content h2 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 1.1;
+    margin-bottom: 0.9rem;
+}
+
+.hero-content p {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    margin-bottom: 1.7rem;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.hero-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    z-index: 3;
+}
+
+.hero-control:hover {
+    background: var(--white);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.hero-control.prev {
+    left: 14px;
+}
+
+.hero-control.next {
+    right: 14px;
+}
+
+.hero-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+}
+
+.hero-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hero-dot.is-active {
+    width: 26px;
+    background: var(--white);
+}
+
+.btn-large {
+    background-color: #2374AF;
+    color: var(--white);
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    display: inline-block;
+    transition: transform 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.btn-large:hover {
+    background-color: var(--hover-blue);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
+/* Títulos de Seção */
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    padding-top: 3rem;
+}
+
+/* Sobre o Projeto */
+.sobre-projeto {
+    background-color: var(--bg-light);
+    padding: 0 1.25rem 3.5rem;
+}
+
+.sobre-projeto__content {
+    max-width: 820px;
+    margin: 0 auto;
+    color: var(--text-light);
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+.sobre-projeto__content p {
+    margin-bottom: 1.25rem;
+}
+
+.sobre-projeto__content p:last-child {
+    margin-bottom: 0;
+}
+
+.sobre-projeto__content strong {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+/* Centraliza o texto de informação do mapa */
+.map-info {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-light);
+    width: 100%;
+}
+
+/* Seção do Mapa */
+/* --- NOVA SEÇÃO DO MAPA SINCRONIZADO --- */
+.map-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 550px;
+}
+
+/* Agrupa o texto e o mapa no lado esquerdo */
+.map-wrapper {
+    flex: 2; /* A caixa toda (texto + mapa) ocupa 2/3 da tela */
+    display: flex;
+    flex-direction: column;
+}
+
+/* O texto agora centraliza apenas em relação à caixa dele */
+.map-info {
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--text-light);
+    width: 100%;
+}
+
+/* O mapa preenche o resto do espaço da caixa */
+.map-view {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 4px solid var(--white);
+    z-index: 1;
+}
+
+.map-sidebar {
+    flex: 1; 
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 10px;
+    
+    /* Novas linhas para o alinhamento perfeito */
+    margin-top: 38px; /* Empurra a lista para baixo (altura do texto + margem) */
+    height: calc(100% - 38px); /* Impede que a lista vaze pela parte de baixo */
+}
+
+/* Estilo da barra de scroll da lista */
+.map-sidebar::-webkit-scrollbar { width: 8px; }
+.map-sidebar::-webkit-scrollbar-track { background: var(--bg-light); border-radius: 4px; }
+.map-sidebar::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+
+/* Cartões da lista de pontos */
+.ponto-card {
+    background: var(--white);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    border-left: 5px solid var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.ponto-card:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.ponto-card.ativo {
+    background-color: rgba(5, 150, 105, 0.1);
+    border-left-color: var(--accent-color);
+}
+
+.ponto-card h3 { font-size: 1.1rem; margin-bottom: 5px; color: var(--secondary-color); }
+.ponto-card p { font-size: 0.9rem; color: var(--text-light); margin: 0; }
+.ponto-card .tag-tipo { font-size: 0.8rem; font-weight: bold; color: var(--primary-color); display: inline-block; margin-top: 8px; }
+
+/* Responsividade para Telemóveis */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1.25rem 0 1.75rem;
+    }
+
+    .hero-slider {
+        width: 96%;
+    }
+
+    .hero-track {
+        min-height: 370px;
+    }
+
+    .hero-slide {
+        padding: 2rem 1.4rem;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .hero-control {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-control.prev {
+        left: 8px;
+    }
+
+    .hero-control.next {
+        right: 8px;
+    }
+
+    .map-layout { flex-direction: column; height: auto; }
+    .map-view { height: 400px; }
+    .map-sidebar { max-height: 400px; }
+}
+
+/* Seção Economia Circular (Cards) */
+.circular-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem;
+}
+.item-card {
+    background: var(--white); border-radius: 10px; padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.item-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+.item-icon { font-size: 3rem; color: var(--primary-color); margin-bottom: 15px; }
+.tag { background: rgba(5, 150, 105, 0.1); color: var(--primary-color); padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; }
+
+/* Botões dos Cards */
+.btn-acao {
+    margin-top: 15px; padding: 8px 15px; border: none; background: var(--primary-color); color: white; border-radius: 5px; cursor: pointer; transition: background 0.3s;
+}
+.btn-acao:hover { background: var(--secondary-color); }
+
+/* Rodapé */
+footer { background-color: var(--text-dark); color: var(--white); text-align: center; padding: 2rem; margin-top: 2rem; }
+
+/* --- Estilos do Chatbot Flutuante --- */
+.chatbot-wrapper {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.chatbot-toggle {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.1);
+    background-color: var(--secondary-color);
+}
+
+.chatbot-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 320px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    transform-origin: bottom right;
+}
+
+/* Classe que esconde o chat */
+.chatbot-window.hidden {
+    transform: scale(0);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chatbot-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header h4 { margin: 0; font-size: 1.1rem; }
+
+.chatbot-header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.chatbot-messages {
+    height: 300px;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: var(--bg-light);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 85%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.message.bot {
+    background-color: rgba(5, 150, 105, 0.1);
+    align-self: flex-start;
+    color: var(--text-dark);
+    border-bottom-left-radius: 0;
+}
+
+.message.user {
+    background-color: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+}
+
+.chatbot-input {
+    display: flex;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    padding-left: 15px;
+}
+
+.chatbot-input button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- SEÇÃO CANAL DE APRENDIZADO --- */
+.aprendizado-section {
+    padding: 80px 0;
+    background-color: var(--bg-light);
+}
+
+.aprendizado-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.aprendizado-inner::before {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    margin: 0 auto 30px auto;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+}
+
+.aprendizado-header .subtitle {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+}
+
+.aprendizado-header h2 {
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin: 10px 0;
+}
+
+.aprendizado-header .highlight {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #0FFCBE 50%, #106EBE 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.aprendizado-header p {
+    color: var(--text-light);
+    max-width: 650px;
+    margin: 0 auto 40px auto;
+    font-size: 1.1rem;
+}
+
+/* Abas (Botões) */
+.tabs-container {
+    display: inline-flex;
+    background: var(--white);
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.tab-btn:hover { color: var(--primary-color); }
+.tab-btn.ativo {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+/* Conteúdo (Cards) */
+.tab-content {
+    display: none; /* Esconde todas por padrão */
+    gap: 20px;
+    text-align: left;
+}
+
+.tab-content.ativa {
+    display: flex; /* Mostra apenas a aba ativa */
+}
+
+.card-principal, .card-secundario {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #eaeaea;
+}
+
+.card-principal { flex: 2; }
+.card-secundario { flex: 1.2; background: var(--bg-light); }
+
+.card-principal h3, .card-secundario h3 {
+    color: var(--secondary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-principal p {
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+.card-secundario ul {
+    list-style: none;
+    padding: 0; margin: 0;
+}
+
+.card-secundario li {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.text-warning { color: var(--accent-color); margin-top: 3px; }
+.text-success { color: var(--primary-color); margin-top: 3px; }
+
+/* Responsividade (Telemóvel) */
+@media (max-width: 768px) {
+    .tab-content.ativa { flex-direction: column; }
+    .tabs-container { border-radius: 15px; }
+    .tab-btn { width: 100%; justify-content: center; }
+}
+
+/* Seção Sobre o Projeto */
+.sobre-container {
+    padding: 80px 10%;
+    background-color: #f9fbfb; /* Fundo levemente acinzentado para destaque */
+}
+
+.sobre-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.sobre-text {
+    flex: 1;
+}
+
+.titulo-moderno {
+    font-size: 2.5rem;
+    color: #008b8b; /* Verde-água escuro */
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.titulo-moderno::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: #0077b6; /* Azul secundário */
+    margin-top: 10px;
+    border-radius: 2px;
+}
+
+.sobre-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.detalhe-decorativo {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(to right, #008b8b, transparent);
+}
+
+.sobre-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.img-flutuante {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.img-flutuante:hover {
+    transform: translateY(-10px);
+}
+
+/* Responsividade para Celulares */
+@media (max-width: 768px) {
+    .sobre-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .titulo-moderno::after {
+        margin: 10px auto;
+    }
+}
+
+/* Bloco Principal "Sobre" */
+.sobre-projeto-bloco {
+    background-color: #20b2aa; /* Verde-água (LightSeaGreen) - Cor inicial do site */
+    margin: 40px 10%;           /* Espaçamento externo para não encostar nas bordas da tela */
+    padding: 60px 40px;         /* Espaçamento interno */
+    border-radius: 30px;        /* Bordas arredondadas conforme solicitado */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Sombra suave para dar profundidade */
+}
+
+/* Container interno para alinhar itens */
+.sobre-container-inner {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Texto dentro do bloco */
+.sobre-text {
+    flex: 1;
+    color: #ffffff; /* Texto branco para contrastar com o fundo verde-água */
+}
+
+.titulo-destaque {
+    font-size: 2.2rem;
+    color: #003366; /* Azul escuro para contraste e destaque */
+    margin-bottom: 15px;
+}
+
+.sobre-text p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Detalhe Azul solicitado */
+.detalhe-linha-azul {
+    width: 80px;
+    height: 6px;
+    background-color: #0077b6; /* Azul secundário */
+    border-radius: 10px;
+}
+
+/* Estilo da Imagem */
+.sobre-image {
+    flex: 1;
+    text-align: center;
+}
+
+.img-curva {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 20px; /* Bordas arredondadas na imagem também */
+    border: 4px solid #0077b6; /* Borda azul para combinar com os detalhes */
+}
+
+/* Ajuste para dispositivos móveis */
+@media (max-width: 768px) {
+    .sobre-container-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detalhe-linha-azul {
+        margin: 0 auto;
+    }
+    
+    .sobre-projeto-bloco {
+        margin: 20px 5%;
+        padding: 40px 20px;
+    }
+}
+
+/* Bloco Sobre o Projeto */
+.secao-quadrada {
+    background-color: #35e2a8a9; /* Verde solicitado  */
+    margin: 40px auto;
+    padding: 80px 50px;
+    max-width: 900px;         /* Limita a largura para parecer mais quadrado  */
+    border-radius: 40px;      /* Bordas arredondadas e suaves  */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.container-sobre {
+    display: flex;
+    flex-direction: column;   /* Empilha os itens para reforçar o formato vertical/quadrado */
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+}
+
+/* Título e Texto */
+.titulo-branco {
+    color: #072e1e;           /* Título branco solicitado  */
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.conteudo-texto p {
+    color: #003729;           /* Verde bem claro para leitura suave  */
+    font-size: 1.15rem;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+/* Detalhe Azul */
+.detalhe-azul-quadrado {
+    width: 60px;
+    height: 10px;
+    background-color: #0077b6; /* Detalhe azul [cite: 23, 27] */
+    border-radius: 5px;
+    margin: 20px auto;
+}
+
+/* Imagem com formato quadrado */
+.img-quadrada {
+    width: 280px;
+    height: auto;
+    background: transparent !important;
+    border: none; /* Caso queira tirar a borda branca que colocamos antes */
+}
+
+
+/* Ajuste para telas maiores: volta para lado a lado se houver espaço */
+@media (min-width: 850px) {
+    .container-sobre {
+        flex-direction: row;
+        text-align: left;
+    }
+    
+    .detalhe-azul-quadrado {
+        margin: 20px 0;
+    }
+}
