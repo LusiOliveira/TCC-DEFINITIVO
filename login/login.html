@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EletroLight - Acesso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar ao Início</a>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form action="#">
+                <h2>Criar Conta</h2>
+                <div class="social-container">
+                    <p>Faça parte da rede sustentável de Manaus</p>
+                </div>
+                <input type="text" id="nome-cadastro" placeholder="Nome Completo" required />
+                <input type="email" id="email-cadastro" placeholder="E-mail" required />
+                <input type="password" id="senha-cadastro" placeholder="Senha" required />
+                <input type="password" id="senha-confirma" placeholder="Confirmar Senha" required />
+                <button type="button" onclick="validarCadastro()">Cadastrar</button>
+            </form>
+        </div>
+
+        <div class="form-container sign-in-container">
+            <form action="#">
+                <div class="logo-min">
+                    <i class="fa-solid fa-leaf"></i> EletroLight
+                </div>
+                <h2>Entrar</h2>
+                <input type="email" id="email-login" placeholder="E-mail" required />
+                <input type="password" id="senha-login" placeholder="Senha" required />
+                <a href="#" class="forgot-password" id="btn-esqueceu-senha">Esqueceu sua senha?</a>
+                <button type="button" onclick="validarLogin()">Entrar</button>
+            </form>
+        </div>
+
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h2>Já tem uma conta?</h2>
+                    <p>Faça login para gerenciar seus anúncios e acessar o mapa de coleta.</p>
+                    <button class="ghost" id="signIn">Entrar</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h2>Olá, Guardião!</h2>
+                    <p>Ainda não tem conta? Junte-se a nós para mitigar os impactos do e-lixo.</p>
+                    <button class="ghost" id="signUp">Cadastrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="modal-recuperacao" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="fechar-modal"><i class="fa-solid fa-xmark"></i></span>
+            <h3>Recuperar Senha</h3>
+            <p>Insira o seu e-mail cadastrado. Enviaremos um link para redefinir a sua senha.</p>
+            <input type="email" id="email-recuperacao" placeholder="O seu e-mail" required />
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancelar" id="btn-cancelar-recuperacao">Cancelar</button>
+                <button type="button" class="btn-enviar" onclick="enviarRecuperacao()">Enviar Link</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>
