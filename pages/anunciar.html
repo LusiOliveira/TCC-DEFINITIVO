@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anunciar Eletrônico - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/anunciar.css">
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="logo">
+            <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="../index.html#inicio">Início</a>
+            <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
+            <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="../index.html#economia">Serviços</a>
+            <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="../login/login.html" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main class="anunciar-main">
+
+        <!-- Hero da página -->
+        <section class="anunciar-hero">
+            <div class="anunciar-hero-content">
+                <span class="subtitle">NOVA PUBLICAÇÃO</span>
+                <h1>Anuncie seu Eletrônico</h1>
+                <p>Doe ou troque eletrônicos. Contribua com a economia circular e reduza o lixo eletrônico em Manaus.</p>
+            </div>
+        </section>
+
+        <!-- Guia de Categorias de Lixo Eletrônico -->
+        <section class="categorias-info">
+            <div class="categorias-info-inner">
+                <h2 class="ci-titulo"><i class="fa-solid fa-recycle"></i> Categorias de Lixo Eletrônico</h2>
+                <p class="ci-subtitulo">Identifique corretamente o tipo do seu equipamento para facilitar o descarte e a reutilização.</p>
+                <div class="ci-grid">
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#DBEAFE; color:#1D4ED8;"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <h3>Celulares e Smartphones</h3>
+                        <p>Aparelhos móveis, feature phones, smartphones e seus acessórios como baterias e capas.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#D1FAE5; color:#065F46;"><i class="fa-solid fa-laptop"></i></div>
+                        <h3>Notebooks e Computadores</h3>
+                        <p>Desktops, notebooks, netbooks, gabinetes, placas e memórias RAM.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#EDE9FE; color:#4C1D95;"><i class="fa-solid fa-tv"></i></div>
+                        <h3>TVs e Monitores</h3>
+                        <p>Televisores CRT, LCD, LED e OLED, monitores de computador e projetores.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#FEF3C7; color:#92400E;"><i class="fa-solid fa-tablet-screen-button"></i></div>
+                        <h3>Tablets e E-readers</h3>
+                        <p>Tablets Android, iPads, Kindles, e-readers e acessórios de leitura digital.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#FCE7F3; color:#9D174D;"><i class="fa-solid fa-headphones"></i></div>
+                        <h3>Áudio e Vídeo</h3>
+                        <p>Fones, caixas de som, câmeras, videocâmeras, rádios e equipamentos Hi-Fi.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#FEE2E2; color:#991B1B;"><i class="fa-solid fa-gamepad"></i></div>
+                        <h3>Videogames e Consoles</h3>
+                        <p>Consoles PlayStation, Xbox, Nintendo, controles e acessórios de games.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#ECFDF5; color:#064E3B;"><i class="fa-solid fa-blender"></i></div>
+                        <h3>Eletrodomésticos</h3>
+                        <p>Impressoras, roteadores, micro-ondas, ventiladores e pequenos eletros.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#F0FDF4; color:#166534;"><i class="fa-solid fa-plug"></i></div>
+                        <h3>Cabos e Carregadores</h3>
+                        <p>Fontes de alimentação, cabos USB, HDMI, VGA e carregadores de todos os tipos.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#FFF7ED; color:#9A3412;"><i class="fa-solid fa-battery-half"></i></div>
+                        <h3>Pilhas e Baterias</h3>
+                        <p>Pilhas alcalinas, baterias de lítio, no-breaks e acumuladores recarregáveis.</p>
+                    </div>
+                    <div class="ci-card">
+                        <div class="ci-icon" style="background:#F1F5F9; color:#334155;"><i class="fa-solid fa-print"></i></div>
+                        <h3>Periféricos e Outros</h3>
+                        <p>Teclados, mouses, webcams, scanners, HDs externos e demais periféricos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formulário de Anúncio -->
+        <section class="form-section">
+            <div class="form-wrapper">
+                <div class="form-side-info">
+                    <h2>Por que anunciar aqui?</h2>
+                    <ul class="beneficios-lista">
+                        <li>
+                            <div class="ben-icon"><i class="fa-solid fa-leaf"></i></div>
+                            <div>
+                                <strong>Impacto Ambiental</strong>
+                                <p>Cada eletrônico reutilizado evita o descarte inadequado em igarapés e aterros.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="ben-icon"><i class="fa-solid fa-handshake"></i></div>
+                            <div>
+                                <strong>Conecta Pessoas</strong>
+                                <p>Quem precisa encontra quem tem. Simples assim.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="ben-icon"><i class="fa-solid fa-recycle"></i></div>
+                            <div>
+                                <strong>Economia Circular</strong>
+                                <p>Mantemos o eletrônico em uso pelo maior tempo possível.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="ben-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div>
+                                <strong>100% Gratuito</strong>
+                                <p>Nenhum custo para anunciar. Plataforma aberta à comunidade.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="dicas-box">
+                        <h3><i class="fa-solid fa-lightbulb"></i> Dicas para um bom anúncio</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-check"></i> Use fotos nítidas e com boa iluminação</li>
+                            <li><i class="fa-solid fa-check"></i> Descreva o defeito com detalhes</li>
+                            <li><i class="fa-solid fa-check"></i> Informe se acompanha acessórios</li>
+                            <li><i class="fa-solid fa-check"></i> Coloque um contato válido</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form class="anuncio-form" id="anuncio-form" novalidate>
+                    <h2 class="form-titulo">Preencha os dados do anúncio</h2>
+
+                    <!-- Dados do Anunciante -->
+                    <fieldset class="form-fieldset">
+                        <legend><i class="fa-solid fa-user"></i> Seus Dados de Contato</legend>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nome">Nome <span class="req">*</span></label>
+                                <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="whatsapp">WhatsApp <span class="req">*</span></label>
+                                <input type="tel" id="whatsapp" name="whatsapp" placeholder="(92) 9 0000-0000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bairro">Bairro / Localização em Manaus <span class="req">*</span></label>
+                            <input type="text" id="bairro" name="bairro" placeholder="Ex: Adrianópolis, Centro, Flores..." required>
+                        </div>
+                    </fieldset>
+
+                    <!-- Dados do Produto -->
+                    <fieldset class="form-fieldset">
+                        <legend><i class="fa-solid fa-box-open"></i> Dados do Eletrônico</legend>
+
+                        <div class="form-group">
+                            <label for="titulo-anuncio">Título do Anúncio <span class="req">*</span></label>
+                            <input type="text" id="titulo-anuncio" name="titulo" placeholder="Ex: Notebook Dell Inspiron com defeito na tela" required maxlength="80">
+                            <span class="char-count" id="titulo-count">0/80</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="categoria">Categoria <span class="req">*</span></label>
+                                <select id="categoria" name="categoria" required>
+                                    <option value="" disabled selected>Selecione a categoria</option>
+                                    <option value="celulares">📱 Celulares e Smartphones</option>
+                                    <option value="notebooks">💻 Notebooks e Computadores</option>
+                                    <option value="tvs">📺 TVs e Monitores</option>
+                                    <option value="tablets">📱 Tablets e E-readers</option>
+                                    <option value="audio">🎧 Áudio e Vídeo</option>
+                                    <option value="videogames">🎮 Videogames e Consoles</option>
+                                    <option value="eletrodomesticos">🔌 Eletrodomésticos</option>
+                                    <option value="cabos">🔋 Cabos e Carregadores</option>
+                                    <option value="pilhas">🔋 Pilhas e Baterias</option>
+                                    <option value="perifericos">🖱️ Periféricos e Outros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo-anuncio">Tipo de Anúncio <span class="req">*</span></label>
+                                <select id="tipo-anuncio" name="tipo" required>
+                                    <option value="" disabled selected>Selecione o tipo</option>
+                                    <option value="doacao">🟢 Doação</option>
+                                    <option value="troca">🟣 Troca</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="condicao">Condição do Item <span class="req">*</span></label>
+                                <select id="condicao" name="condicao" required>
+                                    <option value="" disabled selected>Selecione a condição</option>
+                                    <option value="funcionando">✅ Funcionando</option>
+                                    <option value="defeito-leve">⚠️ Com defeito leve</option>
+                                    <option value="defeito-grave">❌ Com defeito grave</option>
+                                    <option value="pecas">🔧 Somente para peças</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="marca">Marca / Modelo</label>
+                                <input type="text" id="marca" name="marca" placeholder="Ex: Samsung, Dell, LG...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descricao">Descrição Detalhada <span class="req">*</span></label>
+                            <textarea id="descricao" name="descricao" rows="5" placeholder="Descreva o estado do aparelho, defeitos, o que acompanha, etc." required maxlength="500"></textarea>
+                            <span class="char-count" id="desc-count">0/500</span>
+                        </div>
+                    </fieldset>
+
+                    <!-- Foto -->
+                    <fieldset class="form-fieldset">
+                        <legend><i class="fa-solid fa-camera"></i> Foto do Eletrônico</legend>
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="foto-input" name="foto" accept="image/*" multiple>
+                            <label for="foto-input" class="upload-label">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span>Clique ou arraste as fotos aqui</span>
+                                <small>JPG, PNG ou WebP — Máx. 5MB por foto</small>
+                            </label>
+                            <div class="preview-grid" id="preview-grid"></div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="termos" name="termos" required>
+                            <span>Li e aceito os <a href="#" class="link-termos">termos de uso</a> da plataforma EletroLight e confirmo que o item descrito é real.</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-publicar">
+                        <i class="fa-solid fa-bullhorn"></i> Publicar Anúncio
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Sucesso -->
+    <div class="modal-overlay" id="modal-sucesso">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h2>Anúncio Publicado!</h2>
+            <p>Seu eletrônico foi anunciado com sucesso. A comunidade EletroLight já pode visualizá-lo na seção de Serviços.</p>
+            <div class="modal-actions">
+                <a href="../index.html#economia" class="btn-modal-ver">Ver Anúncios</a>
+                <button class="btn-modal-novo" id="btn-novo-anuncio">Novo Anúncio</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+    </footer>
+
+    <script src="../scripts/anuncios-data.js"></script>
+    <script src="../scripts/anunciar.js"></script>
+    <script>
+        // --- Perfil no header ---
+        (function () {
+            const wrap   = document.getElementById('header-user-wrap');
+            const stored = localStorage.getItem('eletrolight_user');
+            if (!wrap || !stored) return;
+            const user         = JSON.parse(stored);
+            const primeiroNome = user.nome.split(' ')[0];
+            wrap.innerHTML = `
+                <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
+                    <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                    ${primeiroNome}
+                    <i class="fa-solid fa-chevron-down perfil-seta"></i>
+                </button>
+                <div class="perfil-dropdown" id="perfil-dropdown">
+                    <span class="perfil-nome-completo">${user.nome}</span>
+                    <span class="perfil-email">${user.email}</span>
+                    <hr class="perfil-divider">
+                    <a href="perfil.html" class="perfil-editar">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                    </a>
+                    <a href="meus-anuncios.html" class="perfil-editar">
+                        <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
+                    </a>
+                    <button class="perfil-sair" id="btn-sair">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+                    </button>
+                </div>`;
+            document.getElementById('btn-perfil-toggle').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dd = document.getElementById('perfil-dropdown');
+                const aberto = dd.classList.toggle('aberto');
+                e.currentTarget.setAttribute('aria-expanded', aberto);
+            });
+            document.addEventListener('click', () => {
+                const dd = document.getElementById('perfil-dropdown');
+                if (dd) dd.classList.remove('aberto');
+            });
+            document.getElementById('btn-sair').addEventListener('click', () => {
+                localStorage.removeItem('eletrolight_user');
+                window.location.href = '../index.html';
+            });
+        })();
+    </script>
+</body>
+</html>

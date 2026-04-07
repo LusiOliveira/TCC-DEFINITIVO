@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/perfil.css">
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="logo">
+            <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="../index.html#inicio">Início</a>
+            <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
+            <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="../index.html#economia">Serviços</a>
+            <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="../login/login.html" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main class="perfil-main">
+
+        <section class="perfil-hero">
+            <div class="perfil-hero-content">
+                <span class="subtitle">CONFIGURAÇÕES</span>
+                <h1>Meu Perfil</h1>
+                <p>Atualize suas informações de contato e foto de perfil.</p>
+            </div>
+        </section>
+
+        <section class="perfil-section">
+            <div class="perfil-wrapper">
+
+                <!-- Coluna da foto -->
+                <div class="perfil-foto-col">
+                    <div class="perfil-avatar-wrap">
+                        <img id="avatar-preview" src="" alt="Foto de perfil" class="perfil-avatar" />
+                        <label for="foto-input" class="perfil-avatar-overlay" title="Trocar foto">
+                            <i class="fa-solid fa-camera"></i>
+                        </label>
+                        <input type="file" id="foto-input" accept="image/*" hidden>
+                    </div>
+                    <p class="perfil-foto-hint">Clique na foto para trocar</p>
+
+                    <div class="perfil-info-fixa">
+                        <h3>Dados fixos</h3>
+                        <div class="perfil-info-item">
+                            <i class="fa-solid fa-user"></i>
+                            <div>
+                                <span class="info-label">Nome</span>
+                                <span class="info-valor" id="info-nome">—</span>
+                            </div>
+                        </div>
+                        <div class="perfil-info-item">
+                            <i class="fa-solid fa-id-card"></i>
+                            <div>
+                                <span class="info-label">CPF</span>
+                                <span class="info-valor" id="info-cpf">—</span>
+                            </div>
+                        </div>
+                        <div class="perfil-info-item">
+                            <i class="fa-solid fa-cake-candles"></i>
+                            <div>
+                                <span class="info-label">Nascimento</span>
+                                <span class="info-valor" id="info-nascimento">—</span>
+                            </div>
+                        </div>
+                        <p class="perfil-fixa-aviso">
+                            <i class="fa-solid fa-lock"></i> Nome e CPF não podem ser alterados.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formulário de edição -->
+                <form class="perfil-form" id="perfil-form" novalidate>
+                    <h2 class="perfil-form-titulo">Editar Informações</h2>
+
+                    <fieldset class="perfil-fieldset">
+                        <legend><i class="fa-solid fa-envelope"></i> Contato</legend>
+
+                        <div class="perfil-form-group">
+                            <label for="perfil-email">E-mail <span class="req">*</span></label>
+                            <input type="email" id="perfil-email" placeholder="seu@email.com" required>
+                        </div>
+
+                        <div class="perfil-form-group">
+                            <label for="perfil-whatsapp">WhatsApp</label>
+                            <input type="tel" id="perfil-whatsapp" placeholder="(92) 9 0000-0000">
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="perfil-fieldset">
+                        <legend><i class="fa-solid fa-lock"></i> Alterar Senha</legend>
+                        <p class="perfil-fieldset-hint">Deixe em branco para manter a senha atual.</p>
+
+                        <div class="perfil-form-group">
+                            <label for="perfil-senha-atual">Senha Atual</label>
+                            <div class="perfil-senha-wrap">
+                                <input type="password" id="perfil-senha-atual" placeholder="Digite sua senha atual">
+                            </div>
+                        </div>
+
+                        <div class="perfil-form-group">
+                            <label for="perfil-senha-nova">Nova Senha</label>
+                            <div class="perfil-senha-wrap">
+                                <input type="password" id="perfil-senha-nova" placeholder="8-16 chars, 1 maiúscula, 1 especial">
+                            </div>
+                        </div>
+
+                        <div class="perfil-form-group">
+                            <label for="perfil-senha-confirma">Confirmar Nova Senha</label>
+                            <div class="perfil-senha-wrap">
+                                <input type="password" id="perfil-senha-confirma" placeholder="Repita a nova senha">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="perfil-actions">
+                        <a href="../index.html" class="btn-cancelar-perfil">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn-salvar-perfil">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+    </footer>
+
+    <script src="../scripts/perfil.js"></script>
+</body>
+</html>

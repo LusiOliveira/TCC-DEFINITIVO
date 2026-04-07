@@ -1,0 +1,354 @@
+/* =============================================
+   PERFIL — Estilos da página de edição
+   ============================================= */
+
+.perfil-main {
+    padding-top: 80px;
+}
+
+/* --- Hero --- */
+.perfil-hero {
+    background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%);
+    padding: 3rem 5%;
+    text-align: center;
+    color: #fff;
+}
+
+.perfil-hero-content .subtitle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.perfil-hero-content h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    color: #fff;
+}
+
+.perfil-hero-content p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.85);
+    margin: 0;
+}
+
+/* --- Layout principal --- */
+.perfil-section {
+    padding: 3rem 5%;
+    background: #F9FAFB;
+    min-height: 70vh;
+}
+
+.perfil-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+/* --- Coluna da foto --- */
+.perfil-foto-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.perfil-avatar-wrap {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.perfil-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: #E5E7EB;
+}
+
+.perfil-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+    cursor: pointer;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.perfil-avatar-wrap:hover .perfil-avatar-overlay {
+    opacity: 1;
+}
+
+.perfil-foto-hint {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    margin: 0;
+}
+
+/* --- Info fixa --- */
+.perfil-info-fixa {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.4rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.perfil-info-fixa h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 1rem;
+}
+
+.perfil-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.perfil-info-item i {
+    color: #059669;
+    font-size: 0.95rem;
+    margin-top: 2px;
+    min-width: 16px;
+}
+
+.info-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.info-valor {
+    display: block;
+    font-size: 0.95rem;
+    color: #1F2937;
+    font-weight: 500;
+    margin-top: 1px;
+}
+
+.perfil-fixa-aviso {
+    font-size: 0.78rem;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0.5rem 0 0;
+    border-top: 1px solid #F3F4F6;
+    padding-top: 0.75rem;
+}
+
+.perfil-fixa-aviso i {
+    color: #D1D5DB;
+}
+
+/* --- Formulário --- */
+.perfil-form {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    padding: 2.5rem;
+}
+
+.perfil-form-titulo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #E5E7EB;
+}
+
+.perfil-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 2rem;
+}
+
+.perfil-fieldset legend {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 0.5rem;
+}
+
+.perfil-fieldset-hint {
+    font-size: 0.82rem;
+    color: #9CA3AF;
+    margin: -0.5rem 0 1rem;
+}
+
+.perfil-form-group {
+    margin-bottom: 1.2rem;
+}
+
+.perfil-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.4rem;
+}
+
+.perfil-form-group input {
+    width: 100%;
+    padding: 11px 15px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1F2937;
+    background: #F9FAFB;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.perfil-form-group input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+    background: #fff;
+}
+
+.perfil-form-group input.erro {
+    border-color: #DC2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.12);
+}
+
+/* --- Wrapper senha com botão olho --- */
+.perfil-senha-wrap {
+    position: relative;
+}
+
+.perfil-senha-wrap input {
+    padding-right: 15px;
+}
+
+
+
+/* --- Botões de ação --- */
+.perfil-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn-cancelar-perfil {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6B7280;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-cancelar-perfil:hover {
+    background: #F3F4F6;
+    color: #1F2937;
+}
+
+.btn-salvar-perfil {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    background: #059669;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    letter-spacing: 0.02em;
+}
+
+.btn-salvar-perfil:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+/* --- Toast --- */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1F2937;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 9999;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-sucesso i { color: #34D399; }
+.toast-erro    i { color: #F87171; }
+
+/* --- Responsivo --- */
+@media (max-width: 768px) {
+    .perfil-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-foto-col {
+        align-items: center;
+    }
+
+    .perfil-form {
+        padding: 1.5rem;
+    }
+}

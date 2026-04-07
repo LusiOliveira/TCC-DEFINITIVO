@@ -19,9 +19,24 @@
                     <p>Faça parte da rede sustentável de Manaus</p>
                 </div>
                 <input type="text" id="nome-cadastro" placeholder="Nome Completo" required />
+                <input type="text" id="cpf-cadastro" placeholder="CPF (000.000.000-00)" maxlength="14" required />
+                <input type="date" id="nascimento-cadastro" title="Data de Nascimento" min="1926-01-01" required />
                 <input type="email" id="email-cadastro" placeholder="E-mail" required />
-                <input type="password" id="senha-cadastro" placeholder="Senha" required />
-                <input type="password" id="senha-confirma" placeholder="Confirmar Senha" required />
+                <div class="senha-wrap">
+                    <input type="password" id="senha-cadastro" placeholder="Senha" required />
+                    <button type="button" class="olho-btn" data-target="senha-cadastro" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
+                </div>
+                <ul id="senha-requisitos" class="senha-req">
+                    <li id="req-tamanho"><i class="fa-solid fa-circle-dot"></i> 8 a 16 caracteres</li>
+                    <li id="req-maiuscula"><i class="fa-solid fa-circle-dot"></i> Uma letra maiúscula</li>
+                    <li id="req-especial"><i class="fa-solid fa-circle-dot"></i> Um caractere especial (ex: @, #, !)</li>
+                </ul>
+                <div class="forca-wrap"><div class="forca-bar" id="forca-bar"></div></div>
+                <span class="forca-label" id="forca-label"></span>
+                <div class="senha-wrap">
+                    <input type="password" id="senha-confirma" placeholder="Confirmar Senha" required />
+                    <button type="button" class="olho-btn" data-target="senha-confirma" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
+                </div>
                 <button type="button" onclick="validarCadastro()">Cadastrar</button>
             </form>
         </div>
@@ -29,11 +44,15 @@
         <div class="form-container sign-in-container">
             <form action="#">
                 <div class="logo-min">
-                    <i class="fa-solid fa-leaf"></i> EletroLight
+                    <img src="../assets/images/Logo.png" alt="" width="38" height="38" class="logo-min__img" />
+                    <span>EletroLight</span>
                 </div>
                 <h2>Entrar</h2>
-                <input type="email" id="email-login" placeholder="E-mail" required />
-                <input type="password" id="senha-login" placeholder="Senha" required />
+                <input type="text" id="email-login" placeholder="E-mail ou CPF" required />
+                <div class="senha-wrap">
+                    <input type="password" id="senha-login" placeholder="Senha" required />
+                    <button type="button" class="olho-btn" data-target="senha-login" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
+                </div>
                 <a href="#" class="forgot-password" id="btn-esqueceu-senha">Esqueceu sua senha?</a>
                 <button type="button" onclick="validarLogin()">Entrar</button>
             </form>
@@ -42,11 +61,17 @@
         <div class="overlay-container">
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
+                    <div class="mascote-box">
+                        <img src="../assets/images/robozito-nerd.png" alt="Mascote EletroLight" class="robo-login">
+                    </div>
                     <h2>Já tem uma conta?</h2>
                     <p>Faça login para gerenciar seus anúncios e acessar o mapa de coleta.</p>
                     <button class="ghost" id="signIn">Entrar</button>
                 </div>
                 <div class="overlay-panel overlay-right">
+                    <div class="mascote-box">
+                        <img src="../assets/images/robozito.png" alt="Mascote EletroLight" class="robo-login">
+                    </div>
                     <h2>Olá, Guardião!</h2>
                     <p>Ainda não tem conta? Junte-se a nós para mitigar os impactos do e-lixo.</p>
                     <button class="ghost" id="signUp">Cadastrar</button>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Anúncios - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        .meus-main { padding-top: 80px; }
+
+        /* Hero */
+        .meus-hero {
+            background: linear-gradient(135deg, #059669 0%, #10B981 60%, #0077b6 100%);
+            padding: 3rem 5%;
+            color: #fff;
+            text-align: center;
+        }
+        .meus-hero span {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.75);
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+        .meus-hero h1 {
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .meus-hero p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.88);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Toolbar */
+        .meus-toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 80px;
+            z-index: 100;
+        }
+
+        .meus-contador {
+            font-size: 0.92rem;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .meus-contador strong { color: #059669; }
+
+        .btn-novo-anuncio {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-novo-anuncio:hover { background: #047857; transform: translateY(-1px); }
+
+        /* Grid */
+        .meus-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 24px;
+        }
+
+        /* Empty state */
+        .meus-vazio {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5rem 1rem;
+            color: #9CA3AF;
+        }
+        .meus-vazio i {
+            font-size: 3.5rem;
+            color: #D1D5DB;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .meus-vazio h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .meus-vazio p { font-size: 0.95rem; margin-bottom: 1.5rem; }
+
+        /* Card com botão excluir */
+        .anuncio-card { position: relative; }
+
+        .btn-excluir-card {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(220, 38, 38, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 5;
+            transition: background 0.2s;
+        }
+        .btn-excluir-card:hover { background: #B91C1C; }
+
+        /* Modal confirmação exclusão */
+        .modal-excluir-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-excluir-overlay.show { display: flex; }
+
+        .modal-excluir-box {
+            background: #fff;
+            border-radius: 18px;
+            padding: 2rem 2.2rem;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-excluir-box i {
+            font-size: 2.5rem;
+            color: #DC2626;
+            margin-bottom: 0.8rem;
+        }
+        .modal-excluir-box h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 0.5rem;
+        }
+        .modal-excluir-box p {
+            font-size: 0.9rem;
+            color: #6B7280;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .modal-excluir-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn-cancelar-excluir {
+            flex: 1;
+            padding: 11px;
+            border: 2px solid #E5E7EB;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #374151;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .btn-cancelar-excluir:hover { border-color: #9CA3AF; }
+        .btn-confirmar-excluir {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            background: #DC2626;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-confirmar-excluir:hover { background: #B91C1C; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1F2937;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 99999;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-sucesso { background: #059669; }
+        .toast-erro    { background: #DC2626; }
+
+        @media (max-width: 600px) {
+            .meus-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Modal editar */
+        .modal-editar-box {
+            background: #fff;
+            border-radius: 18px;
+            padding: 1.8rem 2rem;
+            max-width: 580px;
+            width: 94%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .modal-editar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.4rem;
+        }
+
+        .modal-editar-header h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-fechar-editar {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #9CA3AF;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .btn-fechar-editar:hover { color: #374151; }
+
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .edit-field { display: flex; flex-direction: column; gap: 5px; }
+        .edit-field--full { grid-column: 1 / -1; }
+
+        .edit-field label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .edit-field input,
+        .edit-field select,
+        .edit-field textarea {
+            padding: 9px 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            color: #1F2937;
+            background: #F9FAFB;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+
+        .edit-field input:focus,
+        .edit-field select:focus,
+        .edit-field textarea:focus {
+            outline: none;
+            border-color: #059669;
+            background: #fff;
+        }
+
+        .btn-editar-anuncio {
+            background: #059669 !important;
+            color: #fff !important;
+        }
+        .btn-editar-anuncio:hover { background: #047857 !important; }
+
+        @media (max-width: 480px) {
+            .edit-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="logo">
+            <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="../index.html#inicio">Início</a>
+            <a href="./todos-anuncios.html">Anúncios</a>
+            <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
+            <a href="../index.html#aprendizado">Canal de Conscientização</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="../login/login.html" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main class="meus-main">
+
+        <!-- Hero -->
+        <div class="meus-hero">
+            <span>MINHA CONTA</span>
+            <h1><i class="fa-solid fa-rectangle-list"></i> Meus Anúncios</h1>
+            <p>Visualize e gerencie todos os eletrônicos que você publicou na plataforma.</p>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="meus-toolbar">
+            <p class="meus-contador" id="meus-contador">Carregando...</p>
+            <a href="./anunciar.html" class="btn-novo-anuncio">
+                <i class="fa-solid fa-plus"></i> Novo Anúncio
+            </a>
+        </div>
+
+        <!-- Grid de anúncios -->
+        <div class="meus-grid" id="meus-grid"></div>
+
+    </main>
+
+    <!-- Modal edição de anúncio -->
+    <div class="modal-excluir-overlay" id="modal-editar">
+        <div class="modal-editar-box">
+            <div class="modal-editar-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Editar Anúncio</h3>
+                <button class="btn-fechar-editar" id="btn-fechar-editar" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-editar">
+                <div class="edit-grid">
+                    <div class="edit-field">
+                        <label>Título</label>
+                        <input type="text" id="edit-titulo" required maxlength="80">
+                    </div>
+                    <div class="edit-field">
+                        <label>Marca</label>
+                        <input type="text" id="edit-marca">
+                    </div>
+                    <div class="edit-field">
+                        <label>Categoria</label>
+                        <select id="edit-categoria">
+                            <option value="celulares">Celulares</option>
+                            <option value="notebooks">Notebooks</option>
+                            <option value="tvs">TVs e Monitores</option>
+                            <option value="tablets">Tablets</option>
+                            <option value="audio">Áudio</option>
+                            <option value="videogames">Videogames</option>
+                            <option value="eletrodomesticos">Eletrodomésticos</option>
+                            <option value="cabos">Cabos e Carregadores</option>
+                            <option value="pilhas">Pilhas e Baterias</option>
+                            <option value="perifericos">Periféricos</option>
+                        </select>
+                    </div>
+                    <div class="edit-field">
+                        <label>Tipo</label>
+                        <select id="edit-tipo">
+                            <option value="doacao">Doação</option>
+                            <option value="troca">Troca</option>
+                        </select>
+                    </div>
+                    <div class="edit-field">
+                        <label>Condição</label>
+                        <input type="text" id="edit-condicao" placeholder="Ex: Funcionando, Com defeito...">
+                    </div>
+                    <div class="edit-field">
+                        <label>Bairro</label>
+                        <input type="text" id="edit-bairro">
+                    </div>
+                    <div class="edit-field">
+                        <label>WhatsApp</label>
+                        <input type="text" id="edit-whatsapp" placeholder="(92) 9 0000-0000">
+                    </div>
+                    <div class="edit-field edit-field--full">
+                        <label>Descrição</label>
+                        <textarea id="edit-descricao" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-excluir-btns" style="margin-top:1.2rem;">
+                    <button type="button" class="btn-cancelar-excluir" id="btn-fechar-editar2">Cancelar</button>
+                    <button type="submit" class="btn-confirmar-excluir" style="background:#059669;">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal confirmação exclusão -->
+    <div class="modal-excluir-overlay" id="modal-excluir">
+        <div class="modal-excluir-box">
+            <i class="fa-solid fa-trash-can"></i>
+            <h3>Excluir anúncio?</h3>
+            <p>Esta ação não pode ser desfeita. O anúncio será removido permanentemente da plataforma.</p>
+            <div class="modal-excluir-btns">
+                <button class="btn-cancelar-excluir" id="btn-cancelar-excluir">Cancelar</button>
+                <button class="btn-confirmar-excluir" id="btn-confirmar-excluir">Sim, excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" style="margin-top:4rem;">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="../assets/images/Logo.png" alt="EletroLight" width="32" height="32">
+                    <span>EletroLight</span>
+                </div>
+                <p>Conectando pessoas para um descarte consciente de eletrônicos em Manaus.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EletroLight. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="../scripts/anuncios-data.js"></script>
+    <script>
+    // ── Guard: exige login ──
+    (function () {
+        const raw = localStorage.getItem('eletrolight_user');
+        if (!raw) { window.location.href = '../login/login.html'; }
+    })();
+
+    const session = JSON.parse(localStorage.getItem('eletrolight_user'));
+
+    // ── Header / dropdown ──
+    (function montarHeader() {
+        const wrap = document.getElementById('header-user-wrap');
+        if (!wrap) return;
+
+        const primeiroNome = session.nome.split(' ')[0];
+        wrap.innerHTML = `
+            <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                ${primeiroNome}
+                <i class="fa-solid fa-chevron-down perfil-seta"></i>
+            </button>
+            <div class="perfil-dropdown" id="perfil-dropdown">
+                <span class="perfil-nome-completo">${session.nome}</span>
+                <span class="perfil-email">${session.email}</span>
+                <hr class="perfil-divider">
+                <a href="./perfil.html" class="perfil-editar">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                </a>
+                <a href="./meus-anuncios.html" class="perfil-editar" style="color:#059669;">
+                    <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
+                </a>
+                <button class="perfil-sair" id="btn-sair">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+                </button>
+            </div>`;
+
+        document.getElementById('btn-perfil-toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dd = document.getElementById('perfil-dropdown');
+            const aberto = dd.classList.toggle('aberto');
+            e.currentTarget.setAttribute('aria-expanded', aberto);
+        });
+        document.addEventListener('click', () => {
+            document.getElementById('perfil-dropdown')?.classList.remove('aberto');
+        });
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            localStorage.removeItem('eletrolight_user');
+            window.location.href = '../index.html';
+        });
+    })();
+
+    // ── Renderiza somente os anúncios do usuário logado ──
+    let idParaExcluir = null;
+
+    function renderMeusAnuncios() {
+        const todos = getAnuncios();
+        const meus  = todos.filter(a => a.email && a.email.toLowerCase() === session.email.toLowerCase());
+        const grid  = document.getElementById('meus-grid');
+        const contador = document.getElementById('meus-contador');
+
+        contador.innerHTML = meus.length === 0
+            ? 'Nenhum anúncio publicado ainda.'
+            : `Você tem <strong>${meus.length}</strong> anúncio${meus.length > 1 ? 's' : ''} publicado${meus.length > 1 ? 's' : ''}.`;
+
+        if (meus.length === 0) {
+            grid.innerHTML = `
+                <div class="meus-vazio">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h3>Nenhum anúncio encontrado</h3>
+                    <p>Você ainda não publicou nenhum eletrônico. Que tal começar agora?</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = meus.map(a => {
+            return renderAnuncioCard(a, { isOwner: true }).replace(
+                '<div class="anuncio-img-wrap">',
+                `<div class="anuncio-img-wrap"><button class="btn-excluir-card" data-id="${a.id}"><i class="fa-solid fa-trash"></i> Excluir</button>`
+            );
+        }).join('');
+
+        // Botão excluir
+        grid.querySelectorAll('.btn-excluir-card').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                idParaExcluir = Number(btn.dataset.id);
+                document.getElementById('modal-excluir').classList.add('show');
+            });
+        });
+
+        // Botão editar
+        grid.querySelectorAll('.btn-editar-anuncio').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = Number(btn.closest('.anuncio-card').dataset.id);
+                abrirModalEditar(id);
+            });
+        });
+    }
+
+    // ── Modal exclusão ──
+    document.getElementById('btn-cancelar-excluir').addEventListener('click', () => {
+        document.getElementById('modal-excluir').classList.remove('show');
+        idParaExcluir = null;
+    });
+
+    document.getElementById('btn-confirmar-excluir').addEventListener('click', () => {
+        if (idParaExcluir === null) return;
+        const todos      = getAnuncios();
+        const atualizados = todos.filter(a => a.id !== idParaExcluir);
+        localStorage.setItem('eletrolight_anuncios', JSON.stringify(atualizados));
+        document.getElementById('modal-excluir').classList.remove('show');
+        idParaExcluir = null;
+        renderMeusAnuncios();
+        mostrarToast('Anúncio excluído com sucesso.', 'sucesso');
+    });
+
+    // ── Modal edição ──
+    let idParaEditar = null;
+
+    function abrirModalEditar(id) {
+        const anuncio = getAnuncios().find(a => a.id === id);
+        if (!anuncio) return;
+        idParaEditar = id;
+
+        document.getElementById('edit-titulo').value    = anuncio.titulo    || '';
+        document.getElementById('edit-marca').value     = anuncio.marca     || '';
+        document.getElementById('edit-bairro').value    = anuncio.bairro    || '';
+        document.getElementById('edit-whatsapp').value  = anuncio.whatsapp  || '';
+        document.getElementById('edit-descricao').value = anuncio.descricao || '';
+        document.getElementById('edit-categoria').value = anuncio.categoria || '';
+        document.getElementById('edit-tipo').value      = anuncio.tipo      || '';
+        document.getElementById('edit-condicao').value  = anuncio.condicao  || '';
+
+        document.getElementById('modal-editar').classList.add('show');
+    }
+
+    document.getElementById('btn-fechar-editar2').addEventListener('click', () => {
+        document.getElementById('modal-editar').classList.remove('show');
+        idParaEditar = null;
+    });
+
+    document.getElementById('btn-fechar-editar').addEventListener('click', () => {
+        document.getElementById('modal-editar').classList.remove('show');
+        idParaEditar = null;
+    });
+
+    document.getElementById('form-editar').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (idParaEditar === null) return;
+
+        const lista = getAnuncios();
+        const idx   = lista.findIndex(a => a.id === idParaEditar);
+        if (idx === -1) return;
+
+        lista[idx].titulo    = document.getElementById('edit-titulo').value.trim();
+        lista[idx].marca     = document.getElementById('edit-marca').value.trim();
+        lista[idx].bairro    = document.getElementById('edit-bairro').value.trim();
+        lista[idx].whatsapp  = document.getElementById('edit-whatsapp').value.trim();
+        lista[idx].descricao = document.getElementById('edit-descricao').value.trim();
+        lista[idx].categoria = document.getElementById('edit-categoria').value;
+        lista[idx].tipo      = document.getElementById('edit-tipo').value;
+        lista[idx].condicao  = document.getElementById('edit-condicao').value.trim();
+
+        localStorage.setItem('eletrolight_anuncios', JSON.stringify(lista));
+        document.getElementById('modal-editar').classList.remove('show');
+        idParaEditar = null;
+        renderMeusAnuncios();
+        mostrarToast('Anúncio atualizado com sucesso!', 'sucesso');
+    });
+
+    // ── Toast ──
+    function mostrarToast(msg, tipo) {
+        const t = document.createElement('div');
+        t.className = 'toast toast-' + tipo;
+        t.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
+        document.body.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
+
+    // ── Init ──
+    renderMeusAnuncios();
+
+    // Auto-abre modal de edição se vier com ?editar=<id>
+    const paramEditar = new URLSearchParams(window.location.search).get('editar');
+    if (paramEditar) {
+        abrirModalEditar(Number(paramEditar));
+    }
+    </script>
+</body>
+</html>

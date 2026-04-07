@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário de Usabilidade — EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #F0FDF4;
+            color: #1F2937;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .qs-header {
+            background: linear-gradient(135deg, #059669 0%, #10B981 60%, #34D399 100%);
+            padding: 3rem 5% 2.5rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .qs-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .qs-logo i { font-size: 1.4rem; }
+
+        .qs-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.6rem;
+        }
+
+        .qs-header p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.85);
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .qs-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+        }
+
+        /* ── Container ── */
+        .qs-main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 2.5rem 20px 4rem;
+        }
+
+        /* ── Instruções ── */
+        .qs-instrucoes {
+            background: #fff;
+            border: 1px solid #D1FAE5;
+            border-left: 4px solid #059669;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2.5rem;
+            font-size: 0.92rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .qs-instrucoes strong { color: #059669; }
+
+        /* ── Cartão de pergunta ── */
+        .qs-card {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 2rem 2rem 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s;
+        }
+
+        .qs-card:hover { box-shadow: 0 4px 18px rgba(5,150,105,0.1); }
+
+        .qs-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #059669;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .qs-pergunta {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 0.35rem;
+            line-height: 1.45;
+        }
+
+        .qs-descricao {
+            font-size: 0.86rem;
+            color: #6B7280;
+            margin-bottom: 1.4rem;
+            line-height: 1.5;
+        }
+
+        /* ── Likert (1-5) ── */
+        .likert-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .likert-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            font-weight: 600;
+            padding: 0 2px;
+        }
+
+        .likert-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .likert-options label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .likert-options input[type="radio"] { display: none; }
+
+        .likert-options .likert-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            border-radius: 10px;
+            border: 2px solid #E5E7EB;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #6B7280;
+            background: #F9FAFB;
+            transition: all 0.18s;
+            user-select: none;
+        }
+
+        .likert-options input[type="radio"]:checked + .likert-btn {
+            background: #059669;
+            border-color: #059669;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(5,150,105,0.3);
+        }
+
+        .likert-options label:hover .likert-btn {
+            border-color: #059669;
+            color: #059669;
+        }
+
+        /* ── NPS (0-10) ── */
+        .nps-wrap { display: flex; flex-direction: column; gap: 10px; }
+
+        .nps-options {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .nps-options label { cursor: pointer; }
+        .nps-options input[type="radio"] { display: none; }
+
+        .nps-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 46px;
+            border-radius: 10px;
+            border: 2px solid #E5E7EB;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #6B7280;
+            background: #F9FAFB;
+            transition: all 0.18s;
+            user-select: none;
+        }
+
+        .nps-options input[type="radio"]:checked + .nps-btn {
+            background: #059669;
+            border-color: #059669;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(5,150,105,0.3);
+        }
+
+        .nps-options label:hover .nps-btn {
+            border-color: #059669;
+            color: #059669;
+        }
+
+        .nps-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            font-weight: 600;
+        }
+
+        /* ── Múltipla escolha ── */
+        .multi-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .multi-options label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #374151;
+            background: #F9FAFB;
+            transition: all 0.18s;
+        }
+
+        .multi-options label:hover {
+            border-color: #059669;
+            background: #F0FDF4;
+        }
+
+        .multi-options input[type="checkbox"] { display: none; }
+
+        .multi-options input[type="checkbox"]:checked + .multi-label {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .multi-options label:has(input:checked) {
+            border-color: #059669;
+            background: #F0FDF4;
+        }
+
+        .check-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #D1D5DB;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 11px;
+            color: transparent;
+            transition: all 0.18s;
+        }
+
+        .multi-options label:has(input:checked) .check-box {
+            background: #059669;
+            border-color: #059669;
+            color: #fff;
+        }
+
+        /* ── Resposta aberta ── */
+        .qs-textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px 15px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: #1F2937;
+            background: #F9FAFB;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .qs-textarea:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+            background: #fff;
+        }
+
+        .qs-textarea::placeholder { color: #9CA3AF; }
+
+        /* ── Botão enviar ── */
+        .qs-footer {
+            text-align: center;
+            margin-top: 2.5rem;
+        }
+
+        .btn-enviar-qs {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 48px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-enviar-qs:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+
+        .qs-aviso {
+            margin-top: 0.9rem;
+            font-size: 0.82rem;
+            color: #9CA3AF;
+        }
+
+        /* ── Tela de sucesso ── */
+        .qs-sucesso {
+            display: none;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .qs-sucesso i {
+            font-size: 4rem;
+            color: #059669;
+            margin-bottom: 1rem;
+        }
+
+        .qs-sucesso h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 0.6rem;
+        }
+
+        .qs-sucesso p {
+            color: #6B7280;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* ── Responsivo ── */
+        @media (max-width: 520px) {
+            .qs-header h1 { font-size: 1.5rem; }
+            .qs-card { padding: 1.4rem 1.2rem; }
+            .likert-btn { height: 40px; font-size: 0.9rem; }
+            .nps-btn { width: 42px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="qs-header">
+        <a href="../index.html" class="qs-logo">
+            <i class="fa-solid fa-bolt"></i> EletroLight
+        </a>
+        <div class="qs-badge">Teste de Usabilidade</div>
+        <h1>Questionário UX</h1>
+        <p>Ajude-nos a melhorar o EletroLight respondendo 7 perguntas rápidas sobre sua experiência com o sistema.</p>
+    </header>
+
+    <main class="qs-main">
+
+        <!-- Instruções -->
+        <div class="qs-instrucoes">
+            <strong><i class="fa-solid fa-circle-info"></i> Instruções:</strong>
+            Responda com base na sua experiência real ao navegar pelo sistema EletroLight. Não há respostas certas ou erradas — sua opinião honesta é o que nos ajuda a evoluir. O questionário leva cerca de <strong>3 a 5 minutos</strong>.
+        </div>
+
+        <form id="qs-form">
+
+            <!-- Pergunta 1 -->
+            <div class="qs-card">
+                <div class="qs-num">1</div>
+                <p class="qs-pergunta">Você conseguiu encontrar as informações e funcionalidades que precisava no site com facilidade?</p>
+                <p class="qs-descricao">Considere a organização do menu, a disposição das seções e a clareza dos botões de ação.</p>
+                <div class="likert-wrap">
+                    <div class="likert-labels">
+                        <span>Muito difícil</span>
+                        <span>Muito fácil</span>
+                    </div>
+                    <div class="likert-options">
+                        <label><input type="radio" name="q1" value="1" required><span class="likert-btn">1</span></label>
+                        <label><input type="radio" name="q1" value="2"><span class="likert-btn">2</span></label>
+                        <label><input type="radio" name="q1" value="3"><span class="likert-btn">3</span></label>
+                        <label><input type="radio" name="q1" value="4"><span class="likert-btn">4</span></label>
+                        <label><input type="radio" name="q1" value="5"><span class="likert-btn">5</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pergunta 2 -->
+            <div class="qs-card">
+                <div class="qs-num">2</div>
+                <p class="qs-pergunta">O processo de cadastro e login foi simples e rápido de completar?</p>
+                <p class="qs-descricao">Avalie desde o preenchimento do formulário até o acesso à conta, incluindo as mensagens de erro exibidas.</p>
+                <div class="likert-wrap">
+                    <div class="likert-labels">
+                        <span>Muito complicado</span>
+                        <span>Muito simples</span>
+                    </div>
+                    <div class="likert-options">
+                        <label><input type="radio" name="q2" value="1" required><span class="likert-btn">1</span></label>
+                        <label><input type="radio" name="q2" value="2"><span class="likert-btn">2</span></label>
+                        <label><input type="radio" name="q2" value="3"><span class="likert-btn">3</span></label>
+                        <label><input type="radio" name="q2" value="4"><span class="likert-btn">4</span></label>
+                        <label><input type="radio" name="q2" value="5"><span class="likert-btn">5</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pergunta 3 -->
+            <div class="qs-card">
+                <div class="qs-num">3</div>
+                <p class="qs-pergunta">O formulário de "Anunciar Eletrônico" foi claro e intuitivo de preencher?</p>
+                <p class="qs-descricao">Considere os campos solicitados, a ordem das seções, o upload de foto e as instruções exibidas.</p>
+                <div class="likert-wrap">
+                    <div class="likert-labels">
+                        <span>Muito confuso</span>
+                        <span>Muito claro</span>
+                    </div>
+                    <div class="likert-options">
+                        <label><input type="radio" name="q3" value="1" required><span class="likert-btn">1</span></label>
+                        <label><input type="radio" name="q3" value="2"><span class="likert-btn">2</span></label>
+                        <label><input type="radio" name="q3" value="3"><span class="likert-btn">3</span></label>
+                        <label><input type="radio" name="q3" value="4"><span class="likert-btn">4</span></label>
+                        <label><input type="radio" name="q3" value="5"><span class="likert-btn">5</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pergunta 4 -->
+            <div class="qs-card">
+                <div class="qs-num">4</div>
+                <p class="qs-pergunta">O mapa interativo de pontos de coleta foi útil e fácil de usar?</p>
+                <p class="qs-descricao">Avalie a facilidade de localizar pontos de coleta próximos, interagir com os marcadores e ler as informações exibidas.</p>
+                <div class="likert-wrap">
+                    <div class="likert-labels">
+                        <span>Nada útil</span>
+                        <span>Muito útil</span>
+                    </div>
+                    <div class="likert-options">
+                        <label><input type="radio" name="q4" value="1" required><span class="likert-btn">1</span></label>
+                        <label><input type="radio" name="q4" value="2"><span class="likert-btn">2</span></label>
+                        <label><input type="radio" name="q4" value="3"><span class="likert-btn">3</span></label>
+                        <label><input type="radio" name="q4" value="4"><span class="likert-btn">4</span></label>
+                        <label><input type="radio" name="q4" value="5"><span class="likert-btn">5</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pergunta 5 -->
+            <div class="qs-card">
+                <div class="qs-num">5</div>
+                <p class="qs-pergunta">Quais funcionalidades você teve dificuldade ao usar? <span style="color:#9CA3AF;font-weight:400;font-size:0.85rem;">(pode marcar mais de uma)</span></p>
+                <p class="qs-descricao">Selecione todas as que se aplicaram à sua experiência.</p>
+                <div class="multi-options">
+                    <label>
+                        <input type="checkbox" name="q5" value="cadastro">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Cadastro / Login</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="q5" value="anunciar">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Publicar um anúncio</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="q5" value="mapa">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Usar o mapa de pontos de coleta</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="q5" value="anuncios">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Encontrar e filtrar anúncios</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="q5" value="perfil">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Editar meu perfil</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="q5" value="nenhuma">
+                        <span class="check-box"><i class="fa-solid fa-check"></i></span>
+                        <span class="multi-label">Nenhuma — não tive dificuldades</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Pergunta 6 -->
+            <div class="qs-card">
+                <div class="qs-num">6</div>
+                <p class="qs-pergunta">O que você mudaria ou melhoraria no sistema EletroLight?</p>
+                <p class="qs-descricao">Seja específico: mencione páginas, funcionalidades ou textos que causaram confusão ou poderiam ser aprimorados.</p>
+                <textarea class="qs-textarea" name="q6" placeholder="Ex.: O formulário de anúncio poderia ter um campo de preço. A página de cadastro ficou confusa no campo de data..."></textarea>
+            </div>
+
+            <!-- Pergunta 7 — NPS -->
+            <div class="qs-card">
+                <div class="qs-num">7</div>
+                <p class="qs-pergunta">Em uma escala de 0 a 10, qual a probabilidade de você recomendar o EletroLight a amigos ou familiares?</p>
+                <p class="qs-descricao">0 = Jamais recomendaria &nbsp;•&nbsp; 10 = Com certeza recomendaria</p>
+                <div class="nps-wrap">
+                    <div class="nps-options">
+                        <label><input type="radio" name="q7" value="0" required><span class="nps-btn">0</span></label>
+                        <label><input type="radio" name="q7" value="1"><span class="nps-btn">1</span></label>
+                        <label><input type="radio" name="q7" value="2"><span class="nps-btn">2</span></label>
+                        <label><input type="radio" name="q7" value="3"><span class="nps-btn">3</span></label>
+                        <label><input type="radio" name="q7" value="4"><span class="nps-btn">4</span></label>
+                        <label><input type="radio" name="q7" value="5"><span class="nps-btn">5</span></label>
+                        <label><input type="radio" name="q7" value="6"><span class="nps-btn">6</span></label>
+                        <label><input type="radio" name="q7" value="7"><span class="nps-btn">7</span></label>
+                        <label><input type="radio" name="q7" value="8"><span class="nps-btn">8</span></label>
+                        <label><input type="radio" name="q7" value="9"><span class="nps-btn">9</span></label>
+                        <label><input type="radio" name="q7" value="10"><span class="nps-btn">10</span></label>
+                    </div>
+                    <div class="nps-labels">
+                        <span>Jamais recomendaria</span>
+                        <span>Com certeza recomendaria</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão enviar -->
+            <div class="qs-footer">
+                <button type="submit" class="btn-enviar-qs">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Respostas
+                </button>
+                <p class="qs-aviso"><i class="fa-solid fa-lock"></i> Suas respostas são anônimas e utilizadas apenas para fins acadêmicos.</p>
+            </div>
+
+        </form>
+
+        <!-- Tela de sucesso -->
+        <div class="qs-sucesso" id="qs-sucesso">
+            <i class="fa-solid fa-circle-check"></i>
+            <h2>Obrigado pela sua participação!</h2>
+            <p>Suas respostas foram registradas com sucesso.<br>Elas são essenciais para aprimorarmos o EletroLight.</p>
+            <br>
+            <a href="../index.html" style="color:#059669;font-weight:700;text-decoration:none;">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao início
+            </a>
+        </div>
+
+    </main>
+
+    <footer style="background:#1F2937;color:#9CA3AF;text-align:center;padding:1.5rem;font-size:0.85rem;">
+        <p><i class="fa-solid fa-bolt" style="color:#34D399"></i> Projeto EletroLight &copy; 2026 &mdash; Questionário de Avaliação de Usabilidade (UX)</p>
+    </footer>
+
+    <script>
+        document.getElementById('qs-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form   = document.getElementById('qs-form');
+            const sucesso = document.getElementById('qs-sucesso');
+
+            // Verifica obrigatórias (q1-q4 e q7)
+            const obrigatorias = ['q1','q2','q3','q4','q7'];
+            for (const name of obrigatorias) {
+                if (!form.querySelector(`input[name="${name}"]:checked`)) {
+                    const card = form.querySelector(`input[name="${name}"]`).closest('.qs-card');
+                    card.style.outline = '2px solid #DC2626';
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.addEventListener('change', () => card.style.outline = '', { once: true });
+                    return;
+                }
+            }
+
+            // Coleta respostas
+            const respostas = {
+                q1: form.querySelector('input[name="q1"]:checked')?.value,
+                q2: form.querySelector('input[name="q2"]:checked')?.value,
+                q3: form.querySelector('input[name="q3"]:checked')?.value,
+                q4: form.querySelector('input[name="q4"]:checked')?.value,
+                q5: [...form.querySelectorAll('input[name="q5"]:checked')].map(i => i.value),
+                q6: form.querySelector('textarea[name="q6"]').value.trim(),
+                q7: form.querySelector('input[name="q7"]:checked')?.value,
+                data: new Date().toLocaleString('pt-BR'),
+            };
+
+            // Salva no localStorage
+            const registros = JSON.parse(localStorage.getItem('eletrolight_ux') || '[]');
+            registros.push(respostas);
+            localStorage.setItem('eletrolight_ux', JSON.stringify(registros));
+
+            // Mostra tela de sucesso
+            form.style.display = 'none';
+            sucesso.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos os Anúncios - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        .todos-main { padding-top: 80px; }
+
+        .todos-hero {
+            background: linear-gradient(135deg, #059669 0%, #10B981 60%, #0077b6 100%);
+            padding: 3rem 5%;
+            color: #fff;
+            text-align: center;
+        }
+        .todos-hero span {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.75);
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+        .todos-hero h1 {
+            font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .todos-hero p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.88);
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .todos-controles {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.2rem 5%;
+            position: sticky;
+            top: 80px;
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .busca-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F9FAFB;
+            border: 2px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 8px 16px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 360px;
+        }
+        .busca-input-wrap i { color: #9CA3AF; }
+        .busca-input-wrap input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.95rem;
+            width: 100%;
+            color: #1F2937;
+        }
+
+        .todos-corpo {
+            padding: 2rem 5% 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .todos-info-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .total-anuncios {
+            font-size: 0.95rem;
+            color: #6B7280;
+        }
+        .total-anuncios strong { color: #059669; }
+
+        .btn-anunciar-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #059669;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-anunciar-top:hover {
+            background: #10B981;
+            color: #fff;
+            transform: scale(1.03);
+        }
+
+        .sem-resultados {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #6B7280;
+        }
+        .sem-resultados i {
+            font-size: 3rem;
+            color: #D1FAE5;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        .sem-resultados p { font-size: 1rem; }
+
+        @media (max-width: 600px) {
+            .todos-controles { flex-direction: column; align-items: stretch; }
+            .busca-input-wrap { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="logo">
+            <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="../index.html#inicio">Início</a>
+            <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
+            <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="../index.html#economia">Serviços</a>
+            <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="../login/login.html" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main class="todos-main">
+
+        <section class="todos-hero">
+            <span>TODOS OS ANÚNCIOS</span>
+            <h1><i class="fa-solid fa-recycle"></i> Eletrônicos Disponíveis</h1>
+            <p>Explore todos os eletrônicos anunciados pela comunidade. Doe ou troque.</p>
+        </section>
+
+        <!-- Barra de controles: busca + filtro de categoria -->
+        <div class="todos-controles">
+            <div class="busca-input-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="busca-input" placeholder="Buscar por título ou descrição...">
+            </div>
+
+            <div class="categorias-filtro" id="categorias-filtro" style="margin-bottom:0; flex:1;">
+                <button class="cat-btn ativo" data-cat="todos"><i class="fa-solid fa-border-all"></i> Todos</button>
+                <button class="cat-btn" data-cat="celulares"><i class="fa-solid fa-mobile-screen-button"></i> Celulares</button>
+                <button class="cat-btn" data-cat="notebooks"><i class="fa-solid fa-laptop"></i> Notebooks</button>
+                <button class="cat-btn" data-cat="tvs"><i class="fa-solid fa-tv"></i> TVs</button>
+                <button class="cat-btn" data-cat="tablets"><i class="fa-solid fa-tablet-screen-button"></i> Tablets</button>
+                <button class="cat-btn" data-cat="audio"><i class="fa-solid fa-headphones"></i> Áudio</button>
+                <button class="cat-btn" data-cat="videogames"><i class="fa-solid fa-gamepad"></i> Videogames</button>
+                <button class="cat-btn" data-cat="eletrodomesticos"><i class="fa-solid fa-blender"></i> Eletrodomésticos</button>
+                <button class="cat-btn" data-cat="cabos"><i class="fa-solid fa-plug"></i> Cabos</button>
+                <button class="cat-btn" data-cat="pilhas"><i class="fa-solid fa-battery-half"></i> Pilhas</button>
+                <button class="cat-btn" data-cat="perifericos"><i class="fa-solid fa-print"></i> Periféricos</button>
+            </div>
+        </div>
+
+        <div class="todos-corpo">
+            <div class="todos-info-bar">
+                <p class="total-anuncios" id="total-label">Carregando...</p>
+                <a href="./anunciar.html" class="btn-anunciar-top"><i class="fa-solid fa-plus"></i> Anunciar Eletrônico</a>
+            </div>
+
+            <div class="anuncios-grid" id="anuncios-grid-todos"></div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+    </footer>
+
+    <script src="../scripts/anuncios-data.js"></script>
+    <script>
+        // --- Perfil no header ---
+        (function () {
+            const wrap   = document.getElementById('header-user-wrap');
+            const stored = localStorage.getItem('eletrolight_user');
+            if (!wrap || !stored) return;
+            const user         = JSON.parse(stored);
+            const primeiroNome = user.nome.split(' ')[0];
+            wrap.innerHTML = `
+                <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
+                    <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                    ${primeiroNome}
+                    <i class="fa-solid fa-chevron-down perfil-seta"></i>
+                </button>
+                <div class="perfil-dropdown" id="perfil-dropdown">
+                    <span class="perfil-nome-completo">${user.nome}</span>
+                    <span class="perfil-email">${user.email}</span>
+                    <hr class="perfil-divider">
+                    <a href="./perfil.html" class="perfil-editar">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                    </a>
+                    <a href="./meus-anuncios.html" class="perfil-editar">
+                        <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
+                    </a>
+                    <button class="perfil-sair" id="btn-sair">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+                    </button>
+                </div>`;
+            document.getElementById('btn-perfil-toggle').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dd = document.getElementById('perfil-dropdown');
+                const aberto = dd.classList.toggle('aberto');
+                e.currentTarget.setAttribute('aria-expanded', aberto);
+            });
+            document.addEventListener('click', () => {
+                const dd = document.getElementById('perfil-dropdown');
+                if (dd) dd.classList.remove('aberto');
+            });
+            document.getElementById('btn-sair').addEventListener('click', () => {
+                localStorage.removeItem('eletrolight_user');
+                window.location.reload();
+            });
+        })();
+
+        // --- Renderização completa (sem limite) ---
+        const grid       = document.getElementById('anuncios-grid-todos');
+        const totalLabel = document.getElementById('total-label');
+        let catAtual     = 'todos';
+        let buscaAtual   = '';
+
+        function renderTodos() {
+            const todos     = getAnuncios();
+            let filtrados   = catAtual === 'todos' ? todos : todos.filter(a => a.categoria === catAtual);
+            if (buscaAtual) {
+                const q = buscaAtual.toLowerCase();
+                filtrados = filtrados.filter(a =>
+                    a.titulo.toLowerCase().includes(q) ||
+                    a.descricao.toLowerCase().includes(q)
+                );
+            }
+
+            totalLabel.innerHTML = `Exibindo <strong>${filtrados.length}</strong> anúncio${filtrados.length !== 1 ? 's' : ''}`;
+
+            if (filtrados.length === 0) {
+                grid.innerHTML = `
+                    <div class="sem-resultados">
+                        <i class="fa-solid fa-box-open"></i>
+                        <p>Nenhum anúncio encontrado para este filtro.</p>
+                    </div>`;
+                return;
+            }
+            const emailLogado = (function(){ try { return JSON.parse(localStorage.getItem('eletrolight_user')).email.toLowerCase(); } catch(e){ return ''; } })();
+            grid.innerHTML = filtrados.map(a => renderAnuncioCard(a, { isOwner: emailLogado && a.email && a.email.toLowerCase() === emailLogado })).join('');
+        }
+
+        // Delegação: clique em "Editar Anúncio" redireciona para meus-anuncios
+        grid.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-editar-anuncio');
+            if (!btn) return;
+            const id = btn.closest('.anuncio-card')?.dataset.id;
+            if (id) window.location.href = `./meus-anuncios.html?editar=${id}`;
+        });
+
+        // Filtro de categoria
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('ativo'));
+                btn.classList.add('ativo');
+                catAtual = btn.dataset.cat;
+                renderTodos();
+            });
+        });
+
+        // Busca por texto
+        document.getElementById('busca-input').addEventListener('input', (e) => {
+            buscaAtual = e.target.value.trim();
+            renderTodos();
+        });
+
+        // Render inicial
+        renderTodos();
+
+        // --- Guarda do botão Anunciar ---
+        const btnAnunciarTop = document.querySelector('.btn-anunciar-top');
+        if (btnAnunciarTop) {
+            btnAnunciarTop.addEventListener('click', (e) => {
+                if (!localStorage.getItem('eletrolight_user')) {
+                    e.preventDefault();
+                    window.location.href = '../login/login.html?cadastro=1';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

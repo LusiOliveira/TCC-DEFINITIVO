@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EletroLight - Consumo Consciente</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" crossorigin="anonymous" />
+
+    <link rel="stylesheet" href="./styles/style.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+            <img src="./assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="#inicio">Início</a>
+            <a href="#mapa-coleta">Pontos de Coleta</a>
+            <a href="#aprendizado">Canal de Conscientização</a>
+            <a href="#economia">Serviços</a>
+            <a href="#sobre-projeto">Sobre o Projeto</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="./login/login.html?cadastro=1" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <section id="inicio" class="hero-section">
+            <div class="hero-slider" aria-label="Destaques EletroLight">
+            <div class="hero-track" id="hero-track">
+                <article class="hero-slide is-active" style="background-image: linear-gradient(rgba(10, 20, 30, 0.45), rgba(10, 20, 30, 0.45)), url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1600&q=80');">
+                    <div class="hero-content">
+                        <h1>O Descarte Inteligente Comeca Aqui</h1>
+                        <p>Proteja os igarapes de Manaus e o meio ambiente. Encontre o ponto de logistica reversa mais proximo e participe da rede de troca inteligente.</p>
+                        <a href="#mapa-coleta" class="btn-large"><i class="fa-solid fa-location-dot"></i> Acessar Mapa Interativo</a>
+                    </div>
+                </article>
+
+                <article class="hero-slide" style="background-image: linear-gradient(rgba(10, 20, 30, 0.45), rgba(10, 20, 30, 0.45)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80');">
+                    <div class="hero-content">
+                        <h2>Recicle, Reutilize, Transforme</h2>
+                        <p>Descubra como transformar lixo eletronico em oportunidade e reduzir impactos ambientais com a economia circular.</p>
+                        <a href="#aprendizado" class="btn-large"><i class="fa-solid fa-recycle"></i> Ver Canal de Aprendizado</a>
+                    </div>
+                </article>
+
+                <article class="hero-slide" style="background-image: linear-gradient(rgba(10, 20, 30, 0.45), rgba(10, 20, 30, 0.45)), url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1600&q=80');">
+                    <div class="hero-content">
+                        <h2>Sobre o Projeto</h2>
+                        <p>Conheça o EletroLight: uma plataforma que conecta cidadãos, reciclagem e conscientização para um descarte consciente de eletrônicos em Manaus.</p>
+                        <a href="#sobre-projeto" class="btn-large"><i class="fa-solid fa-circle-info"></i> Conheça o Projeto</a>
+                    </div>
+                </article>
+            </div>
+
+            <button class="hero-control prev" id="hero-prev" aria-label="Slide anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="hero-control next" id="hero-next" aria-label="Proximo slide">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <div class="hero-dots" id="hero-dots" aria-label="Navegacao dos slides">
+                <button class="hero-dot is-active" data-slide="0" aria-label="Ir para slide 1"></button>
+                <button class="hero-dot" data-slide="1" aria-label="Ir para slide 2"></button>
+                <button class="hero-dot" data-slide="2" aria-label="Ir para slide 3"></button>
+            </div>
+            </div>
+        </section>
+
+<section id="sobre-projeto" class="sobre-card">
+    <div class="sobre-card-inner">
+        <div class="sobre-texto">
+            <span class="sobre-tag">ABOUT US</span>
+            <h2>Sobre o Projeto</h2>
+            <div class="linha-azul"></div>
+            <p>
+                Em um cenário onde a obsolescência programada e o consumo acelerado encurtam o ciclo de vida dos dispositivos, a gestão desses materiais torna-se uma prioridade estratégica para a sustentabilidade urbana.
+            </p>
+            <p>
+                Nesse contexto, o projeto <strong>EletroLight</strong> apresenta-se como uma resposta tecnológica robusta às lacunas de gestão de resíduos em Manaus. A iniciativa propõe uma plataforma digital integrada que atua como ponte entre o cidadão, as entidades de reciclagem e o conhecimento técnico.
+            </p>
+        </div>
+        <div class="sobre-imagem">
+            <img src="./assets/images/robozito-nerd.png" alt="Mascote Robô">
+        </div>
+    </div>
+</section>
+
+        <section id="mapa-coleta" class="map-container">
+            <h2 class="section-title">Mapa de Coleta em Manaus</h2>
+            
+            <div class="map-layout">
+                <div class="map-wrapper">
+                    <p class="map-info">Selecione um ponto na lista ou navegue pelo mapa para ver os detalhes.</p>
+                    <div id="map" class="map-view"></div>
+                </div>
+                
+                <div class="map-sidebar" id="lista-pontos">
+                    </div>
+            </div>
+        </section>
+
+        <section id="aprendizado" class="aprendizado-section">
+            <div class="aprendizado-inner">
+                <div class="aprendizado-header">
+                    <span class="subtitle">CANAL DE APRENDIZADO</span>
+                    <h2>Conhecimento que <span class="highlight">transforma</span></h2>
+                    <p>Entenda os impactos do lixo eletrônico e descubra como você pode fazer a diferença na preservação do meio ambiente.</p>
+                </div>
+
+                <div class="tabs-container">
+                    <button class="tab-btn ativo" onclick="mudarAba('o-que-e', this)">
+                        <i class="fa-solid fa-microchip"></i> O que é e-lixo?
+                    </button>
+                    <button class="tab-btn" onclick="mudarAba('impactos', this)">
+                        <i class="fa-solid fa-leaf"></i> Impactos em Manaus
+                    </button>
+                    <button class="tab-btn" onclick="mudarAba('economia', this)">
+                        <i class="fa-solid fa-recycle"></i> Curiosidades
+                    </button>
+                </div>
+
+                <div class="conteudo-container">
+                    <div id="tab-o-que-e" class="tab-content ativa">
+                        <div class="card-principal">
+                            <h3><i class="fa-solid fa-microchip"></i> O que é Lixo Eletrônico?</h3>
+                            <p>Lixo eletrônico (e-lixo) são equipamentos elétricos e eletrônicos descartados — como celulares, computadores, TVs e eletrodomésticos. Esses resíduos contêm substâncias tóxicas como chumbo, mercúrio e cádmio, que podem contaminar o solo e a água se descartados de forma inadequada.</p>
+                        </div>
+                        <div class="card-secundario">
+                            <h3><i class="fa-regular fa-lightbulb"></i> Você sabia?</h3>
+                            <ul>
+                                <li><i class="fa-solid fa-triangle-exclamation text-warning"></i><span>O Brasil é o 5º maior produtor de lixo eletrônico do mundo</span></li>
+                                <li><i class="fa-solid fa-triangle-exclamation text-warning"></i><span>Cada brasileiro gera em média 10,2 kg de e-lixo por ano</span></li>
+                                <li><i class="fa-solid fa-triangle-exclamation text-warning"></i><span>Menos de 3% do lixo eletrônico é reciclado no país</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="tab-impactos" class="tab-content">
+                        <div class="card-principal">
+                            <h3><i class="fa-solid fa-leaf"></i> Impactos em Manaus</h3>
+                            <p>Devido ao Polo Industrial de Manaus, a nossa cidade lida com um volume imenso de eletrônicos. O descarte irregular em igarapés e lixeiras comuns causa contaminação por metais pesados, afetando diretamente a fauna, a flora e as nossas reservas de água.</p>
+                        </div>
+                        <div class="card-secundario">
+                            <h3><i class="fa-solid fa-circle-exclamation"></i> Alerta Local</h3>
+                            <ul>
+                                <li><i class="fa-solid fa-droplet text-warning"></i><span>1 pilha comum pode contaminar o solo por 50 anos</span></li>
+                                <li><i class="fa-solid fa-fish text-warning"></i><span>Igarapés perdem oxigênio devido a componentes químicos</span></li>
+                                <li><i class="fa-solid fa-map-location-dot text-warning"></i><span>Há dezenas de pontos de coleta subutilizados na capital</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="tab-economia" class="tab-content">
+                        <div class="card-principal">
+                            <h3><i class="fa-solid fa-earth-americas"></i> Brasil no Mapa do E-lixo</h3>
+                            <p>O Brasil é um dos maiores geradores de lixo eletrônico do mundo, ficando atrás apenas da China, EUA, Índia e Japão. Nas Américas, é o segundo maior produtor, gerando mais de 2 milhões de toneladas em 2019. Apesar do volume alarmante, apenas cerca de 3% desse lixo é descartado de maneira ambientalmente responsável — tanto no Brasil quanto na América Latina.</p>
+                        </div>
+                        <div class="card-secundario">
+                            <h3><i class="fa-solid fa-chart-bar"></i> Números que Impactam</h3>
+                            <ul>
+                                <li><i class="fa-solid fa-trophy text-warning"></i><span>5º maior produtor de e-lixo do mundo (atrás de China, EUA, Índia e Japão)</span></li>
+                                <li><i class="fa-solid fa-globe-americas text-warning"></i><span>2º maior das Américas, com mais de 2 milhões de toneladas em 2019</span></li>
+                                <li><i class="fa-solid fa-recycle text-success"></i><span>Apenas ~3% do e-lixo é descartado de forma ambientalmente responsável</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="economia" class="servicos-section">
+            <div class="servicos-header">
+                <div class="servicos-titulo-bloco">
+                    <span class="subtitle">ANÚNCIOS DE DOAÇÃO</span>
+                    <h2 class="section-title" style="padding-top:0; margin-bottom:0.5rem;">Serviços do EletroLight</h2>
+                    <p class="servicos-subtitulo">Eletrônicos anunciados pela comunidade para doação ou troca. Dê uma nova vida a esses dispositivos!</p>
+                </div>
+                <a href="./pages/anunciar.html" class="btn-anunciar"><i class="fa-solid fa-plus"></i> Anunciar Eletrônico</a>
+            </div>
+
+            <!-- Filtro por Categoria -->
+            <div class="categorias-filtro" id="categorias-filtro">
+                <button class="cat-btn ativo" data-cat="todos"><i class="fa-solid fa-border-all"></i> Todos</button>
+                <button class="cat-btn" data-cat="celulares"><i class="fa-solid fa-mobile-screen-button"></i> Celulares</button>
+                <button class="cat-btn" data-cat="notebooks"><i class="fa-solid fa-laptop"></i> Notebooks</button>
+                <button class="cat-btn" data-cat="tvs"><i class="fa-solid fa-tv"></i> TVs e Monitores</button>
+                <button class="cat-btn" data-cat="tablets"><i class="fa-solid fa-tablet-screen-button"></i> Tablets</button>
+                <button class="cat-btn" data-cat="audio"><i class="fa-solid fa-headphones"></i> Áudio</button>
+                <button class="cat-btn" data-cat="videogames"><i class="fa-solid fa-gamepad"></i> Videogames</button>
+                <button class="cat-btn" data-cat="eletrodomesticos"><i class="fa-solid fa-blender"></i> Eletrodomésticos</button>
+                <button class="cat-btn" data-cat="cabos"><i class="fa-solid fa-plug"></i> Cabos e Carregadores</button>
+                <button class="cat-btn" data-cat="pilhas"><i class="fa-solid fa-battery-half"></i> Pilhas e Baterias</button>
+            </div>
+
+            <!-- Grid de Anúncios (populado dinamicamente por anuncios-data.js) -->
+            <div class="anuncios-grid" id="anuncios-grid"></div>
+
+            <div class="ver-mais-wrap">
+                <a href="./pages/todos-anuncios.html" class="btn-ver-mais">Ver todos os anúncios <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </section>
+    </main>
+
+<div class="chatbot-wrapper">
+        <button id="chatbot-toggle" class="chatbot-toggle">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+        <div id="chatbot-window" class="chatbot-window hidden">
+            <div class="chatbot-header">
+                <h4>Assistente EletroLight</h4>
+                <button id="chatbot-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot">Olá! Como posso ajudar você com o descarte de eletrônicos hoje?</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input-field" placeholder="Digite sua dúvida...">
+                <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" crossorigin="anonymous"></script>
+    <script src="./scripts/anuncios-data.js"></script>
+    <script src="./scripts/script.js"></script>
+</body>
+</html>
