@@ -149,14 +149,16 @@ const SEED_ANUNCIOS = [
 // =============================================
 
 /**
- * Recupera todos os anúncios do localStorage.
- * Se não existir nenhum dado (primeira visita), semeia com SEED_ANUNCIOS.
+ * Recupera todos os anúncios do Supabase.
  * 
- * @returns {Array<Object>} Array de anúncios completo
+ * @returns {Promise<Array<Object>>} Array de anúncios completo
  */
-function getAnuncios() {
+async function getAnuncios() {
+    if (window.SupabaseService) {
+        return await window.SupabaseService.getAnuncios();
+    }
+    // Fallback para LocalStorage (offline)
     const stored = localStorage.getItem(STORAGE_KEY);
-    // Primeira visita: popula com dados de demonstração
     if (!stored) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ANUNCIOS));
         return SEED_ANUNCIOS;
@@ -165,22 +167,23 @@ function getAnuncios() {
 }
 
 /**
- * Adiciona um novo anúncio ao início do array (prepend).
- * Isso garante que o anúncio mais recente sempre apareça primeiro.
+ * Adiciona um novo anúncio ao Supabase.
  * 
  * @param {Object} item — Objeto anúncio sem id e data (serão gerados)
- * @returns {Array<Object>} Array atualizado com o novo anúncio
+ * @returns {Promise<Object>} Anúncio criado
  */
-function adicionarAnuncio(item) {
-    const lista = getAnuncios();
-    // Gera ID único baseado no timestamp (milissegundos desde 1970)
-    item.id   = Date.now();
-    // Formata data no padrão brasileiro (dd/mm/aaaa)
+async function adicionarAnuncio(item) {
+    if (window.SupabaseService) {
+        const result = await window.SupabaseService.adicionarAnuncio(item);
+        return result;
+    }
+    // Fallback LocalStorage
+    const lista = await getAnuncios();
+    item.id = Date.now();
     item.data = new Date().toLocaleDateString('pt-BR');
-    // unshift = adiciona no início do array (mais recente primeiro)
     lista.unshift(item);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
-    return lista;
+    return item;
 }
 
 // =============================================
@@ -243,7 +246,7 @@ function renderAnuncioCard(item, opcoes) {
     const btnLabel = isOwner
         ? '<i class="fa-solid fa-pen-to-square"></i> Editar Anúncio'
         : tipo.btn;
-    const btnClass = isOwner ? 'btn-interesse btn-editar-anuncio' : 'btn-interesse';
+    const btnClass = isOwner ? 'btn-interesse btn-editar-anuncio' : 'btn-interesse btn-ver-detalhe';
 
     // Template literal com data-attributes para manipulação via JavaScript
     return `

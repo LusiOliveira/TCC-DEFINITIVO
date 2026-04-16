@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anúncio - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        .detalhe-main { padding-top: 80px; }
+
+        .detalhe-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 5% 4rem;
+        }
+
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.92rem;
+            margin-bottom: 1.5rem;
+            transition: gap 0.2s;
+        }
+        .btn-voltar:hover { gap: 12px; }
+
+        /* ---------- Ad detail layout ---------- */
+        .detalhe-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+
+        .detalhe-foto-col {
+            position: relative;
+            background: #f3f4f6;
+            min-height: 340px;
+        }
+        .detalhe-foto-col img {
+            width: 100%;
+            height: 100%;
+            min-height: 340px;
+            object-fit: cover;
+            display: block;
+        }
+        .detalhe-foto-col .anuncio-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        .detalhe-info-col {
+            padding: 2rem 2rem 2rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .detalhe-titulo {
+            font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+            font-weight: 800;
+            color: #1F2937;
+            line-height: 1.2;
+            margin: 0.25rem 0;
+        }
+
+        .detalhe-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #4B5563;
+        }
+        .meta-item i { color: #059669; width: 16px; text-align: center; }
+
+        .detalhe-desc h3, .detalhe-anunciante-block h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #9CA3AF;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.4rem;
+        }
+        .detalhe-desc p {
+            font-size: 0.95rem;
+            color: #374151;
+            line-height: 1.7;
+        }
+
+        .anunciante-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #F0FDF4;
+            border: 1px solid #D1FAE5;
+            border-radius: 12px;
+            padding: 0.85rem 1.1rem;
+        }
+        .anunciante-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #059669;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .anunciante-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+        .anunciante-info { display: flex; flex-direction: column; }
+        .anunciante-label { font-size: 0.76rem; color: #6B7280; }
+        .anunciante-nome  { font-weight: 700; color: #1F2937; font-size: 0.98rem; }
+
+        /* ---------- Not found / loading ---------- */
+        .detalhe-loading, .detalhe-notfound {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #6B7280;
+        }
+        .detalhe-loading i, .detalhe-notfound i {
+            font-size: 3rem;
+            color: #D1FAE5;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        /* ---------- Chat section ---------- */
+        .chat-section {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+            overflow: hidden;
+        }
+
+        /* Login prompt */
+        .chat-login-prompt {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .chat-login-prompt i { font-size: 3rem; color: #D1FAE5; display: block; margin-bottom: 1rem; }
+        .chat-login-prompt h3 { font-size: 1.2rem; font-weight: 700; color: #1F2937; margin-bottom: 0.4rem; }
+        .chat-login-prompt p  { color: #6B7280; font-size: 0.95rem; margin-bottom: 1.5rem; }
+        .chat-login-btns { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .btn-chat-login,
+        .btn-chat-cadastro {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #fff;
+            border: 1px solid #059669;
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 14px rgba(5, 150, 105, 0.18);
+            cursor: pointer;
+        }
+        .btn-chat-login:hover,
+        .btn-chat-cadastro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.25);
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-color: #10B981;
+            color: #fff;
+        }
+
+        /* Chat header */
+        .chat-header-bar {
+            background: linear-gradient(135deg, #059669, #10B981);
+            padding: 1.1rem 1.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .chat-header-bar h2 { font-size: 1.05rem; font-weight: 700; margin: 0; }
+        .chat-header-bar i  { font-size: 1.1rem; }
+
+        /* Messages area */
+        .chat-messages {
+            height: 320px;
+            overflow-y: auto;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: #F9FAFB;
+        }
+
+        .chat-msg { display: flex; flex-direction: column; max-width: 72%; }
+        .chat-msg.minha { align-self: flex-end; align-items: flex-end; }
+        .chat-msg.deles  { align-self: flex-start; align-items: flex-start; }
+
+        .chat-bubble {
+            padding: 10px 15px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .chat-msg.minha .chat-bubble {
+            background: #059669;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.deles .chat-bubble {
+            background: #fff;
+            color: #1F2937;
+            border: 1px solid #E5E7EB;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-hora {
+            font-size: 0.72rem;
+            color: #9CA3AF;
+            margin-top: 3px;
+            padding: 0 4px;
+        }
+
+        .chat-empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            gap: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+        }
+        .chat-empty-state i { font-size: 2.5rem; color: #D1FAE5; }
+
+        /* Input area */
+        .chat-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #E5E7EB;
+            background: #fff;
+        }
+        .chat-input-area textarea {
+            flex: 1;
+            resize: none;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s;
+            line-height: 1.5;
+        }
+        .chat-input-area textarea:focus { border-color: #059669; }
+        .btn-chat-send {
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-chat-send:hover { background: #10B981; transform: scale(1.04); }
+        .btn-chat-send:disabled { background: #9CA3AF; cursor: not-allowed; transform: none; }
+
+        /* Owner layout */
+        .owner-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 400px;
+        }
+        .owner-sidebar {
+            border-right: 1px solid #E5E7EB;
+            background: #F9FAFB;
+            display: flex;
+            flex-direction: column;
+        }
+        .owner-sidebar-label {
+            padding: 0.85rem 1rem 0.5rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #9CA3AF;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .contato-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .contato-item:hover { background: #E5E7EB; }
+        .contato-item.ativo { background: #D1FAE5; border-left-color: #059669; }
+        .contato-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #059669;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; flex-shrink: 0;
+            overflow: hidden;
+        }
+        .contato-avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover; border-radius: 50%; display: block;
+        }
+        .contato-nome { font-weight: 600; font-size: 0.88rem; color: #1F2937; }
+
+        .owner-empty-sidebar {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+        }
+        .owner-empty-sidebar i { font-size: 2rem; color: #D1FAE5; display: block; margin-bottom: 0.5rem; }
+
+        .owner-chat-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .owner-chat-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            gap: 0.5rem;
+            text-align: center;
+            padding: 2rem;
+        }
+        .owner-chat-empty i { font-size: 2.5rem; color: #D1FAE5; }
+
+        .hidden { display: none !important; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .detalhe-wrapper { grid-template-columns: 1fr; }
+            .detalhe-foto-col { min-height: 240px; }
+            .detalhe-info-col { padding: 1.5rem; }
+            .owner-layout { grid-template-columns: 1fr; }
+            .owner-sidebar { border-right: none; border-bottom: 1px solid #E5E7EB; max-height: 200px; overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="logo">
+            <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
+            <span class="logo__text">EletroLight</span>
+        </a>
+        <nav class="nav-links" aria-label="Seções do site">
+            <a href="../index.html#inicio">Início</a>
+            <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
+            <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="../index.html#economia">Serviços</a>
+            <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
+        </nav>
+        <div class="btn-nav-wrap" id="header-user-wrap">
+            <a href="../login/login.html" class="btn-nav" id="btn-header-user">
+                <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                Cadastre-se
+            </a>
+        </div>
+    </header>
+
+    <main class="detalhe-main">
+        <div class="detalhe-container">
+
+            <a href="todos-anuncios.html" class="btn-voltar">
+                <i class="fa-solid fa-arrow-left"></i> Voltar aos Anúncios
+            </a>
+
+            <!-- Loading state -->
+            <div id="detalhe-loading" class="detalhe-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Carregando anúncio…</p>
+            </div>
+
+            <!-- Not found state -->
+            <div id="detalhe-notfound" class="detalhe-notfound hidden">
+                <i class="fa-solid fa-box-open"></i>
+                <p>Anúncio não encontrado ou removido.</p>
+                <a href="todos-anuncios.html" class="btn-anunciar-top" style="display:inline-flex;margin-top:1rem;gap:8px;">
+                    <i class="fa-solid fa-arrow-left"></i> Ver todos os anúncios
+                </a>
+            </div>
+
+            <!-- Ad detail -->
+            <div id="detalhe-wrapper" class="detalhe-wrapper hidden">
+                <!-- Image -->
+                <div class="detalhe-foto-col">
+                    <img id="ad-foto" src="" alt="">
+                    <span id="ad-badge" class="anuncio-badge"></span>
+                </div>
+                <!-- Info -->
+                <div class="detalhe-info-col">
+                    <span id="ad-categoria" class="anuncio-categoria"></span>
+                    <h1 id="ad-titulo" class="detalhe-titulo"></h1>
+                    <div class="detalhe-meta">
+                        <div class="meta-item"><i class="fa-solid fa-screwdriver-wrench"></i><span id="ad-condicao"></span></div>
+                        <div class="meta-item"><i class="fa-solid fa-location-dot"></i><span id="ad-bairro"></span></div>
+                        <div class="meta-item" id="ad-marca-row"><i class="fa-solid fa-tag"></i><span id="ad-marca"></span></div>
+                        <div class="meta-item"><i class="fa-solid fa-calendar-days"></i><span id="ad-data"></span></div>
+                    </div>
+                    <div class="detalhe-desc">
+                        <h3>Descrição</h3>
+                        <p id="ad-descricao"></p>
+                    </div>
+                    <div class="detalhe-anunciante-block">
+                        <h3>Anunciante</h3>
+                        <div class="anunciante-card">
+                            <div class="anunciante-avatar" id="anunciante-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="anunciante-info">
+                                <span class="anunciante-label">Anunciado por</span>
+                                <span class="anunciante-nome" id="ad-nome"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== CHAT SECTION ========== -->
+            <div id="chat-section" class="chat-section hidden">
+
+                <!-- A) Login prompt (visitor not logged in) -->
+                <div id="chat-login-prompt" class="chat-login-prompt hidden">
+                    <i class="fa-solid fa-comments"></i>
+                    <h3>Quer conversar com o anunciante?</h3>
+                    <p>Faça login ou crie uma conta para entrar em contato sobre este anúncio.</p>
+                    <div class="chat-login-btns">
+                        <a id="link-login" href="../login/login.html" class="btn-chat-login">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Fazer Login
+                        </a>
+                        <a id="link-cadastro" href="../login/login.html?cadastro=1" class="btn-chat-cadastro">
+                            <i class="fa-solid fa-user-plus"></i> Criar Conta
+                        </a>
+                    </div>
+                </div>
+
+                <!-- B) Owner view: conversations about this ad -->
+                <div id="owner-view" class="hidden">
+                    <div class="chat-header-bar">
+                        <i class="fa-solid fa-inbox"></i>
+                        <h2>Mensagens sobre este anúncio</h2>
+                    </div>
+                    <div class="owner-layout">
+                        <!-- Sidebar: list of contacts -->
+                        <div class="owner-sidebar">
+                            <div class="owner-sidebar-label">Contatos</div>
+                            <div id="owner-contatos"></div>
+                        </div>
+                        <!-- Chat area -->
+                        <div class="owner-chat-col" id="owner-chat-col">
+                            <div class="owner-chat-empty" id="owner-chat-empty">
+                                <i class="fa-solid fa-hand-pointer"></i>
+                                <p>Selecione um contato para ver a conversa</p>
+                            </div>
+                            <div id="chat-messages-owner" class="chat-messages hidden"></div>
+                            <div id="owner-input-area" class="chat-input-area hidden">
+                                <textarea id="chat-input-owner" placeholder="Digite sua resposta…" rows="2"></textarea>
+                                <button id="chat-send-owner" class="btn-chat-send">
+                                    <i class="fa-solid fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- C) Non-owner view: chat with the ad owner -->
+                <div id="user-view" class="hidden">
+                    <div class="chat-header-bar">
+                        <i class="fa-solid fa-comments"></i>
+                        <h2 id="chat-user-title">Chat com o Anunciante</h2>
+                    </div>
+                    <div id="chat-messages-user" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <textarea id="chat-input-user" placeholder="Digite sua mensagem…" rows="2"></textarea>
+                        <button id="chat-send-user" class="btn-chat-send">
+                            <i class="fa-solid fa-paper-plane"></i> Enviar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- D) No email (seed data): WhatsApp fallback -->
+                <div id="whatsapp-fallback" class="chat-login-prompt hidden">
+                    <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i>
+                    <h3>Contato via WhatsApp</h3>
+                    <p>Este anúncio só está disponível por WhatsApp.</p>
+                    <a id="whatsapp-link" href="#" target="_blank" class="btn-chat-login" style="background:#25D366;">
+                        <i class="fa-brands fa-whatsapp"></i> Abrir WhatsApp
+                    </a>
+                </div>
+
+            </div>
+            <!-- end chat section -->
+
+        </div>
+    </main>
+
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
+    <script src="../scripts/anuncios-data.js"></script>
+    <script>
+        // ---- Header: perfil dropdown ----
+        (function () {
+            const wrap   = document.getElementById('header-user-wrap');
+            const stored = sessionStorage.getItem('eletrolight_session');
+            if (!wrap || !stored) return;
+            const session      = JSON.parse(stored);
+            const primeiroNome = session.nome.split(' ')[0];
+            wrap.innerHTML = `
+                <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
+                    <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                    ${primeiroNome}
+                    <i class="fa-solid fa-chevron-down perfil-seta"></i>
+                </button>
+                <div class="perfil-dropdown" id="perfil-dropdown">
+                    <span class="perfil-nome-completo">${session.nome}</span>
+                    <span class="perfil-email">${session.email}</span>
+                    <hr class="perfil-divider">
+                    <a href="./perfil.html" class="perfil-editar">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                    </a>
+                    <a href="./meus-anuncios.html" class="perfil-editar">
+                        <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
+                    </a>
+                    <button class="perfil-sair" id="btn-sair">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+                    </button>
+                </div>`;
+            document.getElementById('btn-perfil-toggle').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dd = document.getElementById('perfil-dropdown');
+                const aberto = dd.classList.toggle('aberto');
+                e.currentTarget.setAttribute('aria-expanded', aberto);
+            });
+            document.addEventListener('click', () => {
+                const dd = document.getElementById('perfil-dropdown');
+                if (dd) dd.classList.remove('aberto');
+            });
+            document.getElementById('btn-sair').addEventListener('click', () => {
+                sessionStorage.removeItem('eletrolight_session');
+                window.location.reload();
+            });
+        })();
+
+        // ---- Helpers ----
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function formatHora(isoStr) {
+            try {
+                return new Date(isoStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            } catch { return ''; }
+        }
+
+        function renderMessages(msgs, myEmail, containerEl) {
+            if (!msgs || msgs.length === 0) {
+                containerEl.innerHTML = `
+                    <div class="chat-empty-state">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <p>Nenhuma mensagem ainda. Inicie a conversa!</p>
+                    </div>`;
+                return;
+            }
+            containerEl.innerHTML = msgs.map(m => {
+                const isMine = m.remetente_email === myEmail.toLowerCase();
+                return `<div class="chat-msg ${isMine ? 'minha' : 'deles'}">
+                    <div class="chat-bubble">${escapeHtml(m.texto)}</div>
+                    <span class="chat-hora">${isMine ? 'Você' : escapeHtml(m.remetente_nome || m.remetente_email)} · ${formatHora(m.created_at)}</span>
+                </div>`;
+            }).join('');
+            containerEl.scrollTop = containerEl.scrollHeight;
+        }
+
+        // ---- Main init ----
+        (async function init() {
+            const params    = new URLSearchParams(window.location.search);
+            const anuncioId = params.get('id');
+            const session   = JSON.parse(sessionStorage.getItem('eletrolight_session') || 'null');
+
+            if (!anuncioId) {
+                window.location.href = 'todos-anuncios.html';
+                return;
+            }
+
+            // Load ad
+            const todos   = await getAnuncios();
+            const anuncio = todos.find(a => String(a.id) === String(anuncioId));
+
+            document.getElementById('detalhe-loading').classList.add('hidden');
+
+            if (!anuncio) {
+                document.getElementById('detalhe-notfound').classList.remove('hidden');
+                return;
+            }
+
+            // ---- Render ad detail ----
+            const cat  = getCategoriaInfo(anuncio.categoria);
+            const tipo = getTipoInfo(anuncio.tipo);
+            const foto = anuncio.foto ||
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80';
+
+            document.getElementById('ad-foto').src       = foto;
+            document.getElementById('ad-foto').alt       = anuncio.titulo;
+            document.getElementById('ad-badge').textContent = tipo.label;
+            document.getElementById('ad-badge').className    = `anuncio-badge ${tipo.cls}`;
+            document.getElementById('ad-categoria').innerHTML = `<i class="fa-solid ${cat.icon}"></i> ${cat.label}`;
+            document.getElementById('ad-titulo').textContent  = anuncio.titulo;
+            document.getElementById('ad-condicao').textContent = anuncio.condicao;
+            document.getElementById('ad-bairro').textContent   = anuncio.bairro;
+            document.getElementById('ad-data').textContent     = anuncio.data || '';
+            document.getElementById('ad-nome').textContent     = anuncio.nome;
+
+            const ownerEmail = anuncio.email ? anuncio.email.toLowerCase() : null;
+
+            // Busca foto de perfil do anunciante
+            if (ownerEmail && window.SupabaseService) {
+                window.SupabaseService.findUserByEmail(ownerEmail).then(dono => {
+                    if (dono && dono.foto) {
+                        const avatarEl = document.getElementById('anunciante-avatar');
+                        if (avatarEl) avatarEl.innerHTML = `<img src="${dono.foto}" alt="${anuncio.nome}">`;
+                    }
+                });
+            }
+
+            if (anuncio.marca) {
+                document.getElementById('ad-marca').textContent = anuncio.marca;
+            } else {
+                document.getElementById('ad-marca-row').classList.add('hidden');
+            }
+
+            document.getElementById('ad-descricao').textContent = anuncio.descricao;
+            document.title = `${anuncio.titulo} - EletroLight`;
+
+            document.getElementById('detalhe-wrapper').classList.remove('hidden');
+            document.getElementById('chat-section').classList.remove('hidden');
+
+            // ---- Determine chat mode ----
+            const isLoggedIn = !!session;
+            const isOwner    = isLoggedIn && ownerEmail && session.email.toLowerCase() === ownerEmail;
+
+            // Preserve redirect back after login
+            const currentUrl = encodeURIComponent(window.location.href);
+            document.getElementById('link-login').href    = `../login/login.html?redirect=${currentUrl}`;
+            document.getElementById('link-cadastro').href = `../login/login.html?cadastro=1&redirect=${currentUrl}`;
+
+            if (!isLoggedIn) {
+                // Visitor: show login prompt
+                document.getElementById('chat-login-prompt').classList.remove('hidden');
+
+            } else if (isOwner) {
+                // Owner: show conversations panel
+                document.getElementById('owner-view').classList.remove('hidden');
+                await initOwnerView();
+
+            } else if (ownerEmail) {
+                // Logged-in non-owner: show direct chat
+                document.getElementById('user-view').classList.remove('hidden');
+                const ownerNome = anuncio.nome || 'Anunciante';
+                document.getElementById('chat-user-title').textContent = `Chat com ${ownerNome}`;
+                await loadUserChat();
+                // Auto-refresh every 5 s
+                setInterval(loadUserChat, 5000);
+
+            } else {
+                // Seed data with no email: WhatsApp fallback
+                const fallback = document.getElementById('whatsapp-fallback');
+                fallback.classList.remove('hidden');
+                if (anuncio.whatsapp) {
+                    const num = anuncio.whatsapp.replace(/\D/g, '');
+                    document.getElementById('whatsapp-link').href =
+                        `https://wa.me/55${num}?text=${encodeURIComponent(`Olá! Vi seu anúncio "${anuncio.titulo}" no EletroLight e tenho interesse.`)}`;
+                }
+            }
+
+            // ======== Owner view logic ========
+            async function initOwnerView() {
+                const conversas = await window.SupabaseService.getConversasDoAnuncio(anuncioId, session.email);
+                const container = document.getElementById('owner-contatos');
+
+                if (!conversas || conversas.length === 0) {
+                    container.innerHTML = `<div class="owner-empty-sidebar">
+                        <i class="fa-solid fa-inbox"></i>
+                        <p>Nenhuma mensagem recebida ainda.</p>
+                    </div>`;
+                    return;
+                }
+
+                container.innerHTML = conversas.map((c, i) =>
+                    `<div class="contato-item" data-email="${escapeHtml(c.email)}" data-nome="${escapeHtml(c.nome || c.email)}">
+                        <div class="contato-avatar" id="avatar-${i}"><i class="fa-solid fa-user"></i></div>
+                        <div>
+                            <div class="contato-nome">${escapeHtml(c.nome || c.email)}</div>
+                        </div>
+                    </div>`
+                ).join('');
+
+                // Buscar foto de perfil de cada contato
+                conversas.forEach(async (c, i) => {
+                    try {
+                        const usuario = await window.SupabaseService.findUserByEmail(c.email);
+                        if (usuario && usuario.foto) {
+                            const avatarEl = document.getElementById(`avatar-${i}`);
+                            if (avatarEl) avatarEl.innerHTML = `<img src="${usuario.foto}" alt="${escapeHtml(c.nome || c.email)}">`;
+                        }
+                    } catch (e) {}
+                });
+
+                // Click contact
+                container.querySelectorAll('.contato-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        container.querySelectorAll('.contato-item').forEach(i => i.classList.remove('ativo'));
+                        item.classList.add('ativo');
+                        openOwnerConversation(item.dataset.email, item.dataset.nome);
+                    });
+                });
+
+                // Open first automatically
+                const first = container.querySelector('.contato-item');
+                if (first) {
+                    first.classList.add('ativo');
+                    openOwnerConversation(first.dataset.email, first.dataset.nome);
+                }
+            }
+
+            let ownerPollInterval = null;
+            let activeContactEmail = null;
+            let activeContactNome  = null;
+
+            async function openOwnerConversation(contactEmail, contactNome) {
+                activeContactEmail = contactEmail;
+                activeContactNome  = contactNome;
+
+                document.getElementById('owner-chat-empty').classList.add('hidden');
+                const msgBox   = document.getElementById('chat-messages-owner');
+                const inputBox = document.getElementById('owner-input-area');
+                msgBox.classList.remove('hidden');
+                inputBox.classList.remove('hidden');
+
+                const msgs = await window.SupabaseService.getMensagens(anuncioId, session.email, contactEmail);
+                renderMessages(msgs, session.email, msgBox);
+
+                // Reset polling
+                if (ownerPollInterval) clearInterval(ownerPollInterval);
+                ownerPollInterval = setInterval(async () => {
+                    if (!activeContactEmail) return;
+                    const fresh = await window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail);
+                    renderMessages(fresh, session.email, document.getElementById('chat-messages-owner'));
+                }, 5000);
+            }
+
+            // Owner send
+            document.getElementById('chat-send-owner').addEventListener('click', () => sendOwnerMessage());
+            document.getElementById('chat-input-owner').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendOwnerMessage(); }
+            });
+
+            async function sendOwnerMessage() {
+                if (!activeContactEmail) return;
+                const input = document.getElementById('chat-input-owner');
+                const texto = input.value.trim();
+                if (!texto) return;
+                const btn = document.getElementById('chat-send-owner');
+                btn.disabled = true;
+                try {
+                    await window.SupabaseService.enviarMensagem(
+                        anuncioId,
+                        session.email, session.nome,
+                        activeContactEmail, activeContactNome,
+                        texto
+                    );
+                    input.value = '';
+                    const msgs = await window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail);
+                    renderMessages(msgs, session.email, document.getElementById('chat-messages-owner'));
+                } finally {
+                    btn.disabled = false;
+                    input.focus();
+                }
+            }
+
+            // ======== Non-owner chat logic ========
+            async function loadUserChat() {
+                const msgs    = await window.SupabaseService.getMensagens(anuncioId, session.email, ownerEmail);
+                const msgBox  = document.getElementById('chat-messages-user');
+                renderMessages(msgs, session.email, msgBox);
+            }
+
+            document.getElementById('chat-send-user')?.addEventListener('click', () => sendUserMessage());
+            document.getElementById('chat-input-user')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
+            });
+
+            async function sendUserMessage() {
+                const input = document.getElementById('chat-input-user');
+                const texto = input.value.trim();
+                if (!texto) return;
+                const btn = document.getElementById('chat-send-user');
+                btn.disabled = true;
+                try {
+                    await window.SupabaseService.enviarMensagem(
+                        anuncioId,
+                        session.email, session.nome,
+                        ownerEmail, anuncio.nome || 'Anunciante',
+                        texto
+                    );
+                    input.value = '';
+                    await loadUserChat();
+                } finally {
+                    btn.disabled = false;
+                    input.focus();
+                }
+            }
+
+        })(); // end init
+    </script>
+</body>
+</html>

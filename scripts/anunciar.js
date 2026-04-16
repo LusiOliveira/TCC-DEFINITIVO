@@ -1,8 +1,8 @@
 // --- GUARDA DE LOGIN ---
 (function verificarLogin() {
-    const user = localStorage.getItem('eletrolight_user');
+    const user = sessionStorage.getItem('eletrolight_session');
     if (!user) {
-        window.location.href = 'login/login.html?cadastro=1';
+        window.location.href = '../login/login.html?cadastro=1';
     }
 })();
 
@@ -168,7 +168,7 @@ if (form) {
             return;
         }
 
-        const userData = localStorage.getItem('eletrolight_user');
+        const userData = sessionStorage.getItem('eletrolight_session');
         const parsedUser = userData ? JSON.parse(userData) : null;
         const novoAnuncio = {
             titulo:    document.getElementById('titulo-anuncio').value.trim(),

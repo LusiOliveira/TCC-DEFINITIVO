@@ -285,16 +285,19 @@
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
     <script src="../scripts/anuncios-data.js"></script>
     <script src="../scripts/anunciar.js"></script>
     <script>
         // --- Perfil no header ---
         (function () {
             const wrap   = document.getElementById('header-user-wrap');
-            const stored = localStorage.getItem('eletrolight_user');
+            const stored = sessionStorage.getItem('eletrolight_session');
             if (!wrap || !stored) return;
-            const user         = JSON.parse(stored);
-            const primeiroNome = user.nome.split(' ')[0];
+            const session      = JSON.parse(stored);
+            const primeiroNome = session.nome.split(' ')[0];
             wrap.innerHTML = `
                 <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
                     <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
@@ -302,13 +305,13 @@
                     <i class="fa-solid fa-chevron-down perfil-seta"></i>
                 </button>
                 <div class="perfil-dropdown" id="perfil-dropdown">
-                    <span class="perfil-nome-completo">${user.nome}</span>
-                    <span class="perfil-email">${user.email}</span>
+                    <span class="perfil-nome-completo">${session.nome}</span>
+                    <span class="perfil-email">${session.email}</span>
                     <hr class="perfil-divider">
-                    <a href="perfil.html" class="perfil-editar">
+                    <a href="./perfil.html" class="perfil-editar">
                         <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
                     </a>
-                    <a href="meus-anuncios.html" class="perfil-editar">
+                    <a href="./meus-anuncios.html" class="perfil-editar">
                         <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                     </a>
                     <button class="perfil-sair" id="btn-sair">
@@ -326,7 +329,7 @@
                 if (dd) dd.classList.remove('aberto');
             });
             document.getElementById('btn-sair').addEventListener('click', () => {
-                localStorage.removeItem('eletrolight_user');
+                sessionStorage.removeItem('eletrolight_session');
                 window.location.href = '../index.html';
             });
         })();

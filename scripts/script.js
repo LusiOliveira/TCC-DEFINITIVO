@@ -219,9 +219,9 @@ chatbotInputField.addEventListener('keypress', (e) => {
 // --- ANÚNCIOS — RENDERIZAÇÃO DINÂMICA (index.html) ---
 const anunciosGrid = document.getElementById('anuncios-grid');
 
-function renderizarHomeAnuncios(cat) {
+async function renderizarHomeAnuncios(cat) {
     if (!anunciosGrid) return;
-    const todos     = getAnuncios();
+    const todos     = await getAnuncios();
     const filtrados = cat === 'todos' ? todos : todos.filter((a) => a.categoria === cat);
     const exibir    = filtrados.slice(0, LIMITE_HOME);
 
@@ -229,7 +229,8 @@ function renderizarHomeAnuncios(cat) {
         anunciosGrid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#6B7280;padding:2rem;">Nenhum anúncio nesta categoria ainda.</p>';
         return;
     }
-    const emailLogado = (function(){ try { return JSON.parse(localStorage.getItem('eletrolight_user')).email.toLowerCase(); } catch(e){ return ''; } })();
+    const session = sessionStorage.getItem('eletrolight_session');
+    const emailLogado = session ? JSON.parse(session).email.toLowerCase() : '';
     anunciosGrid.innerHTML = exibir.map(a => renderAnuncioCard(a, { isOwner: emailLogado && a.email && a.email.toLowerCase() === emailLogado })).join('');
 }
 
@@ -252,7 +253,14 @@ if (anunciosGrid) {
         const btn = e.target.closest('.btn-editar-anuncio');
         if (!btn) return;
         const id = btn.closest('.anuncio-card')?.dataset.id;
-        if (id) window.location.href = `meus-anuncios.html?editar=${id}`;
+        if (id) window.location.href = `./pages/meus-anuncios.html?editar=${id}`;
+    });
+
+    anunciosGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-ver-detalhe');
+        if (!btn) return;
+        const id = btn.closest('.anuncio-card')?.dataset.id;
+        if (id) window.location.href = `./pages/anuncio-detalhe.html?id=${id}`;
     });
 }
 
@@ -260,9 +268,9 @@ if (anunciosGrid) {
 const btnAnunciar = document.querySelector('.btn-anunciar');
 if (btnAnunciar) {
     btnAnunciar.addEventListener('click', (e) => {
-        if (!localStorage.getItem('eletrolight_user')) {
+        if (!sessionStorage.getItem('eletrolight_session')) {
             e.preventDefault();
-            window.location.href = 'login/login.html?cadastro=1';
+            window.location.href = './login/login.html?cadastro=1';
         }
     });
 }
@@ -270,13 +278,20 @@ if (btnAnunciar) {
 // --- PERFIL NO HEADER ---
 (function () {
     const wrap = document.getElementById('header-user-wrap');
-    if (!wrap) return;
+    if (!wrap) {
+        console.log('Elemento header-user-wrap não encontrado');
+        return;
+    }
 
-    const stored = localStorage.getItem('eletrolight_user');
-    if (!stored) return; // não logado: mantém o botão padrão "Cadastre-se"
+    const stored = sessionStorage.getItem('eletrolight_session');
+    console.log('Sessão no script.js:', stored);
+    if (!stored) {
+        console.log('Usuário não logado - mantendo botão Cadastre-se');
+        return; // não logado: mantém o botão padrão "Cadastre-se"
+    }
 
-    const user       = JSON.parse(stored);
-    const primeiroNome = user.nome.split(' ')[0];
+    const session       = JSON.parse(stored);
+    const primeiroNome = session.nome.split(' ')[0];
 
     // Substitui o botão padrão pelo perfil com dropdown
     wrap.innerHTML = `
@@ -286,13 +301,13 @@ if (btnAnunciar) {
             <i class="fa-solid fa-chevron-down perfil-seta"></i>
         </button>
         <div class="perfil-dropdown" id="perfil-dropdown">
-            <span class="perfil-nome-completo">${user.nome}</span>
-            <span class="perfil-email">${user.email}</span>
+            <span class="perfil-nome-completo">${session.nome}</span>
+            <span class="perfil-email">${session.email}</span>
             <hr class="perfil-divider">
-            <a href="perfil.html" class="perfil-editar">
+            <a href="./pages/perfil.html" class="perfil-editar">
                 <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
             </a>
-            <a href="meus-anuncios.html" class="perfil-editar">
+            <a href="./pages/meus-anuncios.html" class="perfil-editar">
                 <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
             </a>
             <button class="perfil-sair" id="btn-sair">
@@ -316,7 +331,7 @@ if (btnAnunciar) {
 
     // Botão Sair: remove sessão e recarrega
     document.getElementById('btn-sair').addEventListener('click', () => {
-        localStorage.removeItem('eletrolight_user');
+        sessionStorage.removeItem('eletrolight_session');
         window.location.reload();
     });
 })();

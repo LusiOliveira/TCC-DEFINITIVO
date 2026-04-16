@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - EletroLight</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .reset-container { max-width: 400px; margin: 80px auto; padding: 2rem; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .reset-container h2 { text-align: center; margin-bottom: 1.5rem; color: #059669; }
+        .reset-container input { width: 100%; margin-bottom: 1rem; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+        .reset-container input:focus { border-color: #059669; outline: none; }
+        .btn-voltar { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; }
+        .btn-voltar i { margin-right: 5px; }
+        .logo-min { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.5rem; font-size: 1.3rem; font-weight: 700; color: #059669; }
+        .senha-wrap { position: relative; }
+        .senha-wrap input { padding-right: 40px; }
+        .olho-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9CA3AF; }
+        .requisitos { font-size: 0.8rem; color: #6B7280; margin-bottom: 1rem; padding-left: 1.2rem; }
+        .requisitos li { margin-bottom: 3px; }
+        .btn-salvar { width: 100%; padding: 12px; background: #059669; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn-salvar:hover { background: #047857; }
+        .btn-login { display: inline-block; padding: 10px 20px; background: #059669; color: #fff; text-decoration: none; border-radius: 8px; margin-top: 1rem; }
+        .msg-sucesso { text-align: center; display: none; }
+        .msg-sucesso i { font-size: 3rem; color: #059669; margin-bottom: 1rem; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #059669 0%, #10B981 50%, #0077b6 100%); display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+    <a href="login.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+    
+    <div class="reset-container">
+        <div class="logo-min">
+            <img src="../assets/images/Logo.png" alt="" width="38" height="38">
+            <span>EletroLight</span>
+        </div>
+        
+        <div id="form-section">
+            <h2><i class="fa-solid fa-lock"></i> Redefinir Senha</h2>
+            
+            <form id="form-redefinir">
+                <div class="senha-wrap">
+                    <input type="password" id="nova-senha" placeholder="Nova senha" required minlength="8" maxlength="16">
+                    <button type="button" class="olho-btn" onclick="toggleSenha('nova-senha')">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+                
+                <ul class="requisitos">
+                    <li>8 a 16 caracteres</li>
+                    <li>Pelo menos 1 letra maiúscula</li>
+                    <li>Pelo menos 1 caractere especial (@, #, !, etc.)</li>
+                </ul>
+                
+                <div class="senha-wrap">
+                    <input type="password" id="confirma-senha" placeholder="Confirmar nova senha" required>
+                    <button type="button" class="olho-btn" onclick="toggleSenha('confirma-senha')">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+                
+                <button type="submit" class="btn-salvar">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Nova Senha
+                </button>
+            </form>
+        </div>
+        
+        <div id="msg-sucesso" class="msg-sucesso">
+            <i class="fa-solid fa-circle-check"></i>
+            <h3>Senha redefinida!</h3>
+            <p>Sua senha foi atualizada com sucesso.</p>
+            <a href="login.html" class="btn-login">Ir para Login</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        const token = urlParams.get('token');
+        
+        if (!email || !token) {
+            alert('Link inválido ou expirado.');
+            window.location.href = 'login.html';
+        }
+        
+        function toggleSenha(id) {
+            const input = document.getElementById(id);
+            const icon = input.parentElement.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        document.getElementById('form-redefinir').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const senha = document.getElementById('nova-senha').value;
+            const confirma = document.getElementById('confirma-senha').value;
+            
+            if (senha.length < 8 || senha.length > 16) {
+                alert('A senha deve ter entre 8 e 16 caracteres.');
+                return;
+            }
+            if (!/[A-Z]/.test(senha)) {
+                alert('A senha deve conter pelo menos 1 letra maiúscula.');
+                return;
+            }
+            if (!/[^a-zA-Z0-9]/.test(senha)) {
+                alert('A senha deve conter pelo menos 1 caractere especial.');
+                return;
+            }
+            if (senha !== confirma) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+            
+            try {
+                await window.SupabaseService.redefinirSenha(email, token, senha);
+                document.getElementById('form-section').style.display = 'none';
+                document.getElementById('msg-sucesso').style.display = 'block';
+            } catch (err) {
+                alert('Erro: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>

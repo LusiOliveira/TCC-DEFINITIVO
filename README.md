@@ -2,6 +2,10 @@
 
 Plataforma web completa para **doação e troca de eletrônicos usados**, conectando a comunidade de Manaus com pontos de coleta e promovendo a economia circular para reduzir o lixo eletrônico.
 
+> **Backend**: Supabase (PostgreSQL) com localStorage fallback  
+> **Autenticação**: Custom (email/CPF) com Row Level Security  
+> **Chat**: Mensagens em tempo real com notificações
+
 ---
 
 ## 📋 Sumário
@@ -10,23 +14,34 @@ Plataforma web completa para **doação e troca de eletrônicos usados**, conect
 2. [Funcionalidades](#funcionalidades)
 3. [Arquitetura do Sistema](#arquitetura-do-sistema)
 4. [Estrutura de Arquivos](#estrutura-de-arquivos)
-5. [Fluxos de Uso](#fluxos-de-uso)
-6. [API de Dados (localStorage)](#api-de-dados-localstorage)
-7. [Como Executar](#como-executar)
-8. [Tecnologias Utilizadas](#tecnologias-utilizadas)
-9. [Validações e Regras de Negócio](#validações-e-regras-de-negócio)
-10. [Notas para Desenvolvedores](#notas-para-desenvolvedores)
+5. [Diagramas UML](#diagramas-uml)
+6. [Fluxos de Uso](#fluxos-de-uso)
+7. [API de Dados](#api-de-dados)
+8. [Como Executar](#como-executar)
+9. [Tecnologias Utilizadas](#tecnologias-utilizadas)
+10. [Validações e Regras de Negócio](#validações-e-regras-de-negócio)
+11. [Notas para Desenvolvedores](#notas-para-desenvolvedores)
 
 ---
 
 ## 🎯 Visão Geral
 
-O EletroLight é uma aplicação web **single-page** com múltiplas seções, focada em:
+O EletroLight é uma aplicação web **full-stack** focada em:
 
 - **Economia Circular**: Doação e troca de eletrônicos entre usuários
+- **Chat Integrado**: Comunicação direta entre interessados e anunciantes
 - **Conscientização**: Canal educativo sobre e-lixo e impactos ambientais
 - **Geolocalização**: Mapa interativo com pontos de coleta em Manaus
 - **Gamificação**: Sistema de anúncios estilo OLX com categorias
+
+### 🔧 Stack Técnico
+| Camada | Tecnologia |
+|--------|------------|
+| **Frontend** | HTML5, CSS3, JavaScript ES6+ |
+| **Backend** | Supabase (PostgreSQL + PostgREST) |
+| **Auth** | Sessão custom em `sessionStorage` |
+| **Storage** | Supabase Storage para fotos |
+| **Fallback** | localStorage (modo offline) |
 
 ---
 
@@ -47,14 +62,26 @@ O EletroLight é uma aplicação web **single-page** com múltiplas seções, fo
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
-| **Anunciar Eletrônico** | Formulário completo com upload de fotos, categoria, tipo (doação/troca) |
+| **Anunciar Eletrônico** | Formulário completo com upload de fotos ao Supabase Storage |
 | **Categorias** | 10 categorias: celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos |
 | **Filtro Dinâmico** | Botões de categoria que filtram anúncios em tempo real |
-| **Lista Completa** | Página separada (`todos-anuncios.html`) com busca textual |
-| **Meus Anúncios** | Página dedicada (`meus-anuncios.html`) para gerenciar anúncios do usuário logado |
-| **Editar Anúncio** | Modal de edição para corrigir dados do anúncio (título, descrição, categoria, etc.) |
-| **Excluir Anúncio** | Confirmação antes de remover permanentemente |
-| **Persistência** | Dados armazenados em localStorage com prepend (novo anúncio = primeiro) |
+| **Lista Completa** | Página `todos-anuncios.html` com busca textual |
+| **Meus Anúncios** | Gerenciamento com notificações de mensagens |
+| **Editar Anúncio** | Modal de edição para todos os campos |
+| **Excluir Anúncio** | Confirmação antes de remover do Supabase |
+| **Persistência** | Supabase PostgreSQL com localStorage fallback |
+
+### 💬 Sistema de Chat
+
+| Funcionalidade | Descrição |
+|----------------|-----------|
+| **Chat em Anúncios** | Página `anuncio-detalhe.html` com visualização detalhada + chat |
+| **Para Visitantes** | Visualização do anúncio + prompt para login/cadastro |
+| **Para Usuários Logados** | Envio de mensagens ao anunciante |
+| **Para Anunciante** | Painel de conversas com todos os interessados |
+| **Notificações** | Badge vermelho com contagem de conversas pendentes |
+| **Foto de Perfil** | Avatar do usuário exibido nas mensagens (se cadastrada) |
+| **RLS** | Apenas usuários cadastrados podem enviar mensagens |
 
 ### 🔐 Sistema de Autenticação (login/)
 
@@ -66,7 +93,7 @@ O EletroLight é uma aplicação web **single-page** com múltiplas seções, fo
 | **Força da Senha** | Barra visual colorida (Fraca/Média/Forte) durante digitação |
 | **Mostrar/Ocultar Senha** | Botão de olho customizado em todos os campos de senha (bloqueio em 16 caracteres) |
 | **Validações** | CPF único, e-mail único, senha 8-16 chars, 1 maiúscula, 1 especial, 18+ anos |
-| **Sessão** | Token armazenado em `eletrolight_user` no localStorage |
+| **Sessão** | `eletrolight_session` em `sessionStorage` |
 | **Perfil no Header** | Nome do usuário logado com dropdown (Editar Perfil, Meus Anúncios, Sair) em todas as páginas |
 | **Proteção** | Páginas restritas redirecionam para login se não autenticado |
 
@@ -81,8 +108,9 @@ EletroLight/
 │
 ├── pages/                     # Páginas HTML internas
 │   ├── anunciar.html          # Formulário de novo anúncio (protegido)
+│   ├── anuncio-detalhe.html   # Visualização detalhada + Chat
 │   ├── todos-anuncios.html    # Listagem completa com busca
-│   ├── meus-anuncios.html     # Gerenciamento de anúncios do usuário
+│   ├── meus-anuncios.html     # Gerenciamento com notificações
 │   ├── perfil.html            # Edição de perfil do usuário
 │   └── questionario-ux.html   # Questionário de avaliação de usabilidade
 │
@@ -93,17 +121,20 @@ EletroLight/
 │
 ├── scripts/                   # Arquivos JavaScript
 │   ├── script.js              # Lógica da home (carrossel, mapa, anúncios)
-│   ├── anuncios-data.js       # Camada de dados compartilhada (CRUD)
-│   ├── anunciar.js            # Lógica do formulário + guarda de login
+│   ├── supabase-client.js     # Inicialização do cliente Supabase
+│   ├── supabase-service.js    # Serviço de dados (CRUD + Chat)
+│   ├── anuncios-data.js       # Camada de dados com fallback localStorage
+│   ├── anunciar.js            # Lógica do formulário
 │   └── perfil.js              # Validações e salvamento de perfil
+│
+├── diagramas/                 # Diagramas UML
+│   ├── diagrama-er.md         # Diagrama Entidade-Relacionamento
+│   └── diagrama-classes.md    # Diagrama de Classes
 │
 ├── assets/                    # Recursos estáticos
 │   └── images/                # Imagens e assets visuais
-│       ├── Logo.png
-│       ├── robozito.png
-│       └── robozito-nerd.png
 │
-└── login/                     # Sistema de autenticação (mantido separado)
+└── login/                     # Sistema de autenticação
     ├── login.html             # Interface de login/cadastro
     ├── login.css              # Estilos do painel deslizante
     └── login.js               # Validações, máscaras, autenticação
@@ -112,29 +143,39 @@ EletroLight/
 ### Fluxo de Dados
 
 ```
-Usuário cadastra → localStorage (eletrolight_users[])
+Usuário cadastra → Supabase (tabela users)
      ↓
-Usuário loga → sessão ativa (eletrolight_user)
+Usuário loga → sessionStorage (eletrolight_session)
      ↓
-Cria anúncio → localStorage (eletrolight_anuncios[])
+Cria anúncio → Supabase (tabela anuncios) + Storage (fotos)
      ↓
-Anúncios exibidos em todas as páginas via anuncios-data.js
+Envia mensagem → Supabase (tabela mensagens, RLS aplicada)
      ↓
-Usuário edita/exclui → atualização em tempo real
+Fallback offline → localStorage (modo sem conexão)
 ```
 
 ---
 
 ## 📁 Estrutura de Arquivos Detalhada
 
-| Arquivo | Responsabilidade | Chaves localStorage |
-|---------|-----------------|---------------------|
-| `anuncios-data.js` | Seed de dados, CRUD de anúncios, helpers de renderização | `eletrolight_anuncios` |
-| `login.js` | Cadastro, login, validação de CPF, sessão, toggle de senha | `eletrolight_users`, `eletrolight_user` |
-| `script.js` | Carrossel, mapa Leaflet, filtro de categorias na home, abas | - |
-| `anunciar.js` | Formulário de anúncio, compressão de imagem, guarda de rota | - |
-| `perfil.js` | Edição de perfil, alteração de senha | - |
-| `questionario-ux.html` | Coleta de feedback de usabilidade | `eletrolight_ux` |
+| Arquivo | Responsabilidade | Banco de Dados |
+|---------|-----------------|----------------|
+| `supabase-client.js` | Inicializa cliente Supabase com URL e anon key | - |
+| `supabase-service.js` | CRUD completo: users, anuncios, mensagens | `users`, `anuncios`, `mensagens` |
+| `anuncios-data.js` | Camada de dados com fallback localStorage | Supabase + localStorage |
+| `login.js` | Cadastro, login, validação de CPF, sessão | `users` |
+| `script.js` | Carrossel, mapa Leaflet, filtros, abas | - |
+| `anunciar.js` | Formulário de anúncio, upload de fotos | `anuncios` + Storage |
+| `perfil.js` | Edição de perfil, alteração de senha | `users` |
+| `questionario-ux.html` | Coleta de feedback de usabilidade | `eletrolight_ux` (localStorage) |
+
+### Tabelas Supabase
+
+| Tabela | Descrição | RLS |
+|--------|-----------|-----|
+| `users` | Cadastro de usuários (nome, CPF, email, senha, foto) | Desabilitado |
+| `anuncios` | Anúncios de eletrônicos | Público leitura, proprietário escrita |
+| `mensagens` | Chat entre usuários | Leitura pública, inserção apenas usuários cadastrados |
 
 ---
 
@@ -142,7 +183,7 @@ Usuário edita/exclui → atualização em tempo real
 
 ### 1. Cadastro de Novo Usuário
 ```
-login.html → Painel Cadastro → Valida CPF → Salva em eletrolight_users[]
+login.html → Painel Cadastro → Valida CPF → Salva no Supabase (tabela users)
 → Toast de sucesso → Redireciona para painel Login
 ```
 
@@ -161,72 +202,108 @@ index.html → Clica "Anunciar" → Verifica sessão
         → Modal de sucesso → Volta para index.html
 ```
 
-### 4. Editar Anúncio (Fluxo do Proprietário)
+### 4. Visualizar Anúncio Detalhado + Chat
+```
+todos-anuncios.html → Clica "Tenho Interesse" ou "Propor Troca"
+→ Redireciona para anuncio-detalhe.html?id=<id>
+    ├─ [Visitante] → Vê detalhes + botões "Fazer Login / Criar Conta"
+    └─ [Logado] → Vê detalhes + área de chat para enviar mensagens
+
+meus-anuncios.html → Clica "Ver Mensagens"
+→ anuncio-detalhe.html mostrando painel de conversas com interessados
+```
+
+### 5. Editar Anúncio (Fluxo do Proprietário)
 ```
 index.html ou todos-anuncios.html → Clica "Editar Anúncio" no card próprio
 → Redireciona para meus-anuncios.html?editar=<id>
-→ Abre modal pré-preenchido → Edita campos → Salva
+→ Abre modal pré-preenchido → Edita campos → Salva no Supabase
 → Atualização em tempo real nos cards
 ```
 
-### 5. Gerenciar Meus Anúncios
+### 6. Gerenciar Meus Anúncios
 ```
 Header → Dropdown → "Meus Anúncios"
 → Lista filtrada apenas com anúncios do usuário
-→ Opções: Editar (modal) ou Excluir (com confirmação)
+→ Badge vermelho com número de conversas pendentes
+→ Opções: Ver Mensagens, Editar (modal) ou Excluir
 ```
 
-### 6. Visualizar Anúncios
+### 7. Visualizar Todos os Anúncios
 ```
 index.html (máx. 5 anúncios) → "Ver todos" → todos-anuncios.html
 → Busca por texto OU filtro por categoria
-→ Cards próprios mostram "Editar" em vez de "Tenho Interesse"
+→ Cards de terceiros: "Tenho Interesse" / "Propor Troca" → anuncio-detalhe.html
+→ Cards próprios: "Editar Anúncio" → meus-anuncios.html
 ```
 
-### 7. Responder Questionário UX
+### 8. Responder Questionário UX
 ```
 questionario-ux.html → Responde 7 perguntas → Envia
-→ Salva em eletrolight_ux[] → Tela de agradecimento
+→ Salva em localStorage (eletrolight_ux) → Tela de agradecimento
 ```
 
 ---
 
-## 💾 API de Dados (localStorage)
+## � Diagramas UML
 
-### Chaves Utilizadas
+Os diagramas estão disponíveis na pasta `diagramas/` para uso no [Mermaid Live Editor](https://mermaid.live):
+
+### Diagrama Entidade-Relacionamento
+**Arquivo**: `diagramas/diagrama-er.md`
+
+Entidades: `users`, `anuncios`, `mensagens`
+
+```mermaid
+erDiagram
+    USERS ||--o{ ANUNCIOS : publica
+    USERS ||--o{ MENSAGENS : envia
+    ANUNCIOS ||--o{ MENSAGENS : possui
+```
+
+### Diagrama de Classes
+**Arquivo**: `diagramas/diagrama-classes.md`
+
+Namespaces: `Entidades` (User, Anuncio, Mensagem, Session) e `Servicos` (SupabaseService, AnunciosData)
+
+---
+
+## 💾 API de Dados
+
+### Supabase (Principal)
+
+| Tabela | Colunas Principais |
+|--------|-------------------|
+| `users` | id, nome, cpf, email, senha, whatsapp, foto, reset_token, created_at |
+| `anuncios` | id, titulo, categoria, tipo, condicao, descricao, foto, nome, email, whatsapp, bairro, created_at |
+| `mensagens` | id, anuncio_id, remetente_email, remetente_nome, destinatario_email, destinatario_nome, texto, created_at |
+
+### localStorage (Fallback/UX)
 
 ```javascript
-// Array de usuários cadastrados
-localStorage.setItem('eletrolight_users', JSON.stringify([
-  { nome: "João Silva", cpf: "123.456.789-00", email: "joao@email.com", senha: "********" }
-]));
-
-// Sessão atual do usuário
-localStorage.setItem('eletrolight_user', JSON.stringify(
+// Sessão atual (sessionStorage na verdade)
+sessionStorage.setItem('eletrolight_session', JSON.stringify(
   { nome: "João Silva", email: "joao@email.com" }
 ));
 
-// Array de anúncios (novos entram no início via unshift)
-localStorage.setItem('eletrolight_anuncios', JSON.stringify([
-  { id: timestamp, titulo, categoria, tipo, condicao, descricao, foto, nome, whatsapp, bairro, data, email }
-]));
+// Mensagens offline (fallback)
+localStorage.setItem('eletrolight_mensagens', JSON.stringify([...]));
 
-// Respostas do questionário UX
-localStorage.setItem('eletrolight_ux', JSON.stringify([
-  { q1: 5, q2: 4, q3: 5, q4: 4, q5: ['anunciar'], q6: "Sugestão...", q7: 9, data: "06/04/2026, 18:30:00" }
-]));
+// Questionário UX
+localStorage.setItem('eletrolight_ux', JSON.stringify([...]));
 ```
 
-### Funções Exportadas (anuncios-data.js)
+### Funções Exportadas (supabase-service.js)
 
-| Função | Descrição | Parâmetros | Retorno |
-|--------|-----------|------------|---------|
-| `getAnuncios()` | Retorna todos os anúncios do localStorage | - | Array |
-| `adicionarAnuncio(item)` | Adiciona novo anúncio no topo da lista | Object | Array atualizado |
-| `getCategoriaInfo(cat)` | Retorna ícone e label da categoria | String | `{icon, label}` |
-| `getTipoInfo(tipo)` | Retorna classe CSS e label do tipo | String | `{cls, label, btn}` |
-| `renderAnuncioCard(item, opcoes)` | Gera HTML do card de anúncio (com suporte a isOwner) | Object, Object | String HTML |
-| `comprimirImagem(file, maxWidth, callback)` | Redimensiona imagem via canvas | File, Number, Function | base64 string |
+| Função | Descrição |
+|--------|-----------|
+| `findUserByEmail(email)` | Busca usuário por email |
+| `saveUser(user)` | Cadastra novo usuário |
+| `getAnuncios()` | Retorna todos os anúncios |
+| `adicionarAnuncio(anuncio)` | Cria novo anúncio |
+| `getMensagens(anuncioId, emailA, emailB)` | Retorna histórico de chat |
+| `enviarMensagem(...)` | Envia mensagem (Supabase + fallback) |
+| `getConversasDoAnuncio(anuncioId, ownerEmail)` | Lista conversas para notificação |
 
 ---
 
@@ -316,18 +393,21 @@ npx serve .
 2. Adicionar botão de filtro em `index.html` e `todos-anuncios.html`
 3. Atualizar seed em `SEED_ANUNCIOS` se necessário
 
-### Integração com Backend Futuro
-Os pontos de integração estão marcados com comentários `// Backend:` nos arquivos:
-- `login.js`: substituir `localStorage` por chamadas API
-- `anunciar.js`: enviar FormData para endpoint de upload
-- `anuncios-data.js`: substituir `getAnuncios()` por fetch()
-- `perfil.js`: sincronizar alterações de perfil com servidor
+### Variáveis de Ambiente
+Crie um arquivo `scripts/supabase-config.js` (não versionado) com:
+```javascript
+const SUPABASE_URL = 'https://seu-projeto.supabase.co';
+const SUPABASE_ANON_KEY = 'sua-chave-anon';
+```
+
+Ou configure diretamente em `supabase-client.js`.
 
 ### Convenções de Código
 - **IDs**: kebab-case (`email-login`, `titulo-anuncio`)
 - **Classes CSS**: BEM-like (`anuncio-card`, `btn-anunciar`)
-- **Chaves localStorage**: snake_case com prefixo `eletrolight_`
+- **Chaves Storage**: snake_case com prefixo `eletrolight_`
 - **Comentários**: `// --- Seção ---` para blocos, `//` inline para lógica
+- **Funções async**: Sempre retornam Promise, tratam erro com try/catch
 
 ---
 
@@ -340,4 +420,4 @@ Imagens de terceiros sujeitas às licenças dos respectivos provedores.
 
 **Desenvolvido com 💚 para a comunidade de Manaus**
 
-**Versão atualizada em Abril de 2026** — Inclui: Meus Anúncios, Editar Anúncio, Questionário UX, Melhorias no sistema de senha
+**Versão atualizada em Abril de 2026** — Inclui: Supabase Backend, Chat com Notificações, Visualização Detalhada de Anúncios, Upload de Fotos, Diagramas UML

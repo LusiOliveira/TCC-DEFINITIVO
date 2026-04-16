@@ -314,6 +314,71 @@
         }
         .btn-editar-anuncio:hover { background: #047857 !important; }
 
+        .btn-ver-msgs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #F0FDF4;
+            color: #059669;
+            border: 1.5px solid #10B981;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 6px;
+            width: 100%;
+        }
+        .btn-ver-msgs:hover { background: #059669; color: #fff; border-color: #059669; }
+
+        .msg-count {
+            background: #DC2626;
+            color: #fff;
+            border-radius: 999px;
+            padding: 1px 8px;
+            font-size: 0.71rem;
+            font-weight: 800;
+        }
+
+        .card-notif-dot {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 13px;
+            height: 13px;
+            background: #DC2626;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            z-index: 10;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%       { transform: scale(1.35); opacity: 0.7; }
+        }
+
+        .notif-banner {
+            max-width: 1100px;
+            margin: 1.2rem auto 0;
+            padding: 0 5%;
+            display: none;
+        }
+        .notif-banner-inner {
+            background: linear-gradient(90deg, #D1FAE5, #A7F3D0);
+            border: 1px solid #6EE7B7;
+            border-radius: 12px;
+            padding: 0.85rem 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #065F46;
+        }
+        .notif-banner-inner i { color: #059669; font-size: 1.1rem; }
+
         @media (max-width: 480px) {
             .edit-grid { grid-template-columns: 1fr; }
         }
@@ -355,6 +420,14 @@
             <a href="./anunciar.html" class="btn-novo-anuncio">
                 <i class="fa-solid fa-plus"></i> Novo Anúncio
             </a>
+        </div>
+
+        <!-- Banner de notificações -->
+        <div id="notif-banner" class="notif-banner">
+            <div class="notif-banner-inner">
+                <i class="fa-solid fa-bell"></i>
+                <span id="notif-texto"></span>
+            </div>
         </div>
 
         <!-- Grid de anúncios -->
@@ -456,15 +529,18 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
     <script src="../scripts/anuncios-data.js"></script>
     <script>
     // ── Guard: exige login ──
     (function () {
-        const raw = localStorage.getItem('eletrolight_user');
+        const raw = sessionStorage.getItem('eletrolight_session');
         if (!raw) { window.location.href = '../login/login.html'; }
     })();
 
-    const session = JSON.parse(localStorage.getItem('eletrolight_user'));
+    const session = JSON.parse(sessionStorage.getItem('eletrolight_session'));
 
     // ── Header / dropdown ──
     (function montarHeader() {
@@ -503,7 +579,7 @@
             document.getElementById('perfil-dropdown')?.classList.remove('aberto');
         });
         document.getElementById('btn-sair').addEventListener('click', () => {
-            localStorage.removeItem('eletrolight_user');
+            sessionStorage.removeItem('eletrolight_session');
             window.location.href = '../index.html';
         });
     })();
@@ -511,9 +587,14 @@
     // ── Renderiza somente os anúncios do usuário logado ──
     let idParaExcluir = null;
 
-    function renderMeusAnuncios() {
-        const todos = getAnuncios();
+    async function renderMeusAnuncios() {
+        const todos = await getAnuncios();
+        console.log('=== DEBUG renderMeusAnuncios ===');
+        console.log('Todos os anúncios carregados:', todos.map(a => ({ id: a.id, titulo: a.titulo, email: a.email })));
+        
         const meus  = todos.filter(a => a.email && a.email.toLowerCase() === session.email.toLowerCase());
+        console.log('Meus anúncios filtrados:', meus.map(a => ({ id: a.id, titulo: a.titulo })));
+        
         const grid  = document.getElementById('meus-grid');
         const contador = document.getElementById('meus-contador');
 
@@ -538,11 +619,24 @@
             );
         }).join('');
 
+        // Injetar botão "Ver Mensagens" em cada card via DOM
+        meus.forEach(a => {
+            const card = grid.querySelector(`.anuncio-card[data-id="${a.id}"]`);
+            if (!card) return;
+            const body = card.querySelector('.anuncio-body');
+            if (!body) return;
+            const btn = document.createElement('button');
+            btn.className = 'btn-ver-msgs';
+            btn.dataset.id = a.id;
+            btn.innerHTML = '<i class="fa-solid fa-comments"></i> Ver Mensagens';
+            body.appendChild(btn);
+        });
+
         // Botão excluir
         grid.querySelectorAll('.btn-excluir-card').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                idParaExcluir = Number(btn.dataset.id);
+                idParaExcluir = btn.dataset.id;
                 document.getElementById('modal-excluir').classList.add('show');
             });
         });
@@ -551,10 +645,26 @@
         grid.querySelectorAll('.btn-editar-anuncio').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const id = Number(btn.closest('.anuncio-card').dataset.id);
-                abrirModalEditar(id);
+                const card = btn.closest('.anuncio-card');
+                const id = card?.dataset.id;
+                console.log('=== DEBUG clique editar ===');
+                console.log('Card dataset:', card?.dataset);
+                console.log('ID extraído:', id);
+                if (id) abrirModalEditar(id);
             });
         });
+
+        // Botão ver mensagens
+        grid.querySelectorAll('.btn-ver-msgs').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                if (id) window.location.href = `./anuncio-detalhe.html?id=${id}`;
+            });
+        });
+
+        // Carregar contagem de mensagens de forma assíncrona
+        carregarNotificacoes(meus);
     }
 
     // ── Modal exclusão ──
@@ -563,23 +673,59 @@
         idParaExcluir = null;
     });
 
-    document.getElementById('btn-confirmar-excluir').addEventListener('click', () => {
+    document.getElementById('btn-confirmar-excluir').addEventListener('click', async () => {
         if (idParaExcluir === null) return;
-        const todos      = getAnuncios();
-        const atualizados = todos.filter(a => a.id !== idParaExcluir);
-        localStorage.setItem('eletrolight_anuncios', JSON.stringify(atualizados));
-        document.getElementById('modal-excluir').classList.remove('show');
-        idParaExcluir = null;
-        renderMeusAnuncios();
-        mostrarToast('Anúncio excluído com sucesso.', 'sucesso');
+        try {
+            await window.SupabaseService.deletarAnuncio(idParaExcluir);
+            console.log('Delete retornou, verificando...');
+            
+            // Verifica se realmente foi deletado
+            await new Promise(r => setTimeout(r, 500)); // Aguarda 500ms
+            const anuncios = await getAnuncios();
+            const aindaExiste = anuncios.find(a => a.id === idParaExcluir);
+            
+            if (aindaExiste) {
+                console.error('ERRO: Anúncio ainda existe após delete!', aindaExiste);
+                mostrarToast('Erro: Anúncio não foi excluído (pode ser problema de permissão)', 'erro');
+            } else {
+                console.log('Anúncio confirmado como deletado');
+                document.getElementById('modal-excluir').classList.remove('show');
+                idParaExcluir = null;
+                await renderMeusAnuncios();
+                mostrarToast('Anúncio excluído com sucesso.', 'sucesso');
+            }
+        } catch (err) {
+            console.error('Erro ao excluir:', err);
+            mostrarToast('Erro ao excluir anúncio: ' + (err.message || 'Erro desconhecido'), 'erro');
+        }
     });
 
     // ── Modal edição ──
     let idParaEditar = null;
 
-    function abrirModalEditar(id) {
-        const anuncio = getAnuncios().find(a => a.id === id);
-        if (!anuncio) return;
+    async function abrirModalEditar(id) {
+        if (!id) return;
+        console.log('Abrindo modal para ID:', id);
+        console.log('Email do usuário logado:', session.email);
+        
+        const anuncios = await getAnuncios();
+        console.log('Total de anúncios carregados:', anuncios.length);
+        
+        const anuncio = anuncios.find(a => a.id === id);
+        console.log('Anúncio encontrado:', anuncio);
+        
+        if (!anuncio) {
+            console.error('Anúncio não encontrado:', id);
+            mostrarToast('Anúncio não encontrado', 'erro');
+            return;
+        }
+        
+        if (anuncio.email && anuncio.email.toLowerCase() !== session.email.toLowerCase()) {
+            console.error('Email não corresponde:', anuncio.email, '!==', session.email);
+            mostrarToast('Você não tem permissão para editar este anúncio', 'erro');
+            return;
+        }
+        
         idParaEditar = id;
 
         document.getElementById('edit-titulo').value    = anuncio.titulo    || '';
@@ -604,29 +750,87 @@
         idParaEditar = null;
     });
 
-    document.getElementById('form-editar').addEventListener('submit', (e) => {
+    document.getElementById('form-editar').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (idParaEditar === null) return;
 
-        const lista = getAnuncios();
-        const idx   = lista.findIndex(a => a.id === idParaEditar);
-        if (idx === -1) return;
+        console.log('Salvando edição para ID:', idParaEditar);
 
-        lista[idx].titulo    = document.getElementById('edit-titulo').value.trim();
-        lista[idx].marca     = document.getElementById('edit-marca').value.trim();
-        lista[idx].bairro    = document.getElementById('edit-bairro').value.trim();
-        lista[idx].whatsapp  = document.getElementById('edit-whatsapp').value.trim();
-        lista[idx].descricao = document.getElementById('edit-descricao').value.trim();
-        lista[idx].categoria = document.getElementById('edit-categoria').value;
-        lista[idx].tipo      = document.getElementById('edit-tipo').value;
-        lista[idx].condicao  = document.getElementById('edit-condicao').value.trim();
+        try {
+            const updates = {
+                titulo: document.getElementById('edit-titulo').value.trim(),
+                marca: document.getElementById('edit-marca').value.trim(),
+                bairro: document.getElementById('edit-bairro').value.trim(),
+                whatsapp: document.getElementById('edit-whatsapp').value.trim(),
+                descricao: document.getElementById('edit-descricao').value.trim(),
+                categoria: document.getElementById('edit-categoria').value,
+                tipo: document.getElementById('edit-tipo').value,
+                condicao: document.getElementById('edit-condicao').value.trim()
+            };
 
-        localStorage.setItem('eletrolight_anuncios', JSON.stringify(lista));
-        document.getElementById('modal-editar').classList.remove('show');
-        idParaEditar = null;
-        renderMeusAnuncios();
-        mostrarToast('Anúncio atualizado com sucesso!', 'sucesso');
+            console.log('Dados a atualizar:', updates);
+
+            await window.SupabaseService.atualizarAnuncio(idParaEditar, updates);
+            console.log('Update retornou, verificando...');
+            
+            // Verifica se realmente foi atualizado
+            await new Promise(r => setTimeout(r, 500)); // Aguarda 500ms
+            const anuncios = await getAnuncios();
+            const atualizado = anuncios.find(a => a.id === idParaEditar);
+            
+            if (!atualizado) {
+                console.error('ERRO: Anúncio não encontrado após update');
+                mostrarToast('Erro: Anúncio não foi atualizado', 'erro');
+            } else if (atualizado.titulo !== updates.titulo) {
+                console.error('ERRO: Anúncio não foi atualizado. Esperado:', updates.titulo, 'Encontrado:', atualizado.titulo);
+                mostrarToast('Erro: Anúncio não foi atualizado (dados não persistiram)', 'erro');
+            } else {
+                console.log('Anúncio confirmado como atualizado:', atualizado);
+                document.getElementById('modal-editar').classList.remove('show');
+                idParaEditar = null;
+                await renderMeusAnuncios();
+                mostrarToast('Anúncio atualizado com sucesso!', 'sucesso');
+            }
+        } catch (err) {
+            console.error('Erro completo ao atualizar:', err);
+            mostrarToast('Erro ao atualizar: ' + (err.message || 'Erro desconhecido'), 'erro');
+        }
     });
+
+    // ── Notificações de mensagens ──
+    async function carregarNotificacoes(meus) {
+        let totalConversas = 0;
+
+        for (const a of meus) {
+            try {
+                const conversas = await window.SupabaseService.getConversasDoAnuncio(a.id, session.email);
+                const count = conversas ? conversas.length : 0;
+                totalConversas += count;
+
+                const btn = document.querySelector(`.btn-ver-msgs[data-id="${a.id}"]`);
+                if (!btn) continue;
+
+                if (count > 0) {
+                    btn.innerHTML = `<i class="fa-solid fa-comments"></i> Ver Mensagens <span class="msg-count">${count}</span>`;
+                    // Ponto pulsante no card
+                    const card = btn.closest('.anuncio-card');
+                    if (card && !card.querySelector('.card-notif-dot')) {
+                        const dot = document.createElement('div');
+                        dot.className = 'card-notif-dot';
+                        card.appendChild(dot);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // Banner no topo
+        const banner = document.getElementById('notif-banner');
+        const texto  = document.getElementById('notif-texto');
+        if (banner && texto && totalConversas > 0) {
+            texto.innerHTML = `Você tem <strong>${totalConversas} conversa${totalConversas > 1 ? 's' : ''} nova${totalConversas > 1 ? 's' : ''}</strong> nos seus anúncios. Clique em "Ver Mensagens" para responder.`;
+            banner.style.display = 'block';
+        }
+    }
 
     // ── Toast ──
     function mostrarToast(msg, tipo) {
@@ -644,7 +848,7 @@
     // Auto-abre modal de edição se vier com ?editar=<id>
     const paramEditar = new URLSearchParams(window.location.search).get('editar');
     if (paramEditar) {
-        abrirModalEditar(Number(paramEditar));
+        abrirModalEditar(paramEditar); // ID é UUID (string)
     }
     </script>
 </body>

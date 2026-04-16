@@ -197,15 +197,18 @@
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
     <script src="../scripts/anuncios-data.js"></script>
     <script>
         // --- Perfil no header ---
         (function () {
             const wrap   = document.getElementById('header-user-wrap');
-            const stored = localStorage.getItem('eletrolight_user');
+            const stored = sessionStorage.getItem('eletrolight_session');
             if (!wrap || !stored) return;
-            const user         = JSON.parse(stored);
-            const primeiroNome = user.nome.split(' ')[0];
+            const session      = JSON.parse(stored);
+            const primeiroNome = session.nome.split(' ')[0];
             wrap.innerHTML = `
                 <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
                     <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
@@ -213,8 +216,8 @@
                     <i class="fa-solid fa-chevron-down perfil-seta"></i>
                 </button>
                 <div class="perfil-dropdown" id="perfil-dropdown">
-                    <span class="perfil-nome-completo">${user.nome}</span>
-                    <span class="perfil-email">${user.email}</span>
+                    <span class="perfil-nome-completo">${session.nome}</span>
+                    <span class="perfil-email">${session.email}</span>
                     <hr class="perfil-divider">
                     <a href="./perfil.html" class="perfil-editar">
                         <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
@@ -237,7 +240,7 @@
                 if (dd) dd.classList.remove('aberto');
             });
             document.getElementById('btn-sair').addEventListener('click', () => {
-                localStorage.removeItem('eletrolight_user');
+                sessionStorage.removeItem('eletrolight_session');
                 window.location.reload();
             });
         })();
@@ -248,8 +251,8 @@
         let catAtual     = 'todos';
         let buscaAtual   = '';
 
-        function renderTodos() {
-            const todos     = getAnuncios();
+        async function renderTodos() {
+            const todos     = await getAnuncios();
             let filtrados   = catAtual === 'todos' ? todos : todos.filter(a => a.categoria === catAtual);
             if (buscaAtual) {
                 const q = buscaAtual.toLowerCase();
@@ -269,7 +272,7 @@
                     </div>`;
                 return;
             }
-            const emailLogado = (function(){ try { return JSON.parse(localStorage.getItem('eletrolight_user')).email.toLowerCase(); } catch(e){ return ''; } })();
+            const emailLogado = (function(){ try { return JSON.parse(sessionStorage.getItem('eletrolight_session')).email.toLowerCase(); } catch(e){ return ''; } })();
             grid.innerHTML = filtrados.map(a => renderAnuncioCard(a, { isOwner: emailLogado && a.email && a.email.toLowerCase() === emailLogado })).join('');
         }
 
@@ -279,6 +282,14 @@
             if (!btn) return;
             const id = btn.closest('.anuncio-card')?.dataset.id;
             if (id) window.location.href = `./meus-anuncios.html?editar=${id}`;
+        });
+
+        // Delegação: clique em "Propor Troca" / "Tenho Interesse" redireciona para detalhe
+        grid.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-ver-detalhe');
+            if (!btn) return;
+            const id = btn.closest('.anuncio-card')?.dataset.id;
+            if (id) window.location.href = `./anuncio-detalhe.html?id=${id}`;
         });
 
         // Filtro de categoria
@@ -304,7 +315,7 @@
         const btnAnunciarTop = document.querySelector('.btn-anunciar-top');
         if (btnAnunciarTop) {
             btnAnunciarTop.addEventListener('click', (e) => {
-                if (!localStorage.getItem('eletrolight_user')) {
+                if (!sessionStorage.getItem('eletrolight_session')) {
                     e.preventDefault();
                     window.location.href = '../login/login.html?cadastro=1';
                 }

@@ -148,6 +148,53 @@
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/supabase-client.js"></script>
+    <script src="../scripts/supabase-service.js"></script>
     <script src="../scripts/perfil.js"></script>
+    <script>
+        // --- Atualiza header com perfil do usuário ---
+        (function () {
+            const wrap   = document.getElementById('header-user-wrap');
+            const stored = sessionStorage.getItem('eletrolight_session');
+            if (!wrap || !stored) return;
+            const session      = JSON.parse(stored);
+            const primeiroNome = session.nome.split(' ')[0];
+            wrap.innerHTML = `
+                <button class="btn-nav btn-perfil" id="btn-perfil-toggle" aria-expanded="false">
+                    <span class="material-symbols-outlined btn-nav__icon" aria-hidden="true">person</span>
+                    ${primeiroNome}
+                    <i class="fa-solid fa-chevron-down perfil-seta"></i>
+                </button>
+                <div class="perfil-dropdown" id="perfil-dropdown">
+                    <span class="perfil-nome-completo">${session.nome}</span>
+                    <span class="perfil-email">${session.email}</span>
+                    <hr class="perfil-divider">
+                    <a href="./perfil.html" class="perfil-editar" style="color:#059669;">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                    </a>
+                    <a href="./meus-anuncios.html" class="perfil-editar">
+                        <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
+                    </a>
+                    <button class="perfil-sair" id="btn-sair-header">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+                    </button>
+                </div>`;
+            document.getElementById('btn-perfil-toggle').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dd = document.getElementById('perfil-dropdown');
+                const aberto = dd.classList.toggle('aberto');
+                e.currentTarget.setAttribute('aria-expanded', aberto);
+            });
+            document.addEventListener('click', () => {
+                const dd = document.getElementById('perfil-dropdown');
+                if (dd) dd.classList.remove('aberto');
+            });
+            document.getElementById('btn-sair-header').addEventListener('click', () => {
+                sessionStorage.removeItem('eletrolight_session');
+                window.location.href = '../index.html';
+            });
+        })();
+    </script>
 </body>
 </html>

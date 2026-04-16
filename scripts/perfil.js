@@ -5,9 +5,9 @@
 const USERS_KEY = 'eletrolight_users';
 
 // --- Guarda: redireciona para login se não logado ---
-const sessionStored = localStorage.getItem('eletrolight_user');
+const sessionStored = sessionStorage.getItem('eletrolight_session');
 if (!sessionStored) {
-    window.location.href = 'login/login.html';
+    window.location.href = '../login/login.html';
 }
 
 const session = JSON.parse(sessionStored);
@@ -47,28 +47,32 @@ function marcarErro(el) {
 }
 
 // --- Preencher dados na tela ---
-function carregarDados() {
-    const users   = getUsers();
-    const usuario = users.find(u => u.email.toLowerCase() === session.email.toLowerCase());
-    if (!usuario) return;
+async function carregarDados() {
+    try {
+        const usuario = await window.SupabaseService.findUserByEmail(session.email);
+        if (!usuario) return;
 
-    // Info fixa
-    document.getElementById('info-nome').textContent       = usuario.nome;
-    document.getElementById('info-cpf').textContent        = usuario.cpf;
-    document.getElementById('info-nascimento').textContent = usuario.nascimento
-        ? new Date(usuario.nascimento + 'T00:00:00').toLocaleDateString('pt-BR')
-        : '—';
+        // Info fixa
+        document.getElementById('info-nome').textContent       = usuario.nome;
+        document.getElementById('info-cpf').textContent        = usuario.cpf;
+        document.getElementById('info-nascimento').textContent = usuario.nascimento
+            ? new Date(usuario.nascimento + 'T00:00:00').toLocaleDateString('pt-BR')
+            : '—';
 
-    // Campos editáveis
-    document.getElementById('perfil-email').value     = usuario.email;
-    document.getElementById('perfil-whatsapp').value  = usuario.whatsapp || '';
+        // Campos editáveis
+        document.getElementById('perfil-email').value     = usuario.email;
+        document.getElementById('perfil-whatsapp').value  = usuario.whatsapp || '';
 
-    // Avatar
-    const avatarEl = document.getElementById('avatar-preview');
-    if (usuario.foto) {
-        avatarEl.src = usuario.foto;
-    } else {
-        avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(usuario.nome)}&background=059669&color=fff&size=150&bold=true`;
+        // Avatar
+        const avatarEl = document.getElementById('avatar-preview');
+        if (usuario.foto) {
+            avatarEl.src = usuario.foto;
+        } else {
+            avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(usuario.nome)}&background=059669&color=fff&size=150&bold=true`;
+        }
+    } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+        mostrarToast('Erro ao carregar dados do perfil.', 'erro');
     }
 }
 
@@ -122,10 +126,10 @@ document.getElementById('perfil-whatsapp').addEventListener('input', (e) => {
             <span class="perfil-nome-completo">${session.nome}</span>
             <span class="perfil-email">${session.email}</span>
             <hr class="perfil-divider">
-            <a href="perfil.html" class="perfil-editar">
+            <a href="../pages/perfil.html" class="perfil-editar">
                 <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
             </a>
-            <a href="meus-anuncios.html" class="perfil-editar">
+            <a href="../pages/meus-anuncios.html" class="perfil-editar">
                 <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
             </a>
             <button class="perfil-sair" id="btn-sair">
@@ -143,13 +147,13 @@ document.getElementById('perfil-whatsapp').addEventListener('input', (e) => {
         if (dd) dd.classList.remove('aberto');
     });
     document.getElementById('btn-sair').addEventListener('click', () => {
-        localStorage.removeItem('eletrolight_user');
-        window.location.href = 'index.html';
+        window.SupabaseService.clearSession();
+        window.location.href = '../index.html';
     });
 })();
 
 // --- Salvar alterações ---
-document.getElementById('perfil-form').addEventListener('submit', (e) => {
+document.getElementById('perfil-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const novoEmail     = document.getElementById('perfil-email').value.trim();
@@ -168,74 +172,83 @@ document.getElementById('perfil-form').addEventListener('submit', (e) => {
         return;
     }
 
-    const users   = getUsers();
-    const idx     = users.findIndex(u => u.email.toLowerCase() === session.email.toLowerCase());
-    if (idx === -1) {
-        mostrarToast('Usuário não encontrado.', 'erro');
-        return;
+    try {
+        // Busca usuário atual no Supabase
+        const usuario = await window.SupabaseService.findUserByEmail(session.email);
+        if (!usuario) {
+            mostrarToast('Usuário não encontrado.', 'erro');
+            return;
+        }
+
+        // Verifica se e-mail novo já pertence a outro usuário
+        if (novoEmail.toLowerCase() !== session.email.toLowerCase()) {
+            const jaExiste = await window.SupabaseService.findUserByEmail(novoEmail);
+            if (jaExiste) {
+                marcarErro(document.getElementById('perfil-email'));
+                mostrarToast('Este e-mail já está em uso.', 'erro');
+                return;
+            }
+        }
+
+        let updates = {
+            email: novoEmail,
+            whatsapp: novoWhatsapp
+        };
+
+        // Valida senha (somente se o usuário preencheu algum campo de senha)
+        if (senhaAtual || senhaNova || senhaConfirma) {
+            if (senhaAtual !== usuario.senha) {
+                marcarErro(document.getElementById('perfil-senha-atual'));
+                mostrarToast('Senha atual incorreta.', 'erro');
+                return;
+            }
+            if (senhaNova.length < 8 || senhaNova.length > 16) {
+                marcarErro(document.getElementById('perfil-senha-nova'));
+                mostrarToast('Nova senha: 8 a 16 caracteres.', 'erro');
+                return;
+            }
+            if (!/[A-Z]/.test(senhaNova)) {
+                marcarErro(document.getElementById('perfil-senha-nova'));
+                mostrarToast('Nova senha precisa de ao menos 1 letra maiúscula.', 'erro');
+                return;
+            }
+            if (!/[^a-zA-Z0-9]/.test(senhaNova)) {
+                marcarErro(document.getElementById('perfil-senha-nova'));
+                mostrarToast('Nova senha precisa de ao menos 1 caractere especial.', 'erro');
+                return;
+            }
+            if (senhaNova !== senhaConfirma) {
+                marcarErro(document.getElementById('perfil-senha-confirma'));
+                mostrarToast('As senhas não coincidem.', 'erro');
+                return;
+            }
+            updates.senha = senhaNova;
+        }
+
+        // Adiciona foto se for uma nova imagem
+        if (novaFoto && !novaFoto.includes('ui-avatars.com')) {
+            updates.foto = novaFoto;
+        }
+
+        // Atualiza no Supabase (usa ID, não email)
+        await window.SupabaseService.updateUser(usuario.id, updates);
+
+        // Atualiza sessão se o email mudou
+        if (novoEmail.toLowerCase() !== session.email.toLowerCase()) {
+            window.SupabaseService.setSession({ nome: usuario.nome, email: novoEmail });
+        }
+
+        mostrarToast('Perfil atualizado com sucesso!', 'sucesso');
+
+        // Limpa campos de senha
+        document.getElementById('perfil-senha-atual').value    = '';
+        document.getElementById('perfil-senha-nova').value     = '';
+        document.getElementById('perfil-senha-confirma').value = '';
+
+    } catch (err) {
+        console.error('Erro ao atualizar perfil:', err);
+        mostrarToast('Erro ao atualizar perfil. Tente novamente.', 'erro');
     }
-    const usuario = users[idx];
-
-    // Verifica se e-mail novo já pertence a outro usuário
-    if (novoEmail.toLowerCase() !== session.email.toLowerCase()) {
-        const jaExiste = users.find((u, i) => i !== idx && u.email.toLowerCase() === novoEmail.toLowerCase());
-        if (jaExiste) {
-            marcarErro(document.getElementById('perfil-email'));
-            mostrarToast('Este e-mail já está em uso.', 'erro');
-            return;
-        }
-    }
-
-    // Valida senha (somente se o usuário preencheu algum campo de senha)
-    if (senhaAtual || senhaNova || senhaConfirma) {
-        if (senhaAtual !== usuario.senha) {
-            marcarErro(document.getElementById('perfil-senha-atual'));
-            mostrarToast('Senha atual incorreta.', 'erro');
-            return;
-        }
-        if (senhaNova.length < 8 || senhaNova.length > 16) {
-            marcarErro(document.getElementById('perfil-senha-nova'));
-            mostrarToast('Nova senha: 8 a 16 caracteres.', 'erro');
-            return;
-        }
-        if (!/[A-Z]/.test(senhaNova)) {
-            marcarErro(document.getElementById('perfil-senha-nova'));
-            mostrarToast('Nova senha precisa de ao menos 1 letra maiúscula.', 'erro');
-            return;
-        }
-        if (!/[^a-zA-Z0-9]/.test(senhaNova)) {
-            marcarErro(document.getElementById('perfil-senha-nova'));
-            mostrarToast('Nova senha precisa de ao menos 1 caractere especial.', 'erro');
-            return;
-        }
-        if (senhaNova !== senhaConfirma) {
-            marcarErro(document.getElementById('perfil-senha-confirma'));
-            mostrarToast('As senhas não coincidem.', 'erro');
-            return;
-        }
-        usuario.senha = senhaNova;
-    }
-
-    // Atualiza os dados
-    usuario.email    = novoEmail;
-    usuario.whatsapp = novoWhatsapp;
-    if (novaFoto && !novaFoto.includes('ui-avatars.com')) {
-        usuario.foto = novaFoto;
-    }
-
-    users[idx] = usuario;
-    saveUsers(users);
-
-    // Atualiza sessão
-    const novaSession = { ...session, email: novoEmail, nome: usuario.nome };
-    localStorage.setItem('eletrolight_user', JSON.stringify(novaSession));
-
-    mostrarToast('Perfil atualizado com sucesso!', 'sucesso');
-
-    // Limpa campos de senha
-    document.getElementById('perfil-senha-atual').value    = '';
-    document.getElementById('perfil-senha-nova').value     = '';
-    document.getElementById('perfil-senha-confirma').value = '';
 });
 
 // --- Inicializar ---

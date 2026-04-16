@@ -156,8 +156,7 @@ function mostrarToast(msg, tipo) {
     }, 3200);
 }
 
-// --- Cadastro ---
-function validarCadastro() {
+async function validarCadastro() {
     document.querySelectorAll('.sign-up-container input').forEach(i => i.classList.remove('error'));
 
     const nome        = document.getElementById('nome-cadastro').value.trim();
@@ -167,7 +166,7 @@ function validarCadastro() {
     const senha       = document.getElementById('senha-cadastro').value;
     const confirma    = document.getElementById('senha-confirma').value;
     const emailRgx    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const nomeRgx     = /^[a-zA-ZÀ-ÿ\s]+$/; // Apenas letras (incluindo acentuadas) e espaços
+    const nomeRgx     = /^[a-zA-ZÀ-ÿ\s]+$/;
 
     // --- Validação do Nome ---
     if (nome.split(' ').filter(Boolean).length < 2) {
@@ -188,7 +187,7 @@ function validarCadastro() {
         return;
     }
 
-    // --- Validação da Data de Nascimento (mínimo 18 anos, máximo 100 anos) ---
+    // --- Validação da Data de Nascimento ---
     if (!nascimento) {
         setErro('nascimento-cadastro', 'Informe sua data de nascimento.');
         mostrarToast('Informe sua data de nascimento.', 'erro');
@@ -201,8 +200,8 @@ function validarCadastro() {
         return;
     }
     if (idade > 100) {
-        setErro('nascimento-cadastro', 'Data de nascimento inválida. Idade máxima permitida: 100 anos.');
-        mostrarToast('Data de nascimento inválida. Verifique a data informada.', 'erro');
+        setErro('nascimento-cadastro', 'Data de nascimento inválida. Idade máxima: 100 anos.');
+        mostrarToast('Data de nascimento inválida.', 'erro');
         return;
     }
 
@@ -213,7 +212,7 @@ function validarCadastro() {
         return;
     }
 
-    // --- Validação da Senha (8-16 chars + 1 maiúscula + 1 especial) ---
+    // --- Validação da Senha ---
     if (senha.length < 8 || senha.length > 16) {
         setErro('senha-cadastro', 'A senha deve ter entre 8 e 16 caracteres.');
         mostrarToast('A senha deve ter entre 8 e 16 caracteres.', 'erro');
@@ -225,7 +224,7 @@ function validarCadastro() {
         return;
     }
     if (!/[^a-zA-Z0-9]/.test(senha)) {
-        setErro('senha-cadastro', 'A senha deve conter pelo menos 1 caractere especial (ex: @, #, !).');
+        setErro('senha-cadastro', 'A senha deve conter pelo menos 1 caractere especial.');
         mostrarToast('A senha precisa de ao menos 1 caractere especial.', 'erro');
         return;
     }
@@ -237,37 +236,44 @@ function validarCadastro() {
         return;
     }
 
-    // --- Unicidade de e-mail e CPF ---
-    const users = getUsers();
-    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-        setErro('email-cadastro', 'Este e-mail já está cadastrado.');
-        mostrarToast('Este e-mail já está cadastrado.', 'erro');
-        return;
+    // --- Verificar unicidade no Supabase ---
+    try {
+        const existingEmail = await window.SupabaseService.findUserByEmail(email);
+        if (existingEmail) {
+            setErro('email-cadastro', 'Este e-mail já está cadastrado.');
+            mostrarToast('Este e-mail já está cadastrado.', 'erro');
+            return;
+        }
+
+        const existingCPF = await window.SupabaseService.findUserByCPF(cpf);
+        if (existingCPF) {
+            setErro('cpf-cadastro', 'Este CPF já está cadastrado.');
+            mostrarToast('Este CPF já está cadastrado.', 'erro');
+            return;
+        }
+
+        // --- Salva no Supabase ---
+        await window.SupabaseService.saveUser({ nome, cpf, nascimento, email, senha });
+
+        mostrarToast('Conta criada com sucesso! Faça login para continuar.', 'sucesso');
+
+        // Limpa o formulário
+        document.getElementById('nome-cadastro').value        = '';
+        document.getElementById('cpf-cadastro').value         = '';
+        document.getElementById('nascimento-cadastro').value  = '';
+        document.getElementById('email-cadastro').value       = '';
+        document.getElementById('senha-cadastro').value       = '';
+        document.getElementById('senha-confirma').value       = '';
+        setTimeout(() => container.classList.remove('right-panel-active'), 1800);
+
+    } catch (err) {
+        console.error('Erro ao cadastrar:', err);
+        mostrarToast('Erro ao criar conta. Tente novamente.', 'erro');
     }
-    if (users.find(u => u.cpf.replace(/\D/g, '') === cpf.replace(/\D/g, ''))) {
-        setErro('cpf-cadastro', 'Este CPF já está cadastrado.');
-        mostrarToast('Este CPF já está cadastrado.', 'erro');
-        return;
-    }
-
-    // --- Salva o novo usuário ---
-    users.push({ nome, cpf, nascimento, email, senha });
-    saveUsers(users);
-
-    mostrarToast('Conta criada com sucesso! Faça login para continuar.', 'sucesso');
-
-    // Limpa o formulário e redireciona para o painel de login
-    document.getElementById('nome-cadastro').value        = '';
-    document.getElementById('cpf-cadastro').value         = '';
-    document.getElementById('nascimento-cadastro').value  = '';
-    document.getElementById('email-cadastro').value       = '';
-    document.getElementById('senha-cadastro').value       = '';
-    document.getElementById('senha-confirma').value       = '';
-    setTimeout(() => container.classList.remove('right-panel-active'), 1800);
 }
 
 // --- Login ---
-function validarLogin() {
+async function validarLogin() {
     document.querySelectorAll('.sign-in-container input').forEach(i => i.classList.remove('error'));
 
     const identificador = document.getElementById('email-login').value.trim();
@@ -280,26 +286,34 @@ function validarLogin() {
         return;
     }
 
-    const users  = getUsers();
-    const isCPF  = /^\d/.test(identificador.replace(/\D/g, '')) && identificador.replace(/\D/g, '').length === 11;
-    const user   = isCPF
-        ? users.find(u => u.cpf.replace(/\D/g, '') === identificador.replace(/\D/g, ''))
-        : users.find(u => u.email.toLowerCase() === identificador.toLowerCase());
+    try {
+        const isCPF  = /^\d/.test(identificador.replace(/\D/g, '')) && identificador.replace(/\D/g, '').length === 11;
+        
+        const user   = isCPF
+            ? await window.SupabaseService.findUserByCPF(identificador)
+            : await window.SupabaseService.findUserByEmail(identificador);
 
-    if (!user) {
-        setErro('email-login', isCPF ? 'CPF não encontrado. Cadastre-se primeiro.' : 'E-mail não encontrado. Cadastre-se primeiro.');
-        mostrarToast(isCPF ? 'CPF não encontrado.' : 'E-mail não encontrado.', 'erro');
-        return;
-    }
-    if (user.senha !== senha) {
-        setErro('senha-login', 'Senha incorreta.');
-        mostrarToast('Senha incorreta. Tente novamente.', 'erro');
-        return;
-    }
+        if (!user) {
+            setErro('email-login', isCPF ? 'CPF não encontrado. Cadastre-se primeiro.' : 'E-mail não encontrado. Cadastre-se primeiro.');
+            mostrarToast(isCPF ? 'CPF não encontrado.' : 'E-mail não encontrado.', 'erro');
+            return;
+        }
+        if (user.senha !== senha) {
+            setErro('senha-login', 'Senha incorreta.');
+            mostrarToast('Senha incorreta. Tente novamente.', 'erro');
+            return;
+        }
 
-    localStorage.setItem('eletrolight_user', JSON.stringify({ nome: user.nome, email: user.email }));
-    mostrarToast('Login efetuado! Redirecionando...', 'sucesso');
-    setTimeout(() => { window.location.href = '../index.html'; }, 1200);
+        console.log('Usuário encontrado:', user);
+        window.SupabaseService.setSession({ nome: user.nome, email: user.email });
+        console.log('Sessão salva:', sessionStorage.getItem('eletrolight_session'));
+        mostrarToast('Login efetuado! Redirecionando...', 'sucesso');
+        setTimeout(() => { window.location.href = '../index.html'; }, 1200);
+        
+    } catch (err) {
+        console.error('Erro ao fazer login:', err);
+        mostrarToast('Erro ao fazer login. Tente novamente.', 'erro');
+    }
 }
 
 // --- LÓGICA DA TECLA ENTER ---
@@ -356,7 +370,7 @@ modalRecuperacao.addEventListener('click', (e) => {
 });
 
 // Função para validar e enviar a recuperação
-function enviarRecuperacao() {
+async function enviarRecuperacao() {
     const emailRecuperacao = document.getElementById('email-recuperacao');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -368,19 +382,34 @@ function enviarRecuperacao() {
         return;
     }
 
-    // Simulação do envio para o Backend Java/Spring Boot
-    console.log('Pedido de recuperação de senha para o e-mail:', emailRecuperacao.value);
-    alert('Se o e-mail estiver registado no nosso sistema, receberá as instruções para redefinir a sua senha em poucos minutos.');
-    fecharModal();
-}
+    try {
+        const email = emailRecuperacao.value.trim().toLowerCase();
+        
+        // Verifica se usuário existe
+        const user = await window.SupabaseService.findUserByEmail(email);
+        if (!user) {
+            alert('Se o e-mail estiver registrado, você receberá as instruções.');
+            fecharModal();
+            return;
+        }
 
-// Permitir o uso da tecla Enter dentro do Modal
-document.getElementById('email-recuperacao').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        enviarRecuperacao();
+        // Cria token
+        const result = await window.SupabaseService.criarTokenRecuperacao(email);
+        
+        if (result) {
+            // Gera link de recuperação
+            const link = `${window.location.origin}/login/redefinir-senha.html?email=${encodeURIComponent(email)}&token=${result.token}`;
+            
+            console.log('Link de recuperação:', link);
+            alert(`Link de recuperação gerado!\n\n${link}\n\n(Em produção, este link seria enviado por email)`);
+        }
+        
+        fecharModal();
+    } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao processar. Tente novamente.');
     }
-});
+}
 
 // --- LÓGICA DOS BOTÕES DE OLHO (MOSTRAR/OCULTAR SENHA) ---
 document.querySelectorAll('.olho-btn').forEach(btn => {
