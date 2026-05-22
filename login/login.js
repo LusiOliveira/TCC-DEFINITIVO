@@ -305,7 +305,8 @@ async function validarLogin() {
         }
 
         console.log('Usuário encontrado:', user);
-        window.SupabaseService.setSession({ nome: user.nome, email: user.email });
+        console.log('DEBUG is_admin vindo do banco:', user.is_admin, '| tipo:', typeof user.is_admin);
+        window.SupabaseService.setSession({ nome: user.nome, email: user.email, is_admin: user.is_admin === true });
         console.log('Sessão salva:', sessionStorage.getItem('eletrolight_session'));
         mostrarToast('Login efetuado! Redirecionando...', 'sucesso');
         setTimeout(() => { window.location.href = '../index.html'; }, 1200);
@@ -339,77 +340,6 @@ inputsLogin.forEach((input) => {
         }
     });
 });
-
-// --- LÓGICA DO MODAL DE RECUPERAÇÃO DE SENHA ---
-const modalRecuperacao = document.getElementById('modal-recuperacao');
-const btnEsqueceuSenha = document.getElementById('btn-esqueceu-senha');
-const btnFecharModal = document.getElementById('fechar-modal');
-const btnCancelarRecuperacao = document.getElementById('btn-cancelar-recuperacao');
-
-// Abrir Modal
-btnEsqueceuSenha.addEventListener('click', (e) => {
-    e.preventDefault(); // Evita que a página salte para o topo
-    modalRecuperacao.classList.remove('hidden');
-});
-
-// Fechar Modal (no X ou no botão Cancelar)
-const fecharModal = () => {
-    modalRecuperacao.classList.add('hidden');
-    document.getElementById('email-recuperacao').value = ''; // Limpa o campo
-    document.getElementById('email-recuperacao').classList.remove('error');
-};
-
-btnFecharModal.addEventListener('click', fecharModal);
-btnCancelarRecuperacao.addEventListener('click', fecharModal);
-
-// Fechar clicando fora do modal (no fundo escuro)
-modalRecuperacao.addEventListener('click', (e) => {
-    if (e.target === modalRecuperacao) {
-        fecharModal();
-    }
-});
-
-// Função para validar e enviar a recuperação
-async function enviarRecuperacao() {
-    const emailRecuperacao = document.getElementById('email-recuperacao');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    emailRecuperacao.classList.remove('error');
-
-    if (!emailRegex.test(emailRecuperacao.value)) {
-        alert('Por favor, insira um endereço de e-mail válido.');
-        emailRecuperacao.classList.add('error');
-        return;
-    }
-
-    try {
-        const email = emailRecuperacao.value.trim().toLowerCase();
-        
-        // Verifica se usuário existe
-        const user = await window.SupabaseService.findUserByEmail(email);
-        if (!user) {
-            alert('Se o e-mail estiver registrado, você receberá as instruções.');
-            fecharModal();
-            return;
-        }
-
-        // Cria token
-        const result = await window.SupabaseService.criarTokenRecuperacao(email);
-        
-        if (result) {
-            // Gera link de recuperação
-            const link = `${window.location.origin}/login/redefinir-senha.html?email=${encodeURIComponent(email)}&token=${result.token}`;
-            
-            console.log('Link de recuperação:', link);
-            alert(`Link de recuperação gerado!\n\n${link}\n\n(Em produção, este link seria enviado por email)`);
-        }
-        
-        fecharModal();
-    } catch (err) {
-        console.error('Erro:', err);
-        alert('Erro ao processar. Tente novamente.');
-    }
-}
 
 // --- LÓGICA DOS BOTÕES DE OLHO (MOSTRAR/OCULTAR SENHA) ---
 document.querySelectorAll('.olho-btn').forEach(btn => {

@@ -109,21 +109,21 @@
                         <div class="perfil-form-group">
                             <label for="perfil-senha-atual">Senha Atual</label>
                             <div class="perfil-senha-wrap">
-                                <input type="password" id="perfil-senha-atual" placeholder="Digite sua senha atual">
+                                <input type="password" id="perfil-senha-atual" placeholder="Digite sua senha atual" autocomplete="current-password">
                             </div>
                         </div>
 
                         <div class="perfil-form-group">
                             <label for="perfil-senha-nova">Nova Senha</label>
                             <div class="perfil-senha-wrap">
-                                <input type="password" id="perfil-senha-nova" placeholder="8-16 chars, 1 maiúscula, 1 especial">
+                                <input type="password" id="perfil-senha-nova" placeholder="8-16 chars, 1 maiúscula, 1 especial" autocomplete="new-password">
                             </div>
                         </div>
 
                         <div class="perfil-form-group">
                             <label for="perfil-senha-confirma">Confirmar Nova Senha</label>
                             <div class="perfil-senha-wrap">
-                                <input type="password" id="perfil-senha-confirma" placeholder="Repita a nova senha">
+                                <input type="password" id="perfil-senha-confirma" placeholder="Repita a nova senha" autocomplete="new-password">
                             </div>
                         </div>
                     </fieldset>
@@ -176,6 +176,7 @@
                     <a href="./meus-anuncios.html" class="perfil-editar">
                         <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                     </a>
+                    ${session.is_admin ? `<hr class="perfil-divider"><a href="./admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
                     <button class="perfil-sair" id="btn-sair-header">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
                     </button>

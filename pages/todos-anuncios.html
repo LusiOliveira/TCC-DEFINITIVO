@@ -40,9 +40,6 @@
             background: #fff;
             border-bottom: 1px solid #e5e7eb;
             padding: 1.2rem 5%;
-            position: sticky;
-            top: 80px;
-            z-index: 100;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -178,6 +175,7 @@
                 <button class="cat-btn" data-cat="cabos"><i class="fa-solid fa-plug"></i> Cabos</button>
                 <button class="cat-btn" data-cat="pilhas"><i class="fa-solid fa-battery-half"></i> Pilhas</button>
                 <button class="cat-btn" data-cat="perifericos"><i class="fa-solid fa-print"></i> Periféricos</button>
+                <button class="cat-btn" data-cat="outros"><i class="fa-solid fa-box"></i> Outros</button>
             </div>
         </div>
 
@@ -225,6 +223,7 @@
                     <a href="./meus-anuncios.html" class="perfil-editar">
                         <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                     </a>
+                    ${session.is_admin ? `<hr class="perfil-divider"><a href="./admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
                     <button class="perfil-sair" id="btn-sair">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
                     </button>
@@ -248,12 +247,12 @@
         // --- Renderização completa (sem limite) ---
         const grid       = document.getElementById('anuncios-grid-todos');
         const totalLabel = document.getElementById('total-label');
-        let catAtual     = 'todos';
+        let catsAtivas   = new Set(['todos']);
         let buscaAtual   = '';
 
         async function renderTodos() {
             const todos     = await getAnuncios();
-            let filtrados   = catAtual === 'todos' ? todos : todos.filter(a => a.categoria === catAtual);
+            let filtrados   = catsAtivas.has('todos') ? todos : todos.filter(a => catsAtivas.has(a.categoria));
             if (buscaAtual) {
                 const q = buscaAtual.toLowerCase();
                 filtrados = filtrados.filter(a =>
@@ -292,12 +291,29 @@
             if (id) window.location.href = `./anuncio-detalhe.html?id=${id}`;
         });
 
-        // Filtro de categoria
+        // Filtro de categoria (seleção múltipla)
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('ativo'));
-                btn.classList.add('ativo');
-                catAtual = btn.dataset.cat;
+                const cat = btn.dataset.cat;
+                if (cat === 'todos') {
+                    catsAtivas = new Set(['todos']);
+                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('ativo'));
+                    btn.classList.add('ativo');
+                } else {
+                    catsAtivas.delete('todos');
+                    document.querySelector('.cat-btn[data-cat="todos"]').classList.remove('ativo');
+                    if (catsAtivas.has(cat)) {
+                        catsAtivas.delete(cat);
+                        btn.classList.remove('ativo');
+                    } else {
+                        catsAtivas.add(cat);
+                        btn.classList.add('ativo');
+                    }
+                    if (catsAtivas.size === 0) {
+                        catsAtivas.add('todos');
+                        document.querySelector('.cat-btn[data-cat="todos"]').classList.add('ativo');
+                    }
+                }
                 renderTodos();
             });
         });

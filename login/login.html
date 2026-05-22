@@ -53,7 +53,6 @@
                     <input type="password" id="senha-login" placeholder="Senha" required />
                     <button type="button" class="olho-btn" data-target="senha-login" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
                 </div>
-                <a href="#" class="forgot-password" id="btn-esqueceu-senha">Esqueceu sua senha?</a>
                 <button type="button" onclick="validarLogin()">Entrar</button>
             </form>
         </div>
@@ -76,19 +75,6 @@
                     <p>Ainda não tem conta? Junte-se a nós para mitigar os impactos do e-lixo.</p>
                     <button class="ghost" id="signUp">Cadastrar</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-<div id="modal-recuperacao" class="modal-overlay hidden">
-        <div class="modal-content">
-            <span class="close-modal" id="fechar-modal"><i class="fa-solid fa-xmark"></i></span>
-            <h3>Recuperar Senha</h3>
-            <p>Insira o seu e-mail cadastrado. Enviaremos um link para redefinir a sua senha.</p>
-            <input type="email" id="email-recuperacao" placeholder="O seu e-mail" required />
-            <div class="modal-buttons">
-                <button type="button" class="btn-cancelar" id="btn-cancelar-recuperacao">Cancelar</button>
-                <button type="button" class="btn-enviar" onclick="enviarRecuperacao()">Enviar Link</button>
             </div>
         </div>
     </div>

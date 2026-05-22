@@ -108,6 +108,21 @@
         }
         .meus-vazio p { font-size: 0.95rem; margin-bottom: 1.5rem; }
 
+        /* Barra de status (pendente / rejeitado) */
+        .anuncio-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 7px 14px;
+            letter-spacing: 0.02em;
+        }
+        .status-pendente { background: #FEF3C7; color: #92400E; border-bottom: 2px solid #FCD34D; }
+        .status-rejeitado { background: #FEE2E2; color: #991B1B; border-bottom: 2px solid #FCA5A5; }
+        .card-status-pendente { opacity: 0.9; }
+        .card-status-rejeitado { opacity: 0.85; }
+
         /* Card com botão excluir */
         .anuncio-card { position: relative; }
 
@@ -465,6 +480,7 @@
                             <option value="cabos">Cabos e Carregadores</option>
                             <option value="pilhas">Pilhas e Baterias</option>
                             <option value="perifericos">Periféricos</option>
+                            <option value="outros">Outros</option>
                         </select>
                     </div>
                     <div class="edit-field">
@@ -564,6 +580,7 @@
                 <a href="./meus-anuncios.html" class="perfil-editar" style="color:#059669;">
                     <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                 </a>
+                ${session.is_admin ? `<hr class="perfil-divider"><a href="./admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
                 <button class="perfil-sair" id="btn-sair">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
                 </button>
@@ -588,21 +605,16 @@
     let idParaExcluir = null;
 
     async function renderMeusAnuncios() {
-        const todos = await getAnuncios();
-        console.log('=== DEBUG renderMeusAnuncios ===');
-        console.log('Todos os anúncios carregados:', todos.map(a => ({ id: a.id, titulo: a.titulo, email: a.email })));
-        
-        const meus  = todos.filter(a => a.email && a.email.toLowerCase() === session.email.toLowerCase());
-        console.log('Meus anúncios filtrados:', meus.map(a => ({ id: a.id, titulo: a.titulo })));
-        
-        const grid  = document.getElementById('meus-grid');
+        const meus = await getAnunciosByEmail(session.email);
+
+        const grid     = document.getElementById('meus-grid');
         const contador = document.getElementById('meus-contador');
 
-        contador.innerHTML = meus.length === 0
-            ? 'Nenhum anúncio publicado ainda.'
-            : `Você tem <strong>${meus.length}</strong> anúncio${meus.length > 1 ? 's' : ''} publicado${meus.length > 1 ? 's' : ''}.`;
+        const aprovados = meus.filter(a => a.status === 'aprovado').length;
+        const pendentes = meus.filter(a => a.status === 'pendente').length;
 
         if (meus.length === 0) {
+            contador.innerHTML = 'Nenhum anúncio ainda.';
             grid.innerHTML = `
                 <div class="meus-vazio">
                     <i class="fa-solid fa-box-open"></i>
@@ -612,15 +624,41 @@
             return;
         }
 
+        let contadorTexto = `<strong>${aprovados}</strong> publicado${aprovados !== 1 ? 's' : ''}`;
+        if (pendentes > 0) contadorTexto += ` · <strong style="color:#D97706">${pendentes}</strong> aguardando aprovação`;
+        contador.innerHTML = contadorTexto;
+
         grid.innerHTML = meus.map(a => {
-            return renderAnuncioCard(a, { isOwner: true }).replace(
-                '<div class="anuncio-img-wrap">',
-                `<div class="anuncio-img-wrap"><button class="btn-excluir-card" data-id="${a.id}"><i class="fa-solid fa-trash"></i> Excluir</button>`
-            );
+            const isPendente  = a.status === 'pendente';
+            const isRejeitado = a.status === 'rejeitado';
+
+            let cardHtml = renderAnuncioCard(a, { isOwner: a.status === 'aprovado' })
+                .replace(
+                    '<div class="anuncio-img-wrap">',
+                    `<div class="anuncio-img-wrap"><button class="btn-excluir-card" data-id="${a.id}"><i class="fa-solid fa-trash"></i> Excluir</button>`
+                );
+
+            if (isPendente) {
+                cardHtml = cardHtml
+                    .replace('class="anuncio-card"', 'class="anuncio-card card-status-pendente"')
+                    .replace(
+                        '<div class="anuncio-img-wrap">',
+                        `<div class="anuncio-status-bar status-pendente"><i class="fa-solid fa-clock"></i> Aguardando aprovação do admin</div><div class="anuncio-img-wrap">`
+                    );
+            } else if (isRejeitado) {
+                cardHtml = cardHtml
+                    .replace('class="anuncio-card"', 'class="anuncio-card card-status-rejeitado"')
+                    .replace(
+                        '<div class="anuncio-img-wrap">',
+                        `<div class="anuncio-status-bar status-rejeitado"><i class="fa-solid fa-xmark"></i> Anúncio rejeitado</div><div class="anuncio-img-wrap">`
+                    );
+            }
+
+            return cardHtml;
         }).join('');
 
-        // Injetar botão "Ver Mensagens" em cada card via DOM
-        meus.forEach(a => {
+        // Injetar botão "Ver Mensagens" apenas em aprovados
+        meus.filter(a => a.status === 'aprovado').forEach(a => {
             const card = grid.querySelector(`.anuncio-card[data-id="${a.id}"]`);
             if (!card) return;
             const body = card.querySelector('.anuncio-body');

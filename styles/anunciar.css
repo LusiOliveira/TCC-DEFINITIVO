@@ -328,6 +328,23 @@
     background: #ECFDF5;
 }
 
+.upload-area.erro {
+    border-color: #EF4444;
+    background: #FEF2F2;
+}
+
+.upload-area.erro .upload-label i { color: #EF4444; }
+.upload-area.erro .upload-label span { color: #991B1B; }
+
+.upload-erro-msg {
+    color: #EF4444;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 6px;
+    display: none;
+}
+.upload-erro-msg.show { display: block; }
+
 #foto-input {
     display: none;
 }

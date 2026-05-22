@@ -209,6 +209,7 @@ function getCategoriaInfo(cat) {
         cabos:          { icon: 'fa-plug',                 label: 'Cabos e Carregadores' },
         pilhas:         { icon: 'fa-battery-half',         label: 'Pilhas e Baterias' },
         perifericos:    { icon: 'fa-print',                label: 'Periféricos' },
+        outros:         { icon: 'fa-box',                  label: 'Outros' },
     };
     // Fallback genérico caso categoria não exista no mapa
     return map[cat] || { icon: 'fa-microchip', label: cat };

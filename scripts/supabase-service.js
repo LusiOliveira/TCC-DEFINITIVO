@@ -35,7 +35,7 @@ async function findUserByEmail(email) {
     console.log('Buscando usuário por email:', email.toLowerCase());
     const { data, error } = await supabaseInstance
         .from('users')
-        .select('id, nome, cpf, nascimento, email, senha, whatsapp, foto, reset_token, reset_token_expires, created_at, updated_at')
+        .select('id, nome, cpf, nascimento, email, senha, whatsapp, foto, is_admin, bloqueio_publicacao, bloqueio_chat, created_at, updated_at')
         .eq('email', email.toLowerCase())
         .maybeSingle();
     if (error) {
@@ -123,7 +123,8 @@ async function updateUser(userId, updates) {
 function setSession(user) {
     sessionStorage.setItem('eletrolight_session', JSON.stringify({
         nome: user.nome,
-        email: user.email
+        email: user.email,
+        is_admin: user.is_admin || false
     }));
 }
 
@@ -137,96 +138,6 @@ function clearSession() {
 }
 
 // ============================================
-// RECUPERAÇÃO DE SENHA
-// ============================================
-
-function gerarToken() {
-    return Array.from(crypto.getRandomValues(new Uint8Array(24)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-}
-
-async function criarTokenRecuperacao(email) {
-    // Busca direto no Supabase para garantir que temos o ID
-    const { data: user, error: searchError } = await supabaseInstance
-        .from('users')
-        .select('id, nome, email')
-        .eq('email', email.toLowerCase())
-        .maybeSingle();
-    
-    console.log('User da busca direta:', user);
-    
-    if (searchError) {
-        console.error('Erro ao buscar:', searchError);
-        throw searchError;
-    }
-    
-    if (!user || !user.id) {
-        console.error('Usuário não encontrado ou sem ID');
-        return null;
-    }
-    
-    const token = gerarToken();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-    
-    console.log('Fazendo update com id:', user.id);
-    
-    const { error } = await supabaseInstance
-        .from('users')
-        .update({
-            reset_token: token,
-            reset_token_expires: expiresAt.toISOString()
-        })
-        .eq('id', user.id);
-    
-    if (error) {
-        console.error('Erro ao criar token:', error);
-        throw error;
-    }
-    
-    console.log('Token criado com sucesso!');
-    return { token, email, nome: user.nome };
-}
-
-async function validarTokenRecuperacao(email, token) {
-    const { data, error } = await supabaseInstance
-        .from('users')
-        .select('*')
-        .eq('email', email.toLowerCase())
-        .eq('reset_token', token)
-        .single();
-    
-    if (error || !data) return null;
-    if (new Date(data.reset_token_expires) < new Date()) return null;
-    
-    return data;
-}
-
-async function redefinirSenha(email, token, novaSenha) {
-    const user = await validarTokenRecuperacao(email, token);
-    if (!user) {
-        throw new Error('Token inválido ou expirado');
-    }
-    
-    const { error } = await supabaseInstance
-        .from('users')
-        .update({
-            senha: novaSenha,
-            reset_token: null,
-            reset_token_expires: null,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-    
-    if (error) {
-        console.error('Erro ao redefinir senha:', error);
-        throw error;
-    }
-    
-    return true;
-}
-
-// ============================================
 // ANÚNCIOS (substitui eletrolight_anuncios)
 // ============================================
 
@@ -234,6 +145,7 @@ async function getAnuncios() {
     const { data, error } = await supabaseInstance
         .from('anuncios')
         .select('*')
+        .eq('status', 'aprovado')
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -338,7 +250,7 @@ function _getMensagensLS(anuncioId, emailA, emailB) {
             ((m.remetente_email === emailA.toLowerCase() && m.destinatario_email === emailB.toLowerCase()) ||
              (m.remetente_email === emailB.toLowerCase() && m.destinatario_email === emailA.toLowerCase()))
         )
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        .sort((a, b) => a.id - b.id);
 }
 
 function _getConversasLS(anuncioId, ownerEmail) {
@@ -361,7 +273,7 @@ async function getMensagens(anuncioId, emailA, emailB) {
                 .from('mensagens')
                 .select('*')
                 .eq('anuncio_id', String(anuncioId))
-                .order('created_at', { ascending: true });
+                .order('id', { ascending: true });
             if (!error && data) {
                 return data.filter(m =>
                     (m.remetente_email === emailA.toLowerCase() && m.destinatario_email === emailB.toLowerCase()) ||
@@ -395,31 +307,184 @@ async function getConversasDoAnuncio(anuncioId, ownerEmail) {
 }
 
 async function enviarMensagem(anuncioId, remetenteEmail, remetenteNome, destinatarioEmail, destinatarioNome, texto) {
-    const msg = {
+    const base = {
         anuncio_id:        String(anuncioId),
         remetente_email:   remetenteEmail.toLowerCase(),
         remetente_nome:    remetenteNome,
         destinatario_email: destinatarioEmail.toLowerCase(),
         destinatario_nome: destinatarioNome,
-        texto,
-        created_at: new Date().toISOString()
+        texto
     };
     if (supabaseInstance) {
         try {
             const { data, error } = await supabaseInstance
                 .from('mensagens')
-                .insert([msg])
+                .insert([base])
                 .select()
                 .single();
             if (!error && data) return data;
         } catch (e) {}
     }
     // localStorage fallback
+    const msg = { ...base, created_at: new Date().toISOString() };
     const all = JSON.parse(localStorage.getItem(MENSAGENS_KEY) || '[]');
     msg.id = Date.now();
     all.push(msg);
     localStorage.setItem(MENSAGENS_KEY, JSON.stringify(all));
     return msg;
+}
+
+// ============================================
+// ADMIN — Anúncios
+// ============================================
+
+async function getAnunciosPendentes() {
+    const { data, error } = await supabaseInstance
+        .from('anuncios')
+        .select('*')
+        .eq('status', 'pendente')
+        .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+}
+
+async function aprovarAnuncio(id) {
+    const { error } = await supabaseInstance
+        .from('anuncios')
+        .update({ status: 'aprovado', updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw error;
+    return true;
+}
+
+async function rejeitarAnuncio(id) {
+    const { error } = await supabaseInstance
+        .from('anuncios')
+        .update({ status: 'rejeitado', updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw error;
+    return true;
+}
+
+// ============================================
+// ADMIN — Denúncias
+// ============================================
+
+async function getDenuncias() {
+    const { data, error } = await supabaseInstance
+        .from('denuncias')
+        .select('*')
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+}
+
+async function enviarDenuncia(denuncia) {
+    const { data, error } = await supabaseInstance
+        .from('denuncias')
+        .insert([denuncia])
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+async function resolverDenuncia(id) {
+    const { error } = await supabaseInstance
+        .from('denuncias')
+        .update({ status: 'resolvida' })
+        .eq('id', id);
+    if (error) throw error;
+    return true;
+}
+
+// ============================================
+// ADMIN — Conteúdo Educativo
+// ============================================
+
+async function getConteudoEducativo() {
+    const { data, error } = await supabaseInstance
+        .from('conteudo_educativo')
+        .select('*')
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+}
+
+async function adicionarConteudo(conteudo) {
+    const { data, error } = await supabaseInstance
+        .from('conteudo_educativo')
+        .insert([{ ...conteudo, ativo: true }])
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+async function atualizarConteudo(id, updates) {
+    const { error } = await supabaseInstance
+        .from('conteudo_educativo')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw error;
+    return true;
+}
+
+async function deletarConteudo(id) {
+    const { error } = await supabaseInstance
+        .from('conteudo_educativo')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+    return true;
+}
+
+// ============================================
+// ADMIN — Punições
+// ============================================
+
+async function aplicarPunicao(email, tipo) {
+    const updates = {};
+    if (tipo === 'publicacao' || tipo === 'ambos') updates.bloqueio_publicacao = true;
+    if (tipo === 'chat'      || tipo === 'ambos') updates.bloqueio_chat = true;
+    const { error } = await supabaseInstance
+        .from('users')
+        .update(updates)
+        .eq('email', email.toLowerCase());
+    if (error) throw error;
+    return true;
+}
+
+async function removerPunicao(email, tipo) {
+    const updates = {};
+    if (tipo === 'publicacao' || tipo === 'ambos') updates.bloqueio_publicacao = false;
+    if (tipo === 'chat'      || tipo === 'ambos') updates.bloqueio_chat = false;
+    const { error } = await supabaseInstance
+        .from('users')
+        .update(updates)
+        .eq('email', email.toLowerCase());
+    if (error) throw error;
+    return true;
+}
+
+async function excluirConta(email) {
+    await supabaseInstance.from('anuncios').delete().eq('email', email.toLowerCase());
+    const { error } = await supabaseInstance
+        .from('users')
+        .delete()
+        .eq('email', email.toLowerCase());
+    if (error) throw error;
+    return true;
+}
+
+async function getUsuariosBloqueados() {
+    const { data, error } = await supabaseInstance
+        .from('users')
+        .select('id, nome, email, bloqueio_publicacao, bloqueio_chat')
+        .or('bloqueio_publicacao.eq.true,bloqueio_chat.eq.true')
+        .order('nome', { ascending: true });
+    if (error) throw error;
+    return data || [];
 }
 
 // ============================================
@@ -436,9 +501,6 @@ window.SupabaseService = {
     setSession,
     getSession,
     clearSession,
-    criarTokenRecuperacao,
-    validarTokenRecuperacao,
-    redefinirSenha,
     getAnuncios,
     getAnunciosByEmail,
     adicionarAnuncio,
@@ -446,5 +508,19 @@ window.SupabaseService = {
     deletarAnuncio,
     getMensagens,
     getConversasDoAnuncio,
-    enviarMensagem
+    enviarMensagem,
+    getAnunciosPendentes,
+    aprovarAnuncio,
+    rejeitarAnuncio,
+    getDenuncias,
+    enviarDenuncia,
+    resolverDenuncia,
+    getConteudoEducativo,
+    adicionarConteudo,
+    atualizarConteudo,
+    deletarConteudo,
+    aplicarPunicao,
+    removerPunicao,
+    excluirConta,
+    getUsuariosBloqueados
 };

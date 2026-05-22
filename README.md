@@ -4,7 +4,8 @@ Plataforma web completa para **doação e troca de eletrônicos usados**, conect
 
 > **Backend**: Supabase (PostgreSQL) com localStorage fallback  
 > **Autenticação**: Custom (email/CPF) com Row Level Security  
-> **Chat**: Mensagens em tempo real com notificações
+> **Chat**: Mensagens em tempo real com notificações  
+> **Admin**: Painel de moderação com aprovação de anúncios, denúncias e punições
 
 ---
 
@@ -52,9 +53,9 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | Seção | Descrição |
 |-------|-----------|
 | **Hero** | Carrossel de imagens com autoplay e navegação manual |
-| **Mapa de Coleta** | Mapa Leaflet interativo com marcadores sincronizados a lista lateral |
+| **Mapa de Coleta** | Mapa Leaflet com **pinos SVG customizados** (estilo moderno com círculo branco) e lista lateral agrupada por **zonas de Manaus** (Norte, Leste, Oeste, Sul) em acordeões |
 | **Canal de Aprendizado** | Abas com conteúdo educativo sobre e-lixo e curiosidades sobre o Brasil |
-| **Anúncios (Serviços)** | Grid de anúncios com filtro por categoria (máx. 5 na home) e botão Editar para anúncios próprios |
+| **Anúncios (Serviços)** | Grid de anúncios com filtro por múltiplas categorias (máx. 5 na home) e botão Editar para anúncios próprios |
 | **Chatbot** | Assistente virtual demonstrativo com respostas fixas |
 | **Sobre o Projeto** | Informações institucionais |
 
@@ -63,10 +64,10 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | Funcionalidade | Descrição |
 |----------------|-----------|
 | **Anunciar Eletrônico** | Formulário completo com upload de fotos ao Supabase Storage |
-| **Categorias** | 10 categorias: celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos |
-| **Filtro Dinâmico** | Botões de categoria que filtram anúncios em tempo real |
-| **Lista Completa** | Página `todos-anuncios.html` com busca textual |
-| **Meus Anúncios** | Gerenciamento com notificações de mensagens |
+| **Categorias** | 11 categorias: celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos, **outros** |
+| **Filtro Dinâmico** | Seleção múltipla de categorias com botões toggle (igual no index e em todos-anuncios) |
+| **Lista Completa** | Página `todos-anuncios.html` com busca textual e seleção múltipla de categorias |
+| **Meus Anúncios** | Gerenciamento com notificações de mensagens. Exibe anúncios pendentes e rejeitados com badge de status |
 | **Editar Anúncio** | Modal de edição para todos os campos |
 | **Excluir Anúncio** | Confirmação antes de remover do Supabase |
 | **Persistência** | Supabase PostgreSQL com localStorage fallback |
@@ -80,15 +81,30 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | **Para Usuários Logados** | Envio de mensagens ao anunciante |
 | **Para Anunciante** | Painel de conversas com todos os interessados |
 | **Notificações** | Badge vermelho com contagem de conversas pendentes |
-| **Foto de Perfil** | Avatar do usuário exibido nas mensagens (se cadastrada) |
+| **Foto de Perfil** | Avatar do anunciante exibido no **header do chat** (foto ou inicial do nome) |
 | **RLS** | Apenas usuários cadastrados podem enviar mensagens |
+| **Denunciar** | Menu ⋮ no header do chat → modal com **select de motivo** (5 opções) + descrição opcional → salva na tabela `denuncias` |
+| **Restrição de chat** | Usuários bloqueados não conseguem enviar mensagens |
+| **Balões de mensagem** | Mensagens próprias em verde `#10B981` (mesmo do hover das categorias) |
+| **Subtítulo do chat** | Exibe tipo de negociação abaixo do nome: *"Negociação • Troca/Doação"* |
+
+### 🛡️ Painel Administrativo (pages/admin.html)
+
+| Funcionalidade | Descrição |
+|----------------|-----------|
+| **Acesso restrito** | Apenas usuários com `is_admin = true` no Supabase podem acessar |
+| **Anúncios Pendentes** | Lista anúncios com status `pendente` para aprovar ou rejeitar antes da publicação |
+| **Denúncias** | Visualiza denúncias de usuários com filtro por status (pendentes/resolvidas) |
+| **Tomar Ação** | Modal com 5 opções: sem punição, bloquear publicações, bloquear chat, bloquear ambos, excluir conta |
+| **Conteúdo Educativo** | CRUD completo para gerenciar os textos exibidos no canal de aprendizado |
+| **Usuários Restritos** | Lista usuários bloqueados com opções de revogar restrições individualmente |
 
 ### 🔐 Sistema de Autenticação (login/)
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
 | **Cadastro** | Nome completo, CPF (com validação algorítmica), data de nascimento (18+), e-mail, senha |
-| **Login** | Acesso via e-mail **ou** CPF |
+| **Login** | Acesso via e-mail **ou** CPF — sem recuperação de senha |
 | **Validações em Tempo Real** | Nome sem caracteres especiais, checklist de requisitos de senha |
 | **Força da Senha** | Barra visual colorida (Fraca/Média/Forte) durante digitação |
 | **Mostrar/Ocultar Senha** | Botão de olho customizado em todos os campos de senha (bloqueio em 16 caracteres) |
@@ -112,6 +128,7 @@ EletroLight/
 │   ├── todos-anuncios.html    # Listagem completa com busca
 │   ├── meus-anuncios.html     # Gerenciamento com notificações
 │   ├── perfil.html            # Edição de perfil do usuário
+│   ├── admin.html             # Painel administrativo (restrito)
 │   └── questionario-ux.html   # Questionário de avaliação de usabilidade
 │
 ├── styles/                    # Arquivos CSS
@@ -122,7 +139,7 @@ EletroLight/
 ├── scripts/                   # Arquivos JavaScript
 │   ├── script.js              # Lógica da home (carrossel, mapa, anúncios)
 │   ├── supabase-client.js     # Inicialização do cliente Supabase
-│   ├── supabase-service.js    # Serviço de dados (CRUD + Chat)
+│   ├── supabase-service.js    # Serviço de dados (CRUD + Chat + Admin)
 │   ├── anuncios-data.js       # Camada de dados com fallback localStorage
 │   ├── anunciar.js            # Lógica do formulário
 │   └── perfil.js              # Validações e salvamento de perfil
@@ -145,11 +162,15 @@ EletroLight/
 ```
 Usuário cadastra → Supabase (tabela users)
      ↓
-Usuário loga → sessionStorage (eletrolight_session)
+Usuário loga → sessionStorage (eletrolight_session + is_admin)
      ↓
-Cria anúncio → Supabase (tabela anuncios) + Storage (fotos)
+Cria anúncio → Supabase (status = 'pendente') → aguarda aprovação admin
      ↓
-Envia mensagem → Supabase (tabela mensagens, RLS aplicada)
+Admin aprova → status = 'aprovado' → anúncio aparece publicamente
+     ↓
+Envia mensagem → verifica bloqueio_chat → Supabase (tabela mensagens)
+     ↓
+Denúncia enviada → tabela denuncias → admin resolve com punição
      ↓
 Fallback offline → localStorage (modo sem conexão)
 ```
@@ -173,9 +194,11 @@ Fallback offline → localStorage (modo sem conexão)
 
 | Tabela | Descrição | RLS |
 |--------|-----------|-----|
-| `users` | Cadastro de usuários (nome, CPF, email, senha, foto) | Desabilitado |
-| `anuncios` | Anúncios de eletrônicos | Público leitura, proprietário escrita |
+| `users` | Cadastro de usuários (nome, CPF, email, senha, foto, is_admin, bloqueio_publicacao, bloqueio_chat) | Desabilitado |
+| `anuncios` | Anúncios com campo `status` (pendente/aprovado/rejeitado) | Público leitura (só aprovados), proprietário escrita |
 | `mensagens` | Chat entre usuários | Leitura pública, inserção apenas usuários cadastrados |
+| `denuncias` | Denúncias de anúncios e perfis | Inserção pública, leitura restrita ao admin |
+| `conteudo_educativo` | Textos do canal educativo (gerenciado pelo admin) | Leitura pública, escrita restrita ao admin |
 
 ---
 
@@ -193,13 +216,44 @@ login.html → Detecta tipo (CPF começa com número) → Busca no array
 → Valida senha → Cria sessão → Redireciona para index.html
 ```
 
-### 3. Criar Anúncio (Fluxo Protegido)
+### 3. Criar Anúncio (Fluxo Protegido + Moderação)
 ```
 index.html → Clica "Anunciar" → Verifica sessão
     ├─ [Não logado] → login.html?cadastro=1
-    └─ [Logado] → anunciar.html
-        → Preenche formulário → Comprime imagem → Salva via adicionarAnuncio()
-        → Modal de sucesso → Volta para index.html
+    └─ [Logado] → verifica bloqueio_publicacao
+        ├─ [Bloqueado] → alerta de restrição
+        └─ [Liberado] → anunciar.html
+            → Preenche formulário → Comprime imagem → Salva (status='pendente')
+            → Aguarda aprovação do admin antes de aparecer publicamente
+```
+
+### 9. Moderar Anúncios (Fluxo Admin)
+```
+admin.html → Aba "Anúncios Pendentes"
+→ Admin clica Aprovar → status = 'aprovado' → anúncio visível
+→ Admin clica Rejeitar → status = 'rejeitado' → anúncio removido
+```
+
+### 10. Resolver Denúncia com Punição
+```
+Usuário logado → anuncio-detalhe.html → Clica "Denunciar"
+→ Modal com tipo + motivo + descrição → Envia para tabela denuncias
+
+admin.html → Aba "Denúncias" → Clica "Tomar Ação"
+→ Modal de punição:
+    ├─ Sem punição → apenas arquiva
+    ├─ Restringir publicações → bloqueio_publicacao = true
+    ├─ Restringir chat → bloqueio_chat = true
+    ├─ Restringir ambos → ambos = true
+    └─ Excluir conta → remove user + anúncios (confirmação dupla)
+→ Denúncia marcada como resolvida automaticamente
+```
+
+### 11. Gerenciar Restrições
+```
+admin.html → Aba "Usuários Restritos"
+→ Lista usuários com bloqueios ativos
+→ Admin pode revogar publicação, chat ou excluir conta
 ```
 
 ### 4. Visualizar Anúncio Detalhado + Chat
@@ -274,16 +328,18 @@ Namespaces: `Entidades` (User, Anuncio, Mensagem, Session) e `Servicos` (Supabas
 
 | Tabela | Colunas Principais |
 |--------|-------------------|
-| `users` | id, nome, cpf, email, senha, whatsapp, foto, reset_token, created_at |
-| `anuncios` | id, titulo, categoria, tipo, condicao, descricao, foto, nome, email, whatsapp, bairro, created_at |
+| `users` | id, nome, cpf, email, senha, whatsapp, foto, is_admin, bloqueio_publicacao, bloqueio_chat, created_at |
+| `anuncios` | id, titulo, categoria, tipo, condicao, descricao, foto, nome, email, whatsapp, bairro, **status**, created_at |
 | `mensagens` | id, anuncio_id, remetente_email, remetente_nome, destinatario_email, destinatario_nome, texto, created_at |
+| `denuncias` | id, tipo, alvo_email, alvo_id, alvo_titulo, motivo, descricao, denunciante_email, status, created_at |
+| `conteudo_educativo` | id, titulo, categoria, texto, link_video, ativo, created_at, updated_at |
 
 ### localStorage (Fallback/UX)
 
 ```javascript
 // Sessão atual (sessionStorage na verdade)
 sessionStorage.setItem('eletrolight_session', JSON.stringify(
-  { nome: "João Silva", email: "joao@email.com" }
+  { nome: "João Silva", email: "joao@email.com", is_admin: false }
 ));
 
 // Mensagens offline (fallback)
@@ -299,11 +355,25 @@ localStorage.setItem('eletrolight_ux', JSON.stringify([...]));
 |--------|-----------|
 | `findUserByEmail(email)` | Busca usuário por email |
 | `saveUser(user)` | Cadastra novo usuário |
-| `getAnuncios()` | Retorna todos os anúncios |
-| `adicionarAnuncio(anuncio)` | Cria novo anúncio |
+| `getAnuncios()` | Retorna anúncios aprovados (`status = 'aprovado'`) |
+| `adicionarAnuncio(anuncio)` | Cria novo anúncio (status = 'pendente') |
 | `getMensagens(anuncioId, emailA, emailB)` | Retorna histórico de chat |
 | `enviarMensagem(...)` | Envia mensagem (Supabase + fallback) |
 | `getConversasDoAnuncio(anuncioId, ownerEmail)` | Lista conversas para notificação |
+| `getAnunciosPendentes()` | Lista anúncios aguardando moderação |
+| `aprovarAnuncio(id)` | Define status = 'aprovado' |
+| `rejeitarAnuncio(id)` | Define status = 'rejeitado' |
+| `getDenuncias()` | Lista todas as denúncias |
+| `enviarDenuncia(denuncia)` | Registra nova denúncia |
+| `resolverDenuncia(id)` | Marca denúncia como resolvida |
+| `aplicarPunicao(email, tipo)` | Bloqueia publicação, chat ou ambos |
+| `removerPunicao(email, tipo)` | Revoga bloqueio |
+| `excluirConta(email)` | Remove usuário e seus anúncios |
+| `getUsuariosBloqueados()` | Lista usuários com restrições ativas |
+| `getConteudoEducativo()` | Lista conteúdos do canal educativo |
+| `adicionarConteudo(conteudo)` | Cria novo conteúdo educativo |
+| `atualizarConteudo(id, updates)` | Edita conteúdo existente |
+| `deletarConteudo(id)` | Remove conteúdo educativo |
 
 ---
 
@@ -373,10 +443,13 @@ npx serve .
 - ✅ Título: obrigatório
 - ✅ Categoria: obrigatória (dropdown)
 - ✅ Tipo: apenas "doacao" ou "troca"
-- ✅ Foto: máximo 5MB, compressão automática para 400px
+- ✅ Foto: **obrigatória**, máximo 5MB, compressão automática para 400px
 - ✅ Limite home: 5 anúncios (categoria "Todos")
 - ✅ Prepend: novos anúncios aparecem primeiro
 - ✅ Dono identificado: campo `email` vinculado ao criador
+- ✅ Moderação: anúncios criados com `status = 'pendente'` — só aparecem após aprovação admin
+- ✅ Restrição: usuários com `bloqueio_publicacao = true` não conseguem publicar
+- ✅ Edição: apenas proprietário pode editar (verificação via `email`)
 
 ### Edição de Anúncio
 - ✅ Apenas proprietário pode editar (verificação via `email`)
@@ -420,4 +493,4 @@ Imagens de terceiros sujeitas às licenças dos respectivos provedores.
 
 **Desenvolvido com 💚 para a comunidade de Manaus**
 
-**Versão atualizada em Abril de 2026** — Inclui: Supabase Backend, Chat com Notificações, Visualização Detalhada de Anúncios, Upload de Fotos, Diagramas UML
+**Versão atualizada em Maio de 2026** — Inclui: Supabase Backend, Chat com Avatar e Notificações, Filtro por Múltiplas Categorias, Foto Obrigatória em Anúncios, Status Pendente/Rejeitado nos Cards, Pinos SVG no Mapa, Zonas de Manaus em Acordeão, Modal de Denúncia de Chat, Diagramas UML, Painel Administrativo, Sistema de Denúncias e Punições, Moderação de Anúncios

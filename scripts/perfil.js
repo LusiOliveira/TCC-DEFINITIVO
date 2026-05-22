@@ -132,6 +132,7 @@ document.getElementById('perfil-whatsapp').addEventListener('input', (e) => {
             <a href="../pages/meus-anuncios.html" class="perfil-editar">
                 <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
             </a>
+            ${session.is_admin ? `<hr class="perfil-divider"><a href="../pages/admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
             <button class="perfil-sair" id="btn-sair">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
             </button>

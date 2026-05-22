@@ -123,13 +123,6 @@
                             </div>
                         </li>
                         <li>
-                            <div class="ben-icon"><i class="fa-solid fa-recycle"></i></div>
-                            <div>
-                                <strong>Economia Circular</strong>
-                                <p>Mantemos o eletrônico em uso pelo maior tempo possível.</p>
-                            </div>
-                        </li>
-                        <li>
                             <div class="ben-icon"><i class="fa-solid fa-shield-halved"></i></div>
                             <div>
                                 <strong>100% Gratuito</strong>
@@ -198,7 +191,8 @@
                                     <option value="eletrodomesticos">🔌 Eletrodomésticos</option>
                                     <option value="cabos">🔋 Cabos e Carregadores</option>
                                     <option value="pilhas">🔋 Pilhas e Baterias</option>
-                                    <option value="perifericos">🖱️ Periféricos e Outros</option>
+                                    <option value="perifericos">🖱️ Periféricos</option>
+                                    <option value="outros">📦 Outros</option>
                                 </select>
                             </div>
 
@@ -239,7 +233,7 @@
 
                     <!-- Foto -->
                     <fieldset class="form-fieldset">
-                        <legend><i class="fa-solid fa-camera"></i> Foto do Eletrônico</legend>
+                        <legend><i class="fa-solid fa-camera"></i> Foto do Eletrônico <span class="req">*</span></legend>
                         <div class="upload-area" id="upload-area">
                             <input type="file" id="foto-input" name="foto" accept="image/*" multiple>
                             <label for="foto-input" class="upload-label">
@@ -249,6 +243,7 @@
                             </label>
                             <div class="preview-grid" id="preview-grid"></div>
                         </div>
+                        <p class="upload-erro-msg" id="upload-erro-msg"><i class="fa-solid fa-triangle-exclamation"></i> Adicione pelo menos uma foto do eletrônico.</p>
                     </fieldset>
 
                     <div class="form-group checkbox-group">
@@ -314,6 +309,7 @@
                     <a href="./meus-anuncios.html" class="perfil-editar">
                         <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                     </a>
+                    ${session.is_admin ? `<hr class="perfil-divider"><a href="./admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
                     <button class="perfil-sair" id="btn-sair">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
                     </button>

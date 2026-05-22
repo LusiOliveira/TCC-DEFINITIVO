@@ -400,13 +400,6 @@ main {
     font-weight: 600;
 }
 
-/* Centraliza o texto de informação do mapa */
-.map-info {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: var(--text-light);
-    width: 100%;
-}
 
 /* Seção do Mapa */
 /* --- NOVA SEÇÃO DO MAPA SINCRONIZADO --- */
@@ -425,9 +418,9 @@ main {
     flex-direction: column;
 }
 
-/* O texto agora centraliza apenas em relação à caixa dele */
 .map-info {
-    text-align: center;
+    text-align: left;
+    padding-left: 8px;
     margin-bottom: 15px;
     color: var(--text-light);
     width: 100%;
@@ -460,6 +453,39 @@ main {
 .map-sidebar::-webkit-scrollbar { width: 8px; }
 .map-sidebar::-webkit-scrollbar-track { background: var(--bg-light); border-radius: 4px; }
 .map-sidebar::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+
+/* Grupos de Zona (accordion) */
+.zona-grupo { display: flex; flex-direction: column; }
+
+.zona-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--white);
+    border: none;
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    text-align: left;
+    width: 100%;
+    transition: background 0.2s;
+}
+.zona-header:hover { background: #F0FDF4; }
+.zona-header span { display: flex; align-items: center; gap: 8px; }
+.zona-seta { transition: transform 0.25s ease; font-size: 0.8rem; color: var(--text-light); }
+
+.zona-lista {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 10px;
+}
+.zona-lista.aberta { display: flex; }
 
 /* Cartões da lista de pontos */
 .ponto-card {
@@ -623,13 +649,14 @@ main {
 }
 
 .cat-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--white);
 }
 
 .cat-btn.ativo {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
     color: var(--white);
 }
 

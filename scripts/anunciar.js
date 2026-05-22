@@ -57,6 +57,9 @@ if (uploadArea) {
 }
 
 function handleFiles(files) {
+    if (uploadArea) uploadArea.classList.remove('erro');
+    const erroMsg = document.getElementById('upload-erro-msg');
+    if (erroMsg) erroMsg.classList.remove('show');
     files.forEach((file) => {
         if (file.size > 5 * 1024 * 1024) {
             alert(`A foto "${file.name}" excede o limite de 5MB.`);
@@ -127,8 +130,19 @@ function marcarErro(campo) {
 }
 
 if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const _sessao = JSON.parse(sessionStorage.getItem('eletrolight_session') || 'null');
+        if (_sessao && window.SupabaseService) {
+            try {
+                const _usr = await window.SupabaseService.findUserByEmail(_sessao.email);
+                if (_usr && _usr.bloqueio_publicacao) {
+                    alert('Sua conta está restrita de publicar anúncios. Entre em contato com o suporte.');
+                    return;
+                }
+            } catch (_) {}
+        }
 
         const campos = [
             document.getElementById('titulo-anuncio'),
@@ -149,6 +163,16 @@ if (form) {
                 valido = false;
             }
         });
+
+        if (arquivosSelecionados.length === 0) {
+            if (uploadArea) {
+                uploadArea.classList.add('erro');
+                uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            const erroMsg = document.getElementById('upload-erro-msg');
+            if (erroMsg) erroMsg.classList.add('show');
+            valido = false;
+        }
 
         const termos = document.getElementById('termos');
         if (!termos.checked) {
@@ -190,11 +214,7 @@ if (form) {
             modalSucesso.classList.add('show');
         };
 
-        if (arquivosSelecionados.length > 0) {
-            comprimirImagem(arquivosSelecionados[0], 400, salvarEExibir);
-        } else {
-            salvarEExibir(null);
-        }
+        comprimirImagem(arquivosSelecionados[0], 400, salvarEExibir);
     });
 }
 

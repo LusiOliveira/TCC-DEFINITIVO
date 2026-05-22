@@ -68,14 +68,17 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
 }).addTo(map);
 
-// Ícone: jsDelivr (raw.githubusercontent costuma bloquear hotlink / 403)
-const ecoIcon = L.icon({
-    iconUrl: 'https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-2x-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
+// Ícone SVG customizado estilo pin moderno com círculo branco
+const ecoIcon = L.divIcon({
+    className: '',
+    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="32" height="42">
+        <path d="M16 0C8.268 0 2 6.268 2 14c0 10.5 14 28 14 28S30 24.5 30 14C30 6.268 23.732 0 16 0z"
+              fill="#10B981" stroke="#059669" stroke-width="1.2"/>
+        <circle cx="16" cy="14" r="6" fill="white"/>
+    </svg>`,
+    iconSize: [32, 42],
+    iconAnchor: [16, 42],
+    popupAnchor: [0, -44],
 });
 
 // 2. Base de Dados (Array) dos Pontos de Coleta
@@ -85,6 +88,7 @@ const pontosDeColeta = [
         nome: 'Ecoponto Parque do Mindu',
         endereco: 'Rua Gustavo Américo, Parque Dez',
         tipo: 'Pilhas, Baterias e Portáteis',
+        zona: 'Zona Norte',
         lat: -3.0850,
         lng: -60.0050,
     },
@@ -93,6 +97,7 @@ const pontosDeColeta = [
         nome: 'Recicla Manaus Centro',
         endereco: 'Av. Eduardo Ribeiro, Centro',
         tipo: 'Eletrônicos de Grande Porte',
+        zona: 'Zona Leste',
         lat: -3.1300,
         lng: -60.0200,
     },
@@ -101,6 +106,7 @@ const pontosDeColeta = [
         nome: 'Galpão EcoColeta Leste',
         endereco: 'Av. Autaz Mirim, Zona Leste',
         tipo: 'TVs e Monitores',
+        zona: 'Zona Oeste',
         lat: -3.0700,
         lng: -59.9500,
     },
@@ -109,59 +115,87 @@ const pontosDeColeta = [
         nome: 'Ponto Verde UFAM',
         endereco: 'Av. General Rodrigo Octavio, Coroado',
         tipo: 'Informática e Celulares',
+        zona: 'Zona Sul',
         lat: -3.0900,
         lng: -59.9600,
     },
 ];
 
-// 3. Gerar Marcadores e Lista Dinamicamente
+// 3. Gerar Marcadores e Lista Dinamicamente (agrupados por Zona)
 const listaPontosContainer = document.getElementById('lista-pontos');
 const marcadoresCriados = {};
-let pontoAtivoId = null; // Variável "memória" para guardar qual ponto está ampliado
+let pontoAtivoId = null;
 
-pontosDeColeta.forEach((ponto) => {
-    // A. Cria o marcador no mapa
-    const marker = L.marker([ponto.lat, ponto.lng], { icon: ecoIcon }).addTo(map);
-    marker.bindPopup(`<b>${ponto.nome}</b><br>${ponto.endereco}<br><em>Recolhe: ${ponto.tipo}</em>`);
-    marcadoresCriados[ponto.id] = marker;
+const zonas = ['Zona Norte', 'Zona Leste', 'Zona Oeste', 'Zona Sul'];
+const pontosPorZona = {};
+zonas.forEach(z => pontosPorZona[z] = []);
+pontosDeColeta.forEach(p => pontosPorZona[p.zona].push(p));
 
-    // B. Cria o cartão na lista lateral
-    const card = document.createElement('div');
-    card.className = 'ponto-card';
-    card.innerHTML = `
-        <h3>${ponto.nome}</h3>
-        <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
-        <span class="tag-tipo">${ponto.tipo}</span>
-    `;
+zonas.forEach(zona => {
+    const grupo = document.createElement('div');
+    grupo.className = 'zona-grupo';
 
-    // C. Função central que decide se vai AMPLIAR ou DESAMPLIAR
-    const interagirComPonto = () => {
-        if (pontoAtivoId === ponto.id) {
-            // Se o utilizador clicou no mesmo pino/cartão que já estava ativo: DESAMPLIA
-            map.flyTo([-3.1190, -60.0217], 12, { animate: true, duration: 1.5 }); // Volta para Manaus
-            marker.closePopup(); // Fecha a caixinha de texto do pino
-            card.classList.remove('ativo'); // Tira o destaque da lista
-            pontoAtivoId = null; // Limpa a memória
-        } else {
-            // Se clicou num pino novo: AMPLIA
-            document.querySelectorAll('.ponto-card').forEach((c) => c.classList.remove('ativo'));
-            card.classList.add('ativo');
+    const header = document.createElement('button');
+    header.className = 'zona-header';
+    header.innerHTML = `<span><i class="fa-solid fa-map-location-dot"></i> ${zona}</span><i class="fa-solid fa-chevron-down zona-seta"></i>`;
 
-            map.flyTo([ponto.lat, ponto.lng], 16, { animate: true, duration: 1.5 }); // Dá o zoom
-            marker.openPopup();
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const lista = document.createElement('div');
+    lista.className = 'zona-lista';
 
-            pontoAtivoId = ponto.id; // Guarda este pino na memória
-        }
-    };
+    header.addEventListener('click', () => {
+        const aberta = lista.classList.toggle('aberta');
+        header.querySelector('.zona-seta').style.transform = aberta ? 'rotate(180deg)' : '';
+    });
 
-    // D. Adiciona a função ao clique no CARTÃO
-    card.addEventListener('click', interagirComPonto);
+    pontosPorZona[zona].forEach(ponto => {
+        // A. Marcador no mapa
+        const marker = L.marker([ponto.lat, ponto.lng], { icon: ecoIcon }).addTo(map);
+        marker.bindPopup(`<b>${ponto.nome}</b><br>${ponto.endereco}<br><em>Recolhe: ${ponto.tipo}</em>`);
+        marcadoresCriados[ponto.id] = marker;
 
-    // E. Adiciona a função ao clique no PINO DO MAPA
-    marker.on('click', interagirComPonto);
+        // B. Cartão na lista
+        const card = document.createElement('div');
+        card.className = 'ponto-card';
+        card.innerHTML = `
+            <h3>${ponto.nome}</h3>
+            <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
+            <span class="tag-tipo">${ponto.tipo}</span>
+        `;
 
-    listaPontosContainer.appendChild(card);
+        // C. Interação
+        const interagirComPonto = () => {
+            if (pontoAtivoId === ponto.id) {
+                map.flyTo([-3.1190, -60.0217], 12, { animate: true, duration: 1.5 });
+                marker.closePopup();
+                card.classList.remove('ativo');
+                pontoAtivoId = null;
+            } else {
+                document.querySelectorAll('.ponto-card').forEach((c) => c.classList.remove('ativo'));
+                card.classList.add('ativo');
+                map.flyTo([ponto.lat, ponto.lng], 16, { animate: true, duration: 1.5 });
+                marker.openPopup();
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                pontoAtivoId = ponto.id;
+            }
+        };
+
+        card.addEventListener('click', interagirComPonto);
+
+        // Clique no pino: abre o grupo se fechado, depois interage
+        marker.on('click', () => {
+            if (!lista.classList.contains('aberta')) {
+                lista.classList.add('aberta');
+                header.querySelector('.zona-seta').style.transform = 'rotate(180deg)';
+            }
+            interagirComPonto();
+        });
+
+        lista.appendChild(card);
+    });
+
+    grupo.appendChild(header);
+    grupo.appendChild(lista);
+    listaPontosContainer.appendChild(grupo);
 });
 
 // --- Lógica do Chatbot ---
@@ -219,10 +253,10 @@ chatbotInputField.addEventListener('keypress', (e) => {
 // --- ANÚNCIOS — RENDERIZAÇÃO DINÂMICA (index.html) ---
 const anunciosGrid = document.getElementById('anuncios-grid');
 
-async function renderizarHomeAnuncios(cat) {
+async function renderizarHomeAnuncios(catsAtivas) {
     if (!anunciosGrid) return;
     const todos     = await getAnuncios();
-    const filtrados = cat === 'todos' ? todos : todos.filter((a) => a.categoria === cat);
+    const filtrados = catsAtivas.has('todos') ? todos : todos.filter((a) => catsAtivas.has(a.categoria));
     const exibir    = filtrados.slice(0, LIMITE_HOME);
 
     if (exibir.length === 0) {
@@ -234,18 +268,37 @@ async function renderizarHomeAnuncios(cat) {
     anunciosGrid.innerHTML = exibir.map(a => renderAnuncioCard(a, { isOwner: emailLogado && a.email && a.email.toLowerCase() === emailLogado })).join('');
 }
 
-// Filtro de categorias
+// Filtro de categorias (seleção múltipla)
+let homeCatsAtivas = new Set(['todos']);
 const catBtns = document.querySelectorAll('.cat-btn');
 catBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-        catBtns.forEach((b) => b.classList.remove('ativo'));
-        btn.classList.add('ativo');
-        renderizarHomeAnuncios(btn.dataset.cat);
+        const cat = btn.dataset.cat;
+        if (cat === 'todos') {
+            homeCatsAtivas = new Set(['todos']);
+            catBtns.forEach((b) => b.classList.remove('ativo'));
+            btn.classList.add('ativo');
+        } else {
+            homeCatsAtivas.delete('todos');
+            document.querySelector('.cat-btn[data-cat="todos"]').classList.remove('ativo');
+            if (homeCatsAtivas.has(cat)) {
+                homeCatsAtivas.delete(cat);
+                btn.classList.remove('ativo');
+            } else {
+                homeCatsAtivas.add(cat);
+                btn.classList.add('ativo');
+            }
+            if (homeCatsAtivas.size === 0) {
+                homeCatsAtivas.add('todos');
+                document.querySelector('.cat-btn[data-cat="todos"]').classList.add('ativo');
+            }
+        }
+        renderizarHomeAnuncios(homeCatsAtivas);
     });
 });
 
 // Render inicial
-renderizarHomeAnuncios('todos');
+renderizarHomeAnuncios(homeCatsAtivas);
 
 // Delegação: clique em "Editar Anúncio" redireciona para meus-anuncios
 if (anunciosGrid) {
@@ -310,6 +363,7 @@ if (btnAnunciar) {
             <a href="./pages/meus-anuncios.html" class="perfil-editar">
                 <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
             </a>
+            ${session.is_admin ? `<hr class="perfil-divider"><a href="./pages/admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
             <button class="perfil-sair" id="btn-sair">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
             </button>
@@ -337,14 +391,40 @@ if (btnAnunciar) {
 })();
 
 // --- LÓGICA DAS ABAS (CANAL DE APRENDIZADO) ---
+let _conteudoCarregado = false;
+
 function mudarAba(abaId, elementoBotao) {
-    // 1. Tira a cor de todos os botões e esconde todos os conteúdos
     document.querySelectorAll('.tab-btn').forEach((btn) => btn.classList.remove('ativo'));
     document.querySelectorAll('.tab-content').forEach((tab) => tab.classList.remove('ativa'));
-
-    // 2. Pinta o botão clicado de verde
     elementoBotao.classList.add('ativo');
-
-    // 3. Mostra o conteúdo correspondente ao botão clicado
     document.getElementById('tab-' + abaId).classList.add('ativa');
+
+    if (abaId === 'comunidade' && !_conteudoCarregado) {
+        carregarConteudoEducativo();
+    }
+}
+
+async function carregarConteudoEducativo() {
+    const container = document.getElementById('conteudo-dinamico-lista');
+    if (!container) return;
+    try {
+        const lista = await window.SupabaseService.getConteudoEducativo();
+        const ativos = lista.filter(c => c.ativo);
+        _conteudoCarregado = true;
+
+        if (!ativos.length) {
+            container.innerHTML = `<div class="card-principal"><p style="color:#aaa;"><i class="fa-solid fa-inbox"></i> Nenhum conteúdo publicado ainda.</p></div>`;
+            return;
+        }
+
+        container.innerHTML = ativos.map(c => `
+            <div class="card-principal" style="margin-bottom:1.2rem;">
+                <h3>${c.titulo}</h3>
+                <p>${c.texto}</p>
+                ${c.link_video ? `<a href="${c.link_video}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:0.8rem;color:#059669;font-weight:600;"><i class="fa-brands fa-youtube"></i> Assistir vídeo</a>` : ''}
+            </div>
+        `).join('');
+    } catch(e) {
+        container.innerHTML = `<div class="card-principal"><p style="color:#e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> Erro ao carregar conteúdos.</p></div>`;
+    }
 }

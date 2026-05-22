@@ -1,106 +1,129 @@
 classDiagram
     direction TB
 
-    namespace Entidades {
-        class User {
-            <<entity>>
-            +uuid id
-            +String nome
-            +String cpf
-            +Date nascimento
-            +String email
-            +String senha
-            +String whatsapp
-            +String foto
-            +String reset_token
-            +DateTime reset_token_expires
-            +DateTime created_at
-            +DateTime updated_at
-        }
-
-        class Anuncio {
-            <<entity>>
-            +uuid id
-            +String titulo
-            +String categoria
-            +String tipo
-            +String condicao
-            +String marca
-            +String descricao
-            +String foto
-            +String nome
-            +String email
-            +String whatsapp
-            +String bairro
-            +DateTime created_at
-            +DateTime updated_at
-        }
-
-        class Mensagem {
-            <<entity>>
-            +bigint id
-            +String anuncio_id
-            +String remetente_email
-            +String remetente_nome
-            +String destinatario_email
-            +String destinatario_nome
-            +String texto
-            +DateTime created_at
-        }
-
-        class Session {
-            <<entity>>
-            +String nome
-            +String email
-        }
+    class Usuario {
+        +Long id
+        +String nome
+        +String cpf
+        +Date nascimento
+        +String email
+        +String senha
+        +String whatsapp
+        +String foto
+        +Boolean isAdmin
+        +String resetToken
+        +Date resetTokenExpires
+        +Boolean bloqueioPublicacao
+        +Boolean bloqueioChat
+        +Date createdAt
+        +Date updatedAt
+        +login()
+        +cadastrar()
+        +editarPerfil()
+        +publicarAnuncio()
+        +enviarMensagem()
+        +verMensagens()
+        +enviarDenuncia()
     }
 
-    namespace Servicos {
-        class SupabaseService {
-            <<service>>
-            +findUserByEmail(email) Promise
-            +findUserByCPF(cpf) Promise
-            +findUserById(id) Promise
-            +saveUser(user) Promise
-            +updateUser(id, updates) Promise
-            +setSession(user) void
-            +getSession() Session
-            +clearSession() void
-            +criarTokenRecuperacao(email) Promise
-            +validarTokenRecuperacao(email, token) Promise
-            +redefinirSenha(email, token, senha) Promise
-            +getAnuncios() Promise
-            +getAnunciosByEmail(email) Promise
-            +adicionarAnuncio(anuncio) Promise
-            +atualizarAnuncio(id, updates) Promise
-            +deletarAnuncio(id) Promise
-            +getMensagens(anuncioId, emailA, emailB) Promise
-            +getConversasDoAnuncio(anuncioId, ownerEmail) Promise
-            +enviarMensagem(anuncioId, rEmail, rNome, dEmail, dNome, texto) Promise
-        }
-
-        class AnunciosData {
-            <<service>>
-            -String STORAGE_KEY
-            -Number LIMITE_HOME
-            +getAnuncios() Promise
-            +adicionarAnuncio(item) Promise
-            +renderAnuncioCard(item, opcoes) String
-            +getCategoriaInfo(cat) Object
-            +getTipoInfo(tipo) Object
-            +comprimirImagem(file, maxWidth, callback) void
-        }
+    class Administrador {
+        +aprovarAnuncio()
+        +rejeitarAnuncio()
+        +resolverDenuncia()
+        +aplicarPunicao()
+        +removerPunicao()
+        +excluirConta()
+        +gerenciarConteudoEducativo()
+        +listarUsuariosBloqueados()
     }
 
-    %% Relacoes entre entidades
-    User "1" --> "0..*" Anuncio : publica
-    User "1" --> "0..*" Mensagem : envia/recebe
-    Anuncio "1" --> "0..*" Mensagem : contem
+    class Anuncio {
+        +Long id
+        +String titulo
+        +String categoria
+        +String tipo
+        +String condicao
+        +String marca
+        +String descricao
+        +String foto
+        +String nome
+        +String email
+        +String whatsapp
+        +String bairro
+        +String status
+        +Date dataPublicacao
+        +Date createdAt
+        +Date updatedAt
+        +publicar()
+        +editar()
+        +excluir()
+    }
 
-    %% Relacoes entre servicos e entidades
-    SupabaseService ..> User : gerencia
-    SupabaseService ..> Anuncio : gerencia
-    SupabaseService ..> Mensagem : gerencia
-    SupabaseService ..> Session : gerencia
-    AnunciosData --> SupabaseService : usa
-    AnunciosData ..> Anuncio : renderiza
+    class Mensagem {
+        +Long id
+        +Long anuncioId
+        +String texto
+        +String remetenteEmail
+        +String remetenteNome
+        +String destinatarioEmail
+        +String destinatarioNome
+        +Date dataCriacao
+        +enviar()
+    }
+
+    class Denuncia {
+        +Long id
+        +String tipo
+        +String alvoEmail
+        +String alvoTitulo
+        +Long alvoId
+        +String motivo
+        +String descricao
+        +String denuncianteEmail
+        +String status
+        +Date dataCriacao
+        +Long idUsuario
+        +enviar()
+        +resolver()
+    }
+
+    class ConteudoEducativo {
+        +Long id
+        +String titulo
+        +String categoria
+        +String texto
+        +String linkVideo
+        +Boolean ativo
+        +Date dataCriacao
+        +Date updatedAt
+        +ativar()
+        +desativar()
+    }
+
+    class CategoriaEletronico {
+        +String slug
+        +String nome
+        +String icone
+    }
+
+    class PontoColeta {
+        +Long id
+        +String nome
+        +Double latitude
+        +Double longitude
+        +String endereco
+        +String horario
+    }
+
+    Usuario <|-- Administrador : Heranca
+
+    Usuario "1" --> "*" Anuncio : publica
+    Usuario "1" --> "*" Mensagem : envia
+    Usuario "1" --> "*" Denuncia : registra
+
+    Anuncio "1" --> "*" Mensagem : possui
+    Anuncio "*" --> "1" CategoriaEletronico : pertence a
+    Anuncio "1" --> "*" Denuncia : recebe
+
+    Administrador "1" --> "*" Denuncia : resolve
+    Administrador "1" --> "*" ConteudoEducativo : gerencia

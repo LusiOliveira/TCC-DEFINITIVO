@@ -139,6 +139,22 @@
         .anunciante-label { font-size: 0.76rem; color: #6B7280; }
         .anunciante-nome  { font-weight: 700; color: #1F2937; font-size: 0.98rem; }
 
+        .btn-denunciar { background: none; border: none; color: #9CA3AF; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; transition: color 0.2s; margin-top: 8px; }
+        .btn-denunciar:hover { color: #DC2626; }
+
+        .modal-denuncia-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-denuncia-overlay.hidden { display: none; }
+        .modal-denuncia { background: #fff; border-radius: 16px; padding: 1.8rem; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .modal-denuncia h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; color: #DC2626; }
+        .modal-denuncia label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; margin-top: 10px; color: #374151; }
+        .modal-denuncia select, .modal-denuncia textarea { width: 100%; padding: 9px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 0.88rem; font-family: inherit; outline: none; transition: border-color 0.2s; }
+        .modal-denuncia select:focus, .modal-denuncia textarea:focus { border-color: #DC2626; }
+        .modal-denuncia textarea { resize: vertical; min-height: 70px; }
+        .modal-denuncia-btns { display: flex; gap: 8px; margin-top: 1.2rem; }
+        .btn-enviar-denuncia { flex: 1; background: #DC2626; color: white; border: none; border-radius: 8px; padding: 10px; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+        .btn-enviar-denuncia:hover { background: #B91C1C; }
+        .btn-fechar-denuncia { flex: 1; background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+
         /* ---------- Not found / loading ---------- */
         .detalhe-loading, .detalhe-notfound {
             text-align: center;
@@ -204,9 +220,76 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            justify-content: space-between;
         }
         .chat-header-bar h2 { font-size: 1.05rem; font-weight: 700; margin: 0; }
-        .chat-header-bar i  { font-size: 1.1rem; }
+        .chat-header-bar > i  { font-size: 1.1rem; flex-shrink: 0; }
+        .chat-header-info { display: flex; flex-direction: column; flex: 1; }
+        .chat-tipo-negocio { font-size: 0.78rem; opacity: 0.82; margin-top: 2px; }
+        .chat-owner-avatar {
+            width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700; color: #fff; overflow: hidden;
+        }
+        .chat-owner-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Modal de Denúncia */
+        .denuncia-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .denuncia-overlay.hidden { display: none; }
+        .denuncia-modal {
+            background: #fff; border-radius: 16px; padding: 1.8rem;
+            width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .denuncia-modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; color: #DC2626; }
+        .denuncia-modal .denuncia-sub { font-size: 0.83rem; color: #6B7280; margin-bottom: 1.2rem; }
+        .denuncia-modal label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #374151; }
+        .denuncia-modal select, .denuncia-modal textarea {
+            width: 100%; padding: 9px 12px; border: 1.5px solid #E5E7EB;
+            border-radius: 8px; font-size: 0.88rem; color: #1F2937;
+            outline: none; transition: border-color 0.2s; font-family: inherit;
+            margin-bottom: 1rem; background: #fff;
+        }
+        .denuncia-modal select:focus, .denuncia-modal textarea:focus { border-color: #DC2626; }
+        .denuncia-modal textarea { resize: vertical; min-height: 80px; }
+        .denuncia-modal-actions { display: flex; gap: 8px; }
+        .btn-enviar-denuncia {
+            flex: 1; background: #DC2626; color: white; border: none;
+            border-radius: 8px; padding: 10px; font-size: 0.88rem;
+            font-weight: 700; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-enviar-denuncia:hover:not(:disabled) { background: #B91C1C; }
+        .btn-enviar-denuncia:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-cancelar-denuncia {
+            flex: 1; background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB;
+            border-radius: 8px; padding: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+        }
+
+        /* Menu 3 pontos */
+        .chat-menu-wrap { position: relative; flex-shrink: 0; }
+        .chat-menu-btn {
+            background: none; border: none; color: #fff; cursor: pointer;
+            padding: 5px 8px; font-size: 1.25rem; border-radius: 6px;
+            line-height: 1; transition: background 0.15s;
+        }
+        .chat-menu-btn:hover { background: rgba(255,255,255,0.18); }
+        .chat-menu-dropdown {
+            position: absolute; right: 0; top: calc(100% + 6px);
+            background: #fff; border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+            min-width: 170px; z-index: 200; overflow: hidden;
+        }
+        .chat-menu-dropdown.hidden { display: none; }
+        .chat-menu-dropdown button {
+            display: flex; align-items: center; gap: 9px;
+            width: 100%; padding: 11px 16px; border: none;
+            background: none; cursor: pointer; font-size: 0.9rem;
+            color: #EF4444; font-weight: 600;
+        }
+        .chat-menu-dropdown button:hover { background: #FEF2F2; }
 
         /* Messages area */
         .chat-messages {
@@ -231,7 +314,7 @@
             word-break: break-word;
         }
         .chat-msg.minha .chat-bubble {
-            background: #059669;
+            background: #10B981;
             color: #fff;
             border-bottom-right-radius: 4px;
         }
@@ -460,6 +543,36 @@
                                 <span class="anunciante-nome" id="ad-nome"></span>
                             </div>
                         </div>
+                        <button class="btn-denunciar hidden" id="btn-abrir-denuncia">
+                            <i class="fa-solid fa-flag"></i> Denunciar anúncio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Denúncia -->
+            <div class="modal-denuncia-overlay hidden" id="modal-denuncia">
+                <div class="modal-denuncia">
+                    <h3><i class="fa-solid fa-flag"></i> Enviar Denúncia</h3>
+                    <label>Tipo</label>
+                    <select id="den-tipo">
+                        <option value="anuncio">Anúncio</option>
+                        <option value="perfil">Perfil do anunciante</option>
+                    </select>
+                    <label>Motivo</label>
+                    <select id="den-motivo">
+                        <option value="Conteúdo inapropriado">Conteúdo inapropriado</option>
+                        <option value="Fraude ou golpe">Fraude ou golpe</option>
+                        <option value="Spam">Spam</option>
+                        <option value="Produto perigoso">Produto perigoso</option>
+                        <option value="Informação falsa">Informação falsa</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                    <label>Descrição (opcional)</label>
+                    <textarea id="den-desc" placeholder="Descreva o problema..."></textarea>
+                    <div class="modal-denuncia-btns">
+                        <button class="btn-fechar-denuncia" id="btn-fechar-denuncia">Cancelar</button>
+                        <button class="btn-enviar-denuncia" id="btn-enviar-denuncia">Enviar Denúncia</button>
                     </div>
                 </div>
             </div>
@@ -514,8 +627,21 @@
                 <!-- C) Non-owner view: chat with the ad owner -->
                 <div id="user-view" class="hidden">
                     <div class="chat-header-bar">
-                        <i class="fa-solid fa-comments"></i>
-                        <h2 id="chat-user-title">Chat com o Anunciante</h2>
+                        <div class="chat-owner-avatar" id="chat-owner-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="chat-header-info">
+                            <h2 id="chat-user-title">Chat com o Anunciante</h2>
+                            <span id="chat-tipo-negocio" class="chat-tipo-negocio"></span>
+                        </div>
+                        <div class="chat-menu-wrap">
+                            <button class="chat-menu-btn" id="chat-menu-btn" aria-label="Menu">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="chat-menu-dropdown hidden" id="chat-menu-dropdown">
+                                <button id="btn-denunciar-chat"><i class="fa-solid fa-flag"></i> Denunciar conversa</button>
+                            </div>
+                        </div>
                     </div>
                     <div id="chat-messages-user" class="chat-messages"></div>
                     <div class="chat-input-area">
@@ -549,6 +675,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../scripts/supabase-client.js"></script>
+    <!-- Modal Denúncia -->
+    <div class="denuncia-overlay hidden" id="modal-denuncia">
+        <div class="denuncia-modal">
+            <h3><i class="fa-solid fa-flag"></i> Denunciar conversa</h3>
+            <p class="denuncia-sub">Sua denúncia será analisada pela equipe EletroLight.</p>
+            <label for="denuncia-motivo">Motivo</label>
+            <select id="denuncia-motivo">
+                <option value="Conteúdo inapropriado">Conteúdo inapropriado</option>
+                <option value="Spam ou golpe">Spam ou golpe</option>
+                <option value="Assédio ou ameaça">Assédio ou ameaça</option>
+                <option value="Anúncio falso">Anúncio falso</option>
+                <option value="Outro">Outro</option>
+            </select>
+            <label for="denuncia-descricao">Descrição (opcional)</label>
+            <textarea id="denuncia-descricao" placeholder="Descreva o ocorrido com mais detalhes…"></textarea>
+            <div class="denuncia-modal-actions">
+                <button class="btn-cancelar-denuncia" id="btn-cancelar-denuncia">Cancelar</button>
+                <button class="btn-enviar-denuncia" id="btn-enviar-denuncia">Enviar Denúncia</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/supabase-service.js"></script>
     <script src="../scripts/anuncios-data.js"></script>
     <script>
@@ -575,6 +723,7 @@
                     <a href="./meus-anuncios.html" class="perfil-editar">
                         <i class="fa-solid fa-rectangle-list"></i> Meus Anúncios
                     </a>
+                    ${session.is_admin ? `<hr class="perfil-divider"><a href="./admin.html" class="perfil-editar" style="color:#f59e0b;"><i class="fa-solid fa-shield-halved"></i> Painel Admin</a>` : ''}
                     <button class="perfil-sair" id="btn-sair">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
                     </button>
@@ -602,7 +751,14 @@
 
         function formatHora(isoStr) {
             try {
-                return new Date(isoStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const str = isoStr && !isoStr.endsWith('Z') && !isoStr.includes('+')
+                    ? isoStr + 'Z'
+                    : isoStr;
+                return new Date(str).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'America/Manaus'
+                });
             } catch { return ''; }
         }
 
@@ -692,6 +848,48 @@
             const isLoggedIn = !!session;
             const isOwner    = isLoggedIn && ownerEmail && session.email.toLowerCase() === ownerEmail;
 
+            // Mostrar botão Denunciar apenas para usuários logados que não são o dono
+            if (isLoggedIn && !isOwner) {
+                const btnDen = document.getElementById('btn-abrir-denuncia');
+                btnDen.classList.remove('hidden');
+                btnDen.addEventListener('click', () => {
+                    document.getElementById('modal-denuncia').classList.remove('hidden');
+                });
+            }
+
+            document.getElementById('btn-fechar-denuncia').addEventListener('click', () => {
+                document.getElementById('modal-denuncia').classList.add('hidden');
+            });
+
+            document.getElementById('btn-enviar-denuncia').addEventListener('click', async () => {
+                const btn = document.getElementById('btn-enviar-denuncia');
+                const tipo    = document.getElementById('den-tipo').value;
+                const motivo  = document.getElementById('den-motivo').value;
+                const descricao = document.getElementById('den-desc').value.trim();
+                btn.disabled = true;
+                btn.textContent = 'Enviando…';
+                try {
+                    await window.SupabaseService.enviarDenuncia({
+                        tipo,
+                        alvo_email: ownerEmail,
+                        alvo_id: String(anuncioId),
+                        alvo_titulo: anuncio.titulo,
+                        motivo,
+                        descricao: descricao || null,
+                        denunciante_email: session.email,
+                        status: 'pendente'
+                    });
+                    document.getElementById('modal-denuncia').classList.add('hidden');
+                    document.getElementById('den-desc').value = '';
+                    alert('Denúncia enviada. Nossa equipe irá analisar em breve.');
+                } catch (e) {
+                    alert('Erro ao enviar denúncia. Tente novamente.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Enviar Denúncia';
+                }
+            });
+
             // Preserve redirect back after login
             const currentUrl = encodeURIComponent(window.location.href);
             document.getElementById('link-login').href    = `../login/login.html?redirect=${currentUrl}`;
@@ -711,9 +909,76 @@
                 document.getElementById('user-view').classList.remove('hidden');
                 const ownerNome = anuncio.nome || 'Anunciante';
                 document.getElementById('chat-user-title').textContent = `Chat com ${ownerNome}`;
+                const tipoLabel = anuncio.tipo === 'troca' ? 'Troca' : anuncio.tipo === 'doacao' ? 'Doação' : (anuncio.tipo || '');
+                if (tipoLabel) document.getElementById('chat-tipo-negocio').textContent = `Negociação • ${tipoLabel}`;
+
+                // Avatar do dono
+                (async () => {
+                    const avatarEl = document.getElementById('chat-owner-avatar');
+                    try {
+                        const ownerUser = await window.SupabaseService.findUserByEmail(ownerEmail);
+                        if (ownerUser && ownerUser.foto) {
+                            avatarEl.innerHTML = `<img src="${ownerUser.foto}" alt="${ownerNome}">`;
+                        } else {
+                            avatarEl.textContent = ownerNome.charAt(0).toUpperCase();
+                        }
+                    } catch (_) {
+                        avatarEl.textContent = ownerNome.charAt(0).toUpperCase();
+                    }
+                })();
+
+                // Menu 3 pontos
+                const menuBtn = document.getElementById('chat-menu-btn');
+                const menuDropdown = document.getElementById('chat-menu-dropdown');
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menuDropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => menuDropdown.classList.add('hidden'));
+                document.getElementById('btn-denunciar-chat').addEventListener('click', () => {
+                    menuDropdown.classList.add('hidden');
+                    document.getElementById('modal-denuncia').classList.remove('hidden');
+                });
+
+                document.getElementById('btn-cancelar-denuncia').addEventListener('click', () => {
+                    document.getElementById('modal-denuncia').classList.add('hidden');
+                });
+
+                document.getElementById('modal-denuncia').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('modal-denuncia'))
+                        document.getElementById('modal-denuncia').classList.add('hidden');
+                });
+
+                document.getElementById('btn-enviar-denuncia').addEventListener('click', async () => {
+                    const motivo   = document.getElementById('denuncia-motivo').value;
+                    const descricao = document.getElementById('denuncia-descricao').value.trim();
+                    const _sess = JSON.parse(sessionStorage.getItem('eletrolight_session') || 'null');
+                    if (!_sess) return;
+                    const btnD = document.getElementById('btn-enviar-denuncia');
+                    btnD.disabled = true;
+                    btnD.textContent = 'Enviando…';
+                    try {
+                        await window.SupabaseService.enviarDenuncia({
+                            tipo: 'anuncio',
+                            alvo_titulo: anuncio.titulo || '',
+                            alvo_email:  ownerEmail || '',
+                            motivo,
+                            descricao,
+                            denunciante_email: _sess.email,
+                            status: 'pendente'
+                        });
+                        document.getElementById('modal-denuncia').classList.add('hidden');
+                        document.getElementById('denuncia-descricao').value = '';
+                        alert('Denúncia enviada com sucesso. Nossa equipe irá analisar em breve. Obrigado!');
+                    } catch (_e) {
+                        alert('Erro ao enviar denúncia. Tente novamente.');
+                    } finally {
+                        btnD.disabled = false;
+                        btnD.textContent = 'Enviar Denúncia';
+                    }
+                });
+
                 await loadUserChat();
-                // Auto-refresh every 5 s
-                setInterval(loadUserChat, 5000);
 
             } else {
                 // Seed data with no email: WhatsApp fallback
@@ -776,7 +1041,7 @@
                 }
             }
 
-            let ownerPollInterval = null;
+            let ownerChannel = null;
             let activeContactEmail = null;
             let activeContactNome  = null;
 
@@ -793,13 +1058,21 @@
                 const msgs = await window.SupabaseService.getMensagens(anuncioId, session.email, contactEmail);
                 renderMessages(msgs, session.email, msgBox);
 
-                // Reset polling
-                if (ownerPollInterval) clearInterval(ownerPollInterval);
-                ownerPollInterval = setInterval(async () => {
-                    if (!activeContactEmail) return;
-                    const fresh = await window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail);
-                    renderMessages(fresh, session.email, document.getElementById('chat-messages-owner'));
-                }, 5000);
+                // Cancela canal anterior e abre novo canal Realtime
+                if (ownerChannel) window.supabaseClient.removeChannel(ownerChannel);
+                ownerChannel = window.supabaseClient
+                    .channel(`chat-owner-${anuncioId}-${contactEmail}`)
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'mensagens',
+                        filter: `anuncio_id=eq.${anuncioId}`
+                    }, async () => {
+                        if (!activeContactEmail) return;
+                        const fresh = await window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail);
+                        renderMessages(fresh, session.email, document.getElementById('chat-messages-owner'));
+                    })
+                    .subscribe();
             }
 
             // Owner send
@@ -832,11 +1105,26 @@
             }
 
             // ======== Non-owner chat logic ========
+            let userChannel = null;
+
             async function loadUserChat() {
                 const msgs    = await window.SupabaseService.getMensagens(anuncioId, session.email, ownerEmail);
                 const msgBox  = document.getElementById('chat-messages-user');
                 renderMessages(msgs, session.email, msgBox);
             }
+
+            // Canal Realtime para o lado do comprador/interessado
+            userChannel = window.supabaseClient
+                .channel(`chat-user-${anuncioId}-${session.email}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'mensagens',
+                    filter: `anuncio_id=eq.${anuncioId}`
+                }, async () => {
+                    await loadUserChat();
+                })
+                .subscribe();
 
             document.getElementById('chat-send-user')?.addEventListener('click', () => sendUserMessage());
             document.getElementById('chat-input-user')?.addEventListener('keydown', (e) => {
@@ -850,6 +1138,11 @@
                 const btn = document.getElementById('chat-send-user');
                 btn.disabled = true;
                 try {
+                    const _usr = await window.SupabaseService.findUserByEmail(session.email);
+                    if (_usr && _usr.bloqueio_chat) {
+                        alert('Sua conta está restrita de enviar mensagens. Entre em contato com o suporte.');
+                        return;
+                    }
                     await window.SupabaseService.enviarMensagem(
                         anuncioId,
                         session.email, session.nome,
@@ -863,6 +1156,12 @@
                     input.focus();
                 }
             }
+
+            // Limpa canais ao sair da página
+            window.addEventListener('beforeunload', () => {
+                if (ownerChannel) window.supabaseClient.removeChannel(ownerChannel);
+                if (userChannel)  window.supabaseClient.removeChannel(userChannel);
+            });
 
         })(); // end init
     </script>
