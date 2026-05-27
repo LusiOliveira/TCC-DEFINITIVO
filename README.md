@@ -2,9 +2,10 @@
 
 Plataforma web completa para **doação e troca de eletrônicos usados**, conectando a comunidade de Manaus com pontos de coleta e promovendo a economia circular para reduzir o lixo eletrônico.
 
-> **Backend**: Supabase (PostgreSQL) com localStorage fallback  
-> **Autenticação**: Custom (email/CPF) com Row Level Security  
-> **Chat**: Mensagens em tempo real com notificações  
+> **Backend**: Java 21 + Spring Boot (REST API) — deployado no Railway  
+> **Banco de Dados**: PostgreSQL (via Spring Data JPA / Hibernate)  
+> **Autenticação**: Custom (email/CPF) com Spring Security  
+> **Chat**: Mensagens entre usuários com histórico por anúncio  
 > **Admin**: Painel de moderação com aprovação de anúncios, denúncias e punições
 
 ---
@@ -39,10 +40,11 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | Camada | Tecnologia |
 |--------|------------|
 | **Frontend** | HTML5, CSS3, JavaScript ES6+ |
-| **Backend** | Supabase (PostgreSQL + PostgREST) |
+| **Backend** | Java 21, Spring Boot 4.0.6, Spring Data JPA, Spring Security |
+| **Banco de Dados** | PostgreSQL (Hibernate `ddl-auto=update`) |
 | **Auth** | Sessão custom em `sessionStorage` |
-| **Storage** | Supabase Storage para fotos |
-| **Fallback** | localStorage (modo offline) |
+| **Comunicação** | REST API via `fetch` (JSON) |
+| **Deploy Backend** | Railway (`ttc-backend-deploy-production.up.railway.app`) |
 
 ---
 
@@ -63,14 +65,14 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
-| **Anunciar Eletrônico** | Formulário completo com upload de fotos ao Supabase Storage |
+| **Anunciar Eletrônico** | Formulário completo com upload de foto (Base64) |
 | **Categorias** | 11 categorias: celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos, **outros** |
 | **Filtro Dinâmico** | Seleção múltipla de categorias com botões toggle (igual no index e em todos-anuncios) |
 | **Lista Completa** | Página `todos-anuncios.html` com busca textual e seleção múltipla de categorias |
 | **Meus Anúncios** | Gerenciamento com notificações de mensagens. Exibe anúncios pendentes e rejeitados com badge de status |
 | **Editar Anúncio** | Modal de edição para todos os campos |
-| **Excluir Anúncio** | Confirmação antes de remover do Supabase |
-| **Persistência** | Supabase PostgreSQL com localStorage fallback |
+| **Excluir Anúncio** | Confirmação antes de remover do backend |
+| **Persistência** | PostgreSQL via Spring Boot REST API |
 
 ### 💬 Sistema de Chat
 
@@ -82,7 +84,6 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | **Para Anunciante** | Painel de conversas com todos os interessados |
 | **Notificações** | Badge vermelho com contagem de conversas pendentes |
 | **Foto de Perfil** | Avatar do anunciante exibido no **header do chat** (foto ou inicial do nome) |
-| **RLS** | Apenas usuários cadastrados podem enviar mensagens |
 | **Denunciar** | Menu ⋮ no header do chat → modal com **select de motivo** (5 opções) + descrição opcional → salva na tabela `denuncias` |
 | **Restrição de chat** | Usuários bloqueados não conseguem enviar mensagens |
 | **Balões de mensagem** | Mensagens próprias em verde `#10B981` (mesmo do hover das categorias) |
@@ -92,7 +93,7 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
-| **Acesso restrito** | Apenas usuários com `is_admin = true` no Supabase podem acessar |
+| **Acesso restrito** | Apenas usuários com perfil `Administrador` (via `usuario_grupo`) podem acessar |
 | **Anúncios Pendentes** | Lista anúncios com status `pendente` para aprovar ou rejeitar antes da publicação |
 | **Denúncias** | Visualiza denúncias de usuários com filtro por status (pendentes/resolvidas) |
 | **Tomar Ação** | Modal com 5 opções: sem punição, bloquear publicações, bloquear chat, bloquear ambos, excluir conta |
@@ -121,6 +122,7 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 EletroLight/
 ├── index.html                 # Página principal (entry point)
 ├── README.md                  # Documentação do projeto
+├── db_eletro.sql              # Schema PostgreSQL completo
 │
 ├── pages/                     # Páginas HTML internas
 │   ├── anunciar.html          # Formulário de novo anúncio (protegido)
@@ -138,9 +140,9 @@ EletroLight/
 │
 ├── scripts/                   # Arquivos JavaScript
 │   ├── script.js              # Lógica da home (carrossel, mapa, anúncios)
-│   ├── supabase-client.js     # Inicialização do cliente Supabase
-│   ├── supabase-service.js    # Serviço de dados (CRUD + Chat + Admin)
-│   ├── anuncios-data.js       # Camada de dados com fallback localStorage
+│   ├── api-service.js         # Cliente REST para o backend Spring Boot
+│   ├── supabase-service.js    # Legado/compatibilidade (não usado ativamente)
+│   ├── anuncios-data.js       # Camada de dados e seed de anúncios
 │   ├── anunciar.js            # Lógica do formulário
 │   └── perfil.js              # Validações e salvamento de perfil
 │
@@ -160,45 +162,48 @@ EletroLight/
 ### Fluxo de Dados
 
 ```
-Usuário cadastra → Supabase (tabela users)
+Usuário cadastra → Backend Spring Boot → PostgreSQL (tabelas pessoa + usuario)
      ↓
 Usuário loga → sessionStorage (eletrolight_session + is_admin)
      ↓
-Cria anúncio → Supabase (status = 'pendente') → aguarda aprovação admin
+Cria anúncio → POST /anuncios (status = 'pendente') → aguarda aprovação admin
      ↓
-Admin aprova → status = 'aprovado' → anúncio aparece publicamente
+Admin aprova → PATCH /anuncios/{id}/aprovar → status = 'aprovado' → anúncio visível
      ↓
-Envia mensagem → verifica bloqueio_chat → Supabase (tabela mensagens)
+Envia mensagem → POST /mensagens → histórico vinculado ao anúncio
      ↓
-Denúncia enviada → tabela denuncias → admin resolve com punição
-     ↓
-Fallback offline → localStorage (modo sem conexão)
+Denúncia enviada → POST /denuncias → admin resolve com punição
 ```
 
 ---
 
 ## 📁 Estrutura de Arquivos Detalhada
 
-| Arquivo | Responsabilidade | Banco de Dados |
-|---------|-----------------|----------------|
-| `supabase-client.js` | Inicializa cliente Supabase com URL e anon key | - |
-| `supabase-service.js` | CRUD completo: users, anuncios, mensagens | `users`, `anuncios`, `mensagens` |
-| `anuncios-data.js` | Camada de dados com fallback localStorage | Supabase + localStorage |
-| `login.js` | Cadastro, login, validação de CPF, sessão | `users` |
-| `script.js` | Carrossel, mapa Leaflet, filtros, abas | - |
-| `anunciar.js` | Formulário de anúncio, upload de fotos | `anuncios` + Storage |
-| `perfil.js` | Edição de perfil, alteração de senha | `users` |
-| `questionario-ux.html` | Coleta de feedback de usabilidade | `eletrolight_ux` (localStorage) |
+| Arquivo | Responsabilidade | Backend |
+|---------|-----------------|---------|
+| `api-service.js` | Cliente REST para API Java (`fetch` + JSON) | Endpoints Spring Boot |
+| `supabase-service.js` | Legado — mantido apenas para referência | Não utilizado |
+| `anuncios-data.js` | Camada de dados local (seed + helpers) | - |
+| `login.js` | Cadastro, login, validação de CPF, sessão | `/usuarios`, `/usuarios/login` |
+| `script.js` | Carrossel, mapa Leaflet, filtros, abas | `/pontosColetas`, `/ConteudosEducativos/ativos` |
+| `anunciar.js` | Formulário de anúncio, upload de fotos Base64 | `/anuncios` |
+| `perfil.js` | Edição de perfil, alteração de senha | `/usuarios/{id}` |
+| `questionario-ux.html` | Coleta de feedback de usabilidade | `localStorage` |
 
-### Tabelas Supabase
+### Tabelas do Banco (PostgreSQL)
 
-| Tabela | Descrição | RLS |
-|--------|-----------|-----|
-| `users` | Cadastro de usuários (nome, CPF, email, senha, foto, is_admin, bloqueio_publicacao, bloqueio_chat) | Desabilitado |
-| `anuncios` | Anúncios com campo `status` (pendente/aprovado/rejeitado) | Público leitura (só aprovados), proprietário escrita |
-| `mensagens` | Chat entre usuários | Leitura pública, inserção apenas usuários cadastrados |
-| `denuncias` | Denúncias de anúncios e perfis | Inserção pública, leitura restrita ao admin |
-| `conteudo_educativo` | Textos do canal educativo (gerenciado pelo admin) | Leitura pública, escrita restrita ao admin |
+| Tabela | Descrição |
+|--------|-----------|
+| `pessoa` | Dados pessoais desnormalizados (nome, CPF, nascimento, WhatsApp) |
+| `usuario` | Credenciais (email, senha hash, foto, flags de bloqueio) |
+| `grupo` | Perfis de acesso (1=Administrador, 2=Usuário Comum) |
+| `usuario_grupo` | Vínculo N:N entre usuário e perfil |
+| `categoria` | Taxonomia dos anúncios (slug único) |
+| `anuncio` | Anúncios com campo `status` (pendente/aprovado/rejeitado) |
+| `mensagem` | Chat entre usuários vinculado a um anúncio |
+| `denuncia` | Denúncias contra anúncios ou perfis |
+| `conteudo_educativo` | Textos do canal educativo (gerenciado pelo admin) |
+| `ponto_coleta` | Locais de descarte/reciclagem em Manaus |
 
 ---
 
@@ -206,13 +211,13 @@ Fallback offline → localStorage (modo sem conexão)
 
 ### 1. Cadastro de Novo Usuário
 ```
-login.html → Painel Cadastro → Valida CPF → Salva no Supabase (tabela users)
+login.html → Painel Cadastro → Valida CPF → POST /usuarios/registrar
 → Toast de sucesso → Redireciona para painel Login
 ```
 
 ### 2. Login com E-mail ou CPF
 ```
-login.html → Detecta tipo (CPF começa com número) → Busca no array
+login.html → Detecta tipo (CPF começa com número) → POST /usuarios/login
 → Valida senha → Cria sessão → Redireciona para index.html
 ```
 
@@ -223,37 +228,8 @@ index.html → Clica "Anunciar" → Verifica sessão
     └─ [Logado] → verifica bloqueio_publicacao
         ├─ [Bloqueado] → alerta de restrição
         └─ [Liberado] → anunciar.html
-            → Preenche formulário → Comprime imagem → Salva (status='pendente')
+            → Preenche formulário → Converte imagem para Base64 → POST /anuncios (status='pendente')
             → Aguarda aprovação do admin antes de aparecer publicamente
-```
-
-### 9. Moderar Anúncios (Fluxo Admin)
-```
-admin.html → Aba "Anúncios Pendentes"
-→ Admin clica Aprovar → status = 'aprovado' → anúncio visível
-→ Admin clica Rejeitar → status = 'rejeitado' → anúncio removido
-```
-
-### 10. Resolver Denúncia com Punição
-```
-Usuário logado → anuncio-detalhe.html → Clica "Denunciar"
-→ Modal com tipo + motivo + descrição → Envia para tabela denuncias
-
-admin.html → Aba "Denúncias" → Clica "Tomar Ação"
-→ Modal de punição:
-    ├─ Sem punição → apenas arquiva
-    ├─ Restringir publicações → bloqueio_publicacao = true
-    ├─ Restringir chat → bloqueio_chat = true
-    ├─ Restringir ambos → ambos = true
-    └─ Excluir conta → remove user + anúncios (confirmação dupla)
-→ Denúncia marcada como resolvida automaticamente
-```
-
-### 11. Gerenciar Restrições
-```
-admin.html → Aba "Usuários Restritos"
-→ Lista usuários com bloqueios ativos
-→ Admin pode revogar publicação, chat ou excluir conta
 ```
 
 ### 4. Visualizar Anúncio Detalhado + Chat
@@ -271,14 +247,14 @@ meus-anuncios.html → Clica "Ver Mensagens"
 ```
 index.html ou todos-anuncios.html → Clica "Editar Anúncio" no card próprio
 → Redireciona para meus-anuncios.html?editar=<id>
-→ Abre modal pré-preenchido → Edita campos → Salva no Supabase
+→ Abre modal pré-preenchido → PUT /anuncios/{id} → Salva no backend
 → Atualização em tempo real nos cards
 ```
 
 ### 6. Gerenciar Meus Anúncios
 ```
 Header → Dropdown → "Meus Anúncios"
-→ Lista filtrada apenas com anúncios do usuário
+→ GET /anuncios/usuario/{usuarioId} — lista filtrada
 → Badge vermelho com número de conversas pendentes
 → Opções: Ver Mensagens, Editar (modal) ou Excluir
 ```
@@ -297,92 +273,160 @@ questionario-ux.html → Responde 7 perguntas → Envia
 → Salva em localStorage (eletrolight_ux) → Tela de agradecimento
 ```
 
+### 9. Moderar Anúncios (Fluxo Admin)
+```
+admin.html → Aba "Anúncios Pendentes" → GET /anuncios/pendentes
+→ Admin clica Aprovar → PATCH /anuncios/{id}/aprovar → status = 'aprovado' → anúncio visível
+→ Admin clica Rejeitar → PATCH /anuncios/{id}/rejeitar → status = 'rejeitado' → anúncio removido
+```
+
+### 10. Resolver Denúncia com Punição
+```
+Usuário logado → anuncio-detalhe.html → Clica "Denunciar"
+→ Modal com tipo + motivo + descrição → POST /denuncias
+
+admin.html → Aba "Denúncias" → GET /denuncias → Clica "Tomar Ação"
+→ PATCH /usuarios/{id}/punir (ou /punir/remover)
+    ├─ Sem punição → apenas arquiva
+    ├─ Restringir publicações → bloqueio_publicacao = true
+    ├─ Restringir chat → bloqueio_chat = true
+    ├─ Restringir ambos → ambos = true
+    └─ Excluir conta → DELETE /usuarios/{id}/conta (confirmação dupla)
+→ PATCH /denuncias/{id}/resolver → denúncia marcada como resolvida
+```
+
+### 11. Gerenciar Restrições
+```
+admin.html → Aba "Usuários Restritos" → GET /usuarios/bloqueados
+→ Lista usuários com bloqueios ativos
+→ Admin pode revogar publicação, chat ou excluir conta
+```
+
 ---
 
-## � Diagramas UML
+## 📊 Diagramas UML
 
 Os diagramas estão disponíveis na pasta `diagramas/` para uso no [Mermaid Live Editor](https://mermaid.live):
 
 ### Diagrama Entidade-Relacionamento
 **Arquivo**: `diagramas/diagrama-er.md`
 
-Entidades: `users`, `anuncios`, `mensagens`
-
-```mermaid
-erDiagram
-    USERS ||--o{ ANUNCIOS : publica
-    USERS ||--o{ MENSAGENS : envia
-    ANUNCIOS ||--o{ MENSAGENS : possui
-```
+Entidades: `pessoa`, `usuario`, `grupo`, `usuario_grupo`, `categoria`, `anuncio`, `mensagem`, `denuncia`, `conteudo_educativo`, `ponto_coleta`
 
 ### Diagrama de Classes
 **Arquivo**: `diagramas/diagrama-classes.md`
 
-Namespaces: `Entidades` (User, Anuncio, Mensagem, Session) e `Servicos` (SupabaseService, AnunciosData)
+Namespaces: `Entidades` (User, Anuncio, Mensagem, Session) e `Servicos` (ApiService, AnunciosData)
 
 ---
 
 ## 💾 API de Dados
 
-### Supabase (Principal)
+### Endpoints Principais (Spring Boot REST API)
 
-| Tabela | Colunas Principais |
-|--------|-------------------|
-| `users` | id, nome, cpf, email, senha, whatsapp, foto, is_admin, bloqueio_publicacao, bloqueio_chat, created_at |
-| `anuncios` | id, titulo, categoria, tipo, condicao, descricao, foto, nome, email, whatsapp, bairro, **status**, created_at |
-| `mensagens` | id, anuncio_id, remetente_email, remetente_nome, destinatario_email, destinatario_nome, texto, created_at |
-| `denuncias` | id, tipo, alvo_email, alvo_id, alvo_titulo, motivo, descricao, denunciante_email, status, created_at |
-| `conteudo_educativo` | id, titulo, categoria, texto, link_video, ativo, created_at, updated_at |
+Base URL de produção: `https://ttc-backend-deploy-production.up.railway.app`
 
-### localStorage (Fallback/UX)
+#### Usuários (`/usuarios`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/usuarios` | Lista todos os usuários |
+| `POST` | `/usuarios/registrar` | Cadastra novo usuário |
+| `POST` | `/usuarios/login` | Autentica por e-mail ou CPF + senha |
+| `GET` | `/usuarios/{id}` | Busca usuário por ID |
+| `GET` | `/usuarios/email/{email}` | Busca usuário por e-mail |
+| `PUT` | `/usuarios/{id}` | Atualiza dados do usuário |
+| `PATCH` | `/usuarios/senha` | Altera senha (senha atual + nova) |
+| `DELETE` | `/usuarios/{id}` | Remove usuário |
+| `GET` | `/usuarios/bloqueados` | Lista usuários com punições ativas |
+| `PATCH` | `/usuarios/{id}/punir` | Aplica bloqueio de publicação/chat |
+| `PATCH` | `/usuarios/{id}/punir/remover` | Revoga todas as punições |
+| `DELETE` | `/usuarios/{id}/conta` | Exclui conta e anúncios em cascata |
+
+#### Anúncios (`/anuncios`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/anuncios` | Lista todos os anúncios |
+| `GET` | `/anuncios/aprovados` | Lista anúncios aprovados (home) |
+| `GET` | `/anuncios/pendentes` | Lista anúncios pendentes (admin) |
+| `POST` | `/anuncios` | Cria novo anúncio (status = pendente) |
+| `GET` | `/anuncios/{id}` | Busca anúncio por ID |
+| `GET` | `/anuncios/usuario/{usuarioId}` | Lista anúncios de um usuário |
+| `GET` | `/anuncios/categoria/{categoriaId}` | Lista por categoria |
+| `PUT` | `/anuncios/{id}` | Atualiza anúncio |
+| `DELETE` | `/anuncios/{id}` | Remove anúncio |
+| `PATCH` | `/anuncios/{id}/aprovar` | Aprova anúncio (admin) |
+| `PATCH` | `/anuncios/{id}/rejeitar` | Rejeita anúncio (admin) |
+
+#### Mensagens (`/mensagens`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/mensagens` | Lista todas as mensagens |
+| `POST` | `/mensagens` | Envia nova mensagem |
+| `GET` | `/mensagens/{id}` | Busca mensagem por ID |
+| `PUT` | `/mensagens/{id}` | Atualiza mensagem |
+| `DELETE` | `/mensagens/{id}` | Remove mensagem |
+| `GET` | `/mensagens/anuncio/{anuncioId}` | Lista mensagens de um anúncio |
+| `GET` | `/mensagens/email/{email}` | Lista mensagens de um usuário |
+| `GET` | `/mensagens/conversa?emailA=&emailB=&anuncioId=` | Histórico entre dois usuários |
+
+#### Denúncias (`/denuncias`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/denuncias` | Lista todas as denúncias |
+| `POST` | `/denuncias` | Cria nova denúncia |
+| `GET` | `/denuncias/{id}` | Busca denúncia por ID |
+| `GET` | `/denuncias/usuario/{usuarioId}` | Denúncias de um usuário |
+| `PUT` | `/denuncias/{id}` | Atualiza denúncia |
+| `DELETE` | `/denuncias/{id}` | Remove denúncia |
+| `PATCH` | `/denuncias/{id}/resolver` | Marca denúncia como resolvida |
+
+#### Conteúdo Educativo (`/ConteudosEducativos`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/ConteudosEducativos` | Lista todos |
+| `GET` | `/ConteudosEducativos/ativos` | Lista apenas ativos (home) |
+| `POST` | `/ConteudosEducativos` | Cria conteúdo |
+| `GET` | `/ConteudosEducativos/{id}` | Busca por ID |
+| `PUT` | `/ConteudosEducativos/{id}` | Atualiza conteúdo |
+| `DELETE` | `/ConteudosEducativos/{id}` | Remove conteúdo |
+
+#### Pontos de Coleta (`/pontosColetas`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/pontosColetas` | Lista todos os pontos |
+| `POST` | `/pontosColetas` | Adiciona ponto |
+| `GET` | `/pontosColetas/{id}` | Busca por ID |
+| `PUT` | `/pontosColetas/{id}` | Atualiza ponto |
+| `DELETE` | `/pontosColetas/{id}` | Remove ponto |
+
+### localStorage (UX / Fallback offline)
 
 ```javascript
-// Sessão atual (sessionStorage na verdade)
+// Sessão atual (sessionStorage)
 sessionStorage.setItem('eletrolight_session', JSON.stringify(
-  { nome: "João Silva", email: "joao@email.com", is_admin: false }
+  { id: 1, nome: "João Silva", email: "joao@email.com", is_admin: false }
 ));
-
-// Mensagens offline (fallback)
-localStorage.setItem('eletrolight_mensagens', JSON.stringify([...]));
 
 // Questionário UX
 localStorage.setItem('eletrolight_ux', JSON.stringify([...]));
 ```
 
-### Funções Exportadas (supabase-service.js)
-
-| Função | Descrição |
-|--------|-----------|
-| `findUserByEmail(email)` | Busca usuário por email |
-| `saveUser(user)` | Cadastra novo usuário |
-| `getAnuncios()` | Retorna anúncios aprovados (`status = 'aprovado'`) |
-| `adicionarAnuncio(anuncio)` | Cria novo anúncio (status = 'pendente') |
-| `getMensagens(anuncioId, emailA, emailB)` | Retorna histórico de chat |
-| `enviarMensagem(...)` | Envia mensagem (Supabase + fallback) |
-| `getConversasDoAnuncio(anuncioId, ownerEmail)` | Lista conversas para notificação |
-| `getAnunciosPendentes()` | Lista anúncios aguardando moderação |
-| `aprovarAnuncio(id)` | Define status = 'aprovado' |
-| `rejeitarAnuncio(id)` | Define status = 'rejeitado' |
-| `getDenuncias()` | Lista todas as denúncias |
-| `enviarDenuncia(denuncia)` | Registra nova denúncia |
-| `resolverDenuncia(id)` | Marca denúncia como resolvida |
-| `aplicarPunicao(email, tipo)` | Bloqueia publicação, chat ou ambos |
-| `removerPunicao(email, tipo)` | Revoga bloqueio |
-| `excluirConta(email)` | Remove usuário e seus anúncios |
-| `getUsuariosBloqueados()` | Lista usuários com restrições ativas |
-| `getConteudoEducativo()` | Lista conteúdos do canal educativo |
-| `adicionarConteudo(conteudo)` | Cria novo conteúdo educativo |
-| `atualizarConteudo(id, updates)` | Edita conteúdo existente |
-| `deletarConteudo(id)` | Remove conteúdo educativo |
-
 ---
 
 ## 🚀 Como Executar
 
-### Opção 1: Abertura Direta
-Duplo clique em `index.html` (alguns recursos externos podem ter limitações).
+### Frontend (Site5)
 
-### Opção 2: Servidor Local (Recomendado)
+#### Opção 1: Abertura Direta
+Duplo clique em `index.html` (o backend remoto será consumido automaticamente).
+
+#### Opção 2: Servidor Local (Recomendado)
 
 **VS Code / Cursor:**
 ```bash
@@ -392,7 +436,7 @@ Duplo clique em `index.html` (alguns recursos externos podem ter limitações).
 
 **Python:**
 ```bash
-cd c:\Users\lusiv\Desktop\Site5
+cd "c:\Users\lusiv\Desktop\Site5 - Copia"
 python -m http.server 8080
 # Acesse: http://localhost:8080
 ```
@@ -403,18 +447,46 @@ npx serve .
 # Acesse: http://localhost:3000
 ```
 
+### Backend (projetoEletro)
+
+Requisitos: Java 21 + Maven
+
+```bash
+cd "c:\Users\lusiv\Desktop\projetoEletro - Copia"
+
+# Executar localmente (porta 8081)
+.\mvnw spring-boot:run
+
+# Ou compilar e rodar
+.\mvnw clean package
+java -jar target\projetoEletro-0.0.1-SNAPSHOT.jar
+```
+
+Configure as variáveis de ambiente no `application.properties` ou via `.env`:
+- `DATASOURCE_URL` — JDBC URL do PostgreSQL
+- `DATASOURCE_USERNAME`
+- `DATASOURCE_PASSWORD`
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Tecnologia | Uso | CDN |
-|------------|-----|-----|
+| Tecnologia | Uso | Fonte |
+|------------|-----|-------|
 | **HTML5** | Estrutura semântica | - |
 | **CSS3** | Estilos, Grid, Flexbox, animações | - |
 | **JavaScript (ES6+)** | Lógica de negócio, DOM, eventos | - |
 | **Leaflet** | Mapa interativo | unpkg.com |
 | **Font Awesome 6** | Ícones | cdnjs |
 | **Google Fonts** | Tipografia (Material Symbols, Segoe UI) | fonts.googleapis.com |
+| **Java 21** | Backend REST API | - |
+| **Spring Boot 4.0.6** | Framework backend | Maven Central |
+| **Spring Data JPA** | Acesso ao banco de dados | - |
+| **Spring Security** | Hash de senhas (bcrypt) | - |
+| **PostgreSQL** | Banco de dados relacional | - |
+| **Hibernate** | ORM / Mapeamento objeto-relacional | - |
+| **Lombok** | Redução de boilerplate | Maven Central |
+| **Railway** | Deploy do backend | railway.app |
 
 ---
 
@@ -443,16 +515,16 @@ npx serve .
 - ✅ Título: obrigatório
 - ✅ Categoria: obrigatória (dropdown)
 - ✅ Tipo: apenas "doacao" ou "troca"
-- ✅ Foto: **obrigatória**, máximo 5MB, compressão automática para 400px
+- ✅ Foto: **obrigatória**, máximo 5MB, convertida para Base64
 - ✅ Limite home: 5 anúncios (categoria "Todos")
 - ✅ Prepend: novos anúncios aparecem primeiro
-- ✅ Dono identificado: campo `email` vinculado ao criador
+- ✅ Dono identificado: campo `usuarioId` vinculado ao criador
 - ✅ Moderação: anúncios criados com `status = 'pendente'` — só aparecem após aprovação admin
 - ✅ Restrição: usuários com `bloqueio_publicacao = true` não conseguem publicar
-- ✅ Edição: apenas proprietário pode editar (verificação via `email`)
+- ✅ Edição: apenas proprietário pode editar
 
 ### Edição de Anúncio
-- ✅ Apenas proprietário pode editar (verificação via `email`)
+- ✅ Apenas proprietário pode editar
 - ✅ Campos editáveis: título, marca, categoria, tipo, condição, bairro, WhatsApp, descrição
 - ✅ Atualização em tempo real após salvar
 - ✅ Redirecionamento com parâmetro `?editar=<id>` abre modal automaticamente
@@ -462,18 +534,17 @@ npx serve .
 ## 📝 Notas para Desenvolvedores
 
 ### Adicionar Nova Categoria de Anúncio
-1. Editar `getCategoriaInfo()` em `anuncios-data.js`
+1. Inserir no banco: `INSERT INTO categoria (id_categoria, slug, nome, icone) VALUES (...)`
 2. Adicionar botão de filtro em `index.html` e `todos-anuncios.html`
-3. Atualizar seed em `SEED_ANUNCIOS` se necessário
+3. Atualizar seed em `SEED_ANUNCIOS` em `anuncios-data.js` se necessário
 
-### Variáveis de Ambiente
-Crie um arquivo `scripts/supabase-config.js` (não versionado) com:
+### Configurar URL do Backend
+Edite `scripts/api-service.js`:
 ```javascript
-const SUPABASE_URL = 'https://seu-projeto.supabase.co';
-const SUPABASE_ANON_KEY = 'sua-chave-anon';
+const API_BASE = 'https://ttc-backend-deploy-production.up.railway.app';
+// Para desenvolvimento local:
+// const API_BASE = 'http://localhost:8081';
 ```
-
-Ou configure diretamente em `supabase-client.js`.
 
 ### Convenções de Código
 - **IDs**: kebab-case (`email-login`, `titulo-anuncio`)
@@ -493,4 +564,4 @@ Imagens de terceiros sujeitas às licenças dos respectivos provedores.
 
 **Desenvolvido com 💚 para a comunidade de Manaus**
 
-**Versão atualizada em Maio de 2026** — Inclui: Supabase Backend, Chat com Avatar e Notificações, Filtro por Múltiplas Categorias, Foto Obrigatória em Anúncios, Status Pendente/Rejeitado nos Cards, Pinos SVG no Mapa, Zonas de Manaus em Acordeão, Modal de Denúncia de Chat, Diagramas UML, Painel Administrativo, Sistema de Denúncias e Punições, Moderação de Anúncios
+**Versão atualizada em Maio de 2026** — Inclui: Backend Java Spring Boot, REST API, PostgreSQL, Chat com Avatar e Notificações, Filtro por Múltiplas Categorias, Foto Obrigatória em Anúncios, Status Pendente/Rejeitado nos Cards, Pinos SVG no Mapa, Zonas de Manaus em Acordeão, Modal de Denúncia de Chat, Diagramas UML, Painel Administrativo, Sistema de Denúncias e Punições, Moderação de Anúncios

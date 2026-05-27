@@ -18,10 +18,14 @@
             <img src="./assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
             <span class="logo__text">EletroLight</span>
         </a>
-        <nav class="nav-links" aria-label="Seções do site">
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Abrir menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="nav-links" id="nav-links" aria-label="Seções do site">
             <a href="#inicio">Início</a>
             <a href="#mapa-coleta">Pontos de Coleta</a>
             <a href="#aprendizado">Canal de Conscientização</a>
+            <a href="./pages/conteudos.html">Conteúdos</a>
             <a href="#economia">Serviços</a>
             <a href="#sobre-projeto">Sobre o Projeto</a>
         </nav>
@@ -128,9 +132,6 @@
                     <button class="tab-btn" onclick="mudarAba('economia', this)">
                         <i class="fa-solid fa-recycle"></i> Curiosidades
                     </button>
-                    <button class="tab-btn" onclick="mudarAba('comunidade', this)">
-                        <i class="fa-solid fa-book-open"></i> Conteúdos
-                    </button>
                 </div>
 
                 <div class="conteudo-container">
@@ -180,10 +181,8 @@
                     </div>
 
                     <div id="tab-comunidade" class="tab-content">
-                        <div id="conteudo-dinamico-lista">
-                            <div class="card-principal">
-                                <p style="color:#aaa;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando conteúdos...</p>
-                            </div>
+                        <div class="card-principal" style="text-align:center;">
+                            <p style="color:#4B5563;"><i class="fa-solid fa-book-open" style="color:#059669;"></i> Acesse a página de <a href="./pages/conteudos.html" style="color:#059669;font-weight:700;">Conteúdos Educativos</a> para explorar todos os artigos e vídeos.</p>
                         </div>
                     </div>
 
@@ -233,9 +232,7 @@
                 <h4>Assistente EletroLight</h4>
                 <button id="chatbot-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="chatbot-messages" id="chatbot-messages">
-                <div class="message bot">Olá! Como posso ajudar você com o descarte de eletrônicos hoje?</div>
-            </div>
+            <div class="chatbot-messages" id="chatbot-messages"></div>
             <div class="chatbot-input">
                 <input type="text" id="chatbot-input-field" placeholder="Digite sua dúvida...">
                 <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
@@ -249,9 +246,7 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./scripts/supabase-client.js"></script>
-    <script src="./scripts/supabase-service.js"></script>
+    <script src="./scripts/api-service.js"></script>
     <script src="./scripts/anuncios-data.js"></script>
     <script src="./scripts/script.js"></script>
 </body>

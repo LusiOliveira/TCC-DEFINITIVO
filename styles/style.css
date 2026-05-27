@@ -52,6 +52,35 @@ header {
     gap: 1rem;
 }
 
+/* Menu hamburger */
+.nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    z-index: 1001;
+}
+.nav-hamburger:hover { background: #f1f5f9; }
+.nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: #334155;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+.nav-hamburger.is-active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.nav-hamburger.is-active span:nth-child(2) { opacity: 0; }
+.nav-hamburger.is-active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
 .logo {
     font-size: 1.8rem;
     font-weight: 700;
@@ -454,39 +483,6 @@ main {
 .map-sidebar::-webkit-scrollbar-track { background: var(--bg-light); border-radius: 4px; }
 .map-sidebar::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
 
-/* Grupos de Zona (accordion) */
-.zona-grupo { display: flex; flex-direction: column; }
-
-.zona-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--white);
-    border: none;
-    border-left: 4px solid var(--primary-color);
-    border-radius: 8px;
-    padding: 12px 15px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
-    text-align: left;
-    width: 100%;
-    transition: background 0.2s;
-}
-.zona-header:hover { background: #F0FDF4; }
-.zona-header span { display: flex; align-items: center; gap: 8px; }
-.zona-seta { transition: transform 0.25s ease; font-size: 0.8rem; color: var(--text-light); }
-
-.zona-lista {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 10px;
-}
-.zona-lista.aberta { display: flex; }
-
 /* Cartões da lista de pontos */
 .ponto-card {
     background: var(--white);
@@ -545,9 +541,62 @@ main {
         right: 8px;
     }
 
-    .map-layout { flex-direction: column; height: auto; }
-    .map-view { height: 400px; }
-    .map-sidebar { max-height: 400px; }
+    .map-layout { flex-direction: column; height: auto; gap: 16px; }
+    .map-wrapper { flex: unset; }
+    .map-view { height: 300px; border-radius: 12px; }
+    .map-info { padding-left: 0; text-align: center; font-size: 0.9rem; }
+    .map-sidebar {
+        flex: unset;
+        margin-top: 0;
+        height: auto;
+        max-height: 350px;
+        padding-right: 4px;
+        gap: 10px;
+    }
+    .ponto-card { padding: 12px; }
+
+    /* Menu mobile */
+    header {
+        grid-template-columns: 1fr auto auto;
+        padding: 0.75rem 4%;
+    }
+    .nav-hamburger { display: flex; }
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        padding: 0.5rem 0;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-radius: 0 0 16px 16px;
+        transform: translateY(-10px);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        max-height: 0;
+        overflow: hidden;
+    }
+    .nav-links.is-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+        max-height: 500px;
+    }
+    .nav-links a {
+        width: 90%;
+        text-align: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .nav-links a:last-child { border-bottom: none; }
+    .btn-nav-wrap { justify-self: end; }
+    .btn-nav { padding: 8px 14px; font-size: 0.8rem; white-space: nowrap; }
+    .logo { font-size: 1.4rem; gap: 6px; }
+    .logo__img { height: 32px; }
 }
 
 /* Seção Economia Circular (Cards) */
@@ -812,7 +861,26 @@ main {
 }
 
 @media (max-width: 768px) {
-    .servicos-header { flex-direction: column; }
+    .servicos-header { flex-direction: column; gap: 0.8rem; }
+    .btn-anunciar { padding: 10px 20px; font-size: 0.92rem; }
+
+    .categorias-filtro {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 6px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .categorias-filtro::-webkit-scrollbar { display: none; }
+
+    .cat-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+
     .anuncios-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 }
 
@@ -900,25 +968,93 @@ footer { background-color: var(--text-dark); color: var(--white); text-align: ce
 }
 
 .message {
-    max-width: 85%;
-    padding: 10px 15px;
-    border-radius: 15px;
-    font-size: 0.9rem;
-    line-height: 1.4;
+    max-width: 90%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    white-space: pre-line;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .message.bot {
-    background-color: rgba(5, 150, 105, 0.1);
+    background-color: #fff;
     align-self: flex-start;
     color: var(--text-dark);
-    border-bottom-left-radius: 0;
+    border: 1px solid #E5E7EB;
+    border-bottom-left-radius: 4px;
 }
 
 .message.user {
-    background-color: var(--primary-color);
+    background-color: #059669;
     color: white;
     align-self: flex-end;
-    border-bottom-right-radius: 0;
+    border-bottom-right-radius: 4px;
+}
+
+.typing-indicator {
+    display: flex !important;
+    gap: 4px;
+    align-items: center;
+    padding: 12px 16px !important;
+    background: rgba(5,150,105,0.08) !important;
+    width: fit-content;
+}
+.typing-indicator .dot {
+    width: 7px; height: 7px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+    display: inline-block;
+}
+.typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Botões interativos do chatbot */
+.chatbot-botoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 4px 0 10px;
+    max-width: 100%;
+}
+.chatbot-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 2px 0 4px;
+    align-self: flex-start;
+}
+.chatbot-btn-opcao {
+    background: #fff;
+    border: 1.5px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-align: left;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chatbot-btn-opcao i {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+.chatbot-btn-opcao:hover {
+    background: var(--primary-color);
+    color: white;
 }
 
 .chatbot-input {
@@ -949,6 +1085,14 @@ footer { background-color: var(--text-dark); color: var(--white); text-align: ce
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Chatbot mobile */
+@media (max-width: 768px) {
+    .chatbot-wrapper { bottom: 12px; right: 12px; }
+    .chatbot-toggle { width: 48px; height: 48px; font-size: 1.2rem; }
+    .chatbot-window { width: calc(100vw - 24px); right: 0; bottom: 68px; }
+    .chatbot-messages { height: 220px; }
 }
 
 /* --- SEÇÃO CANAL DE APRENDIZADO --- */

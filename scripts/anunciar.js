@@ -137,7 +137,7 @@ if (form) {
         if (_sessao && window.SupabaseService) {
             try {
                 const _usr = await window.SupabaseService.findUserByEmail(_sessao.email);
-                if (_usr && _usr.bloqueio_publicacao) {
+                if (_usr && _usr.bloqueioPublicacao) {
                     alert('Sua conta está restrita de publicar anúncios. Entre em contato com o suporte.');
                     return;
                 }

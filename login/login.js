@@ -22,8 +22,26 @@ const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const container    = document.getElementById('container');
 
+// Sempre inicia mostrando o login
+container.classList.remove('right-panel-active');
+
 signUpButton.addEventListener('click', () => container.classList.add('right-panel-active'));
 signInButton.addEventListener('click', () => container.classList.remove('right-panel-active'));
+
+const linkParaCadastro = document.getElementById('link-para-cadastro');
+const linkParaLogin    = document.getElementById('link-para-login');
+if (linkParaCadastro) {
+    linkParaCadastro.addEventListener('click', (e) => {
+        e.preventDefault();
+        container.classList.add('right-panel-active');
+    });
+}
+if (linkParaLogin) {
+    linkParaLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        container.classList.remove('right-panel-active');
+    });
+}
 
 // Abre direto no painel de cadastro se vier com ?cadastro=1
 if (new URLSearchParams(window.location.search).get('cadastro') === '1') {
@@ -86,6 +104,32 @@ function calcularIdade(dataNasc) {
     // Subtrai 1 se ainda não fez aniversário neste ano
     if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
     return idade;
+}
+
+// --- Máscara de Data de Nascimento (DD/MM/AAAA) ---
+function mascaraData(v) {
+    v = v.replace(/\D/g, '').slice(0, 8);
+    if (v.length >= 5) {
+        v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, '$1/$2/$3');
+    } else if (v.length > 2) {
+        v = v.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+    }
+    return v;
+}
+
+function parseDataBR(str) {
+    const partes = str.split('/');
+    if (partes.length !== 3) return '';
+    const [dia, mes, ano] = partes;
+    if (!dia || !mes || !ano) return '';
+    return `${ano}-${mes}-${dia}`;
+}
+
+const nascInput = document.getElementById('nascimento-cadastro');
+if (nascInput) {
+    nascInput.addEventListener('input', () => {
+        nascInput.value = mascaraData(nascInput.value);
+    });
 }
 
 // --- Barra de força + checklist de requisitos de senha em tempo real ---
@@ -161,7 +205,7 @@ async function validarCadastro() {
 
     const nome        = document.getElementById('nome-cadastro').value.trim();
     const cpf         = document.getElementById('cpf-cadastro').value.trim();
-    const nascimento  = document.getElementById('nascimento-cadastro').value;
+    const nascimento  = parseDataBR(document.getElementById('nascimento-cadastro').value.trim());
     const email       = document.getElementById('email-cadastro').value.trim();
     const senha       = document.getElementById('senha-cadastro').value;
     const confirma    = document.getElementById('senha-confirma').value;
@@ -180,8 +224,8 @@ async function validarCadastro() {
         return;
     }
 
-    // --- Validação do CPF ---
-    if (!validarCPF(cpf)) {
+    // --- Validação do CPF (opcional) ---
+    if (cpf && !validarCPF(cpf)) {
         setErro('cpf-cadastro', 'CPF inválido. Verifique o número digitado.');
         mostrarToast('CPF inválido. Verifique o número digitado.', 'erro');
         return;
@@ -245,25 +289,27 @@ async function validarCadastro() {
             return;
         }
 
-        const existingCPF = await window.SupabaseService.findUserByCPF(cpf);
-        if (existingCPF) {
-            setErro('cpf-cadastro', 'Este CPF já está cadastrado.');
-            mostrarToast('Este CPF já está cadastrado.', 'erro');
-            return;
+        if (cpf) {
+            const existingCPF = await window.SupabaseService.findUserByCPF(cpf);
+            if (existingCPF) {
+                setErro('cpf-cadastro', 'Este CPF já está cadastrado.');
+                mostrarToast('Este CPF já está cadastrado.', 'erro');
+                return;
+            }
         }
 
         // --- Salva no Supabase ---
-        await window.SupabaseService.saveUser({ nome, cpf, nascimento, email, senha });
+        await window.SupabaseService.saveUser({ nome, cpf: cpf || null, nascimento, email, senha });
 
         mostrarToast('Conta criada com sucesso! Faça login para continuar.', 'sucesso');
 
         // Limpa o formulário
-        document.getElementById('nome-cadastro').value        = '';
-        document.getElementById('cpf-cadastro').value         = '';
-        document.getElementById('nascimento-cadastro').value  = '';
-        document.getElementById('email-cadastro').value       = '';
-        document.getElementById('senha-cadastro').value       = '';
-        document.getElementById('senha-confirma').value       = '';
+        document.getElementById('nome-cadastro').value = '';
+        document.getElementById('cpf-cadastro').value  = '';
+        document.getElementById('nascimento-cadastro').value = '';
+        document.getElementById('email-cadastro').value = '';
+        document.getElementById('senha-cadastro').value = '';
+        document.getElementById('senha-confirma').value = '';
         setTimeout(() => container.classList.remove('right-panel-active'), 1800);
 
     } catch (err) {
@@ -287,33 +333,30 @@ async function validarLogin() {
     }
 
     try {
-        const isCPF  = /^\d/.test(identificador.replace(/\D/g, '')) && identificador.replace(/\D/g, '').length === 11;
-        
-        const user   = isCPF
-            ? await window.SupabaseService.findUserByCPF(identificador)
-            : await window.SupabaseService.findUserByEmail(identificador);
+        const user = await window.SupabaseService.autenticar(identificador, senha);
 
         if (!user) {
-            setErro('email-login', isCPF ? 'CPF não encontrado. Cadastre-se primeiro.' : 'E-mail não encontrado. Cadastre-se primeiro.');
-            mostrarToast(isCPF ? 'CPF não encontrado.' : 'E-mail não encontrado.', 'erro');
-            return;
-        }
-        if (user.senha !== senha) {
-            setErro('senha-login', 'Senha incorreta.');
-            mostrarToast('Senha incorreta. Tente novamente.', 'erro');
+            setErro('email-login', 'Credenciais inválidas.');
+            mostrarToast('Credenciais inválidas.', 'erro');
             return;
         }
 
-        console.log('Usuário encontrado:', user);
-        console.log('DEBUG is_admin vindo do banco:', user.is_admin, '| tipo:', typeof user.is_admin);
-        window.SupabaseService.setSession({ nome: user.nome, email: user.email, is_admin: user.is_admin === true });
+        console.log('Usuário autenticado:', user);
+        console.log('DEBUG isAdmin vindo do banco:', user.isAdmin, '| tipo:', typeof user.isAdmin);
+        window.SupabaseService.setSession({
+            id: user.id,
+            nome: user.nome,
+            email: user.email,
+            is_admin: user.isAdmin === true
+        });
         console.log('Sessão salva:', sessionStorage.getItem('eletrolight_session'));
         mostrarToast('Login efetuado! Redirecionando...', 'sucesso');
         setTimeout(() => { window.location.href = '../index.html'; }, 1200);
-        
+
     } catch (err) {
         console.error('Erro ao fazer login:', err);
-        mostrarToast('Erro ao fazer login. Tente novamente.', 'erro');
+        setErro('senha-login', 'Senha incorreta.');
+        mostrarToast('Senha incorreta. Tente novamente.', 'erro');
     }
 }
 

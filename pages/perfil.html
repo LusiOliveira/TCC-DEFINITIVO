@@ -16,10 +16,14 @@
             <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
             <span class="logo__text">EletroLight</span>
         </a>
-        <nav class="nav-links" aria-label="Seções do site">
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Abrir menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="nav-links" id="nav-links" aria-label="Seções do site">
             <a href="../index.html#inicio">Início</a>
             <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
             <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="./conteudos.html">Conteúdos</a>
             <a href="../index.html#economia">Serviços</a>
             <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
         </nav>
@@ -148,9 +152,7 @@
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../scripts/supabase-client.js"></script>
-    <script src="../scripts/supabase-service.js"></script>
+    <script src="../scripts/api-service.js"></script>
     <script src="../scripts/perfil.js"></script>
     <script>
         // --- Atualiza header com perfil do usuário ---

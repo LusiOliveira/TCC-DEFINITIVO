@@ -1,6 +1,6 @@
 # 📋 EletroLight - Documento de Requisitos
 
-**Versão:** 1.2  
+**Versão:** 1.4  
 **Data:** Maio 2026  
 **Sistema:** Plataforma de Doação e Troca de Eletrônicos
 
@@ -34,9 +34,9 @@
 
 | ID | Requisito | Prioridade |
 |---|---|---|
-| RF-010 | O sistema deve permitir criação de anúncios com título, categoria, tipo (doação/troca), condição, descrição, foto e localização | Alta |
+| RF-010 | O sistema deve permitir criação de anúncios com título, categoria, tipo (doação/troca), condição, descrição, marca, foto e bairro | Alta |
 | RF-011 | O sistema deve permitir upload de imagens com compressão automática (máx. 400px) | Alta |
-| RF-012 | O sistema deve classificar anúncios por categoria eletrônica | Média |
+| RF-012 | O sistema deve classificar anúncios por 11 categorias de eletrônicos (celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos, outros) | Média |
 | RF-013 | O sistema deve permitir edição e exclusão de anúncios exclusivamente pelo proprietário | Alta |
 | RF-015 | O sistema deve exibir lista de anúncios com filtros por categoria | Alta |
 | RF-016 | O sistema deve exibir grid limitado a 5 anúncios na página inicial | Média |
@@ -50,7 +50,6 @@
 | RF-019 | O sistema deve criar anúncios com status "pendente" por padrão | Alta |
 | RF-020 | O sistema deve permitir aprovação e rejeição de anúncios pendentes por administradores | Alta |
 | RF-022 | O sistema deve exibir apenas anúncios "aprovados" para usuários comuns | Alta |
-| RF-023 | O sistema deve notificar proprietário sobre aprovação/rejeição | Baixa |
 
 ### 1.4 Módulo de Chat
 
@@ -60,7 +59,7 @@
 | RF-025 | O sistema deve exibir histórico de mensagens por anúncio | Alta |
 | RF-026 | O sistema deve exibir lista de conversas para o anunciante | Alta |
 | RF-027 | O sistema deve notificar anunciante sobre novas mensagens (badge) | Média |
-| RF-028 | O sistema deve exibir foto de perfil do remetente nas mensagens | Média |
+| RF-028 | O sistema deve exibir foto de perfil do anunciante no header do chat e na lista de conversas | Média |
 | RF-029 | O sistema deve impedir envio de mensagens por usuários bloqueados | Alta |
 
 ### 1.5 Módulo de Denúncias
@@ -91,7 +90,7 @@
 | ID | Requisito | Prioridade |
 |---|---|---|
 | RF-045 | O sistema deve permitir CRUD de conteúdos educativos pelo admin | Média |
-| RF-046 | O sistema deve categorizar conteúdos (reciclagem, curiosidades, dicas, impacto, legislação) | Média |
+| RF-046 | O sistema deve categorizar conteúdos por tipo (vídeo, artigo) | Média |
 | RF-047 | O sistema deve permitir ativar/desativar conteúdos via toggle | Média |
 | RF-048 | O sistema deve exibir apenas conteúdos ativos na página inicial | Média |
 | RF-049 | O sistema deve permitir inclusão de link de vídeo (YouTube) | Baixa |
@@ -111,6 +110,13 @@
 |---|---|---|
 | RF-054 | O sistema deve exibir chatbot flutuante com abertura/fechamento e resposta fixa de demonstração na página inicial | Baixa |
 
+### 1.10 Módulo de Conteúdo Educativo — Página Pública
+
+| ID | Requisito | Prioridade |
+|---|---|---|
+| RF-055 | O sistema deve exibir página dedicada de conteúdos educativos com filtros por tipo (vídeo/artigo) e busca textual | Média |
+| RF-056 | O sistema deve exibir thumbnail e link original nos cards de conteúdo, quando disponíveis | Baixa |
+
 ---
 
 ## 2. REQUISITOS NÃO-FUNCIONAIS (RNF)
@@ -119,17 +125,17 @@
 
 | ID | Requisito | Métrica |
 |---|---|---|
-| RNF-001 | Tempo de resposta das consultas Supabase | < 2 segundos |
+| RNF-001 | Tempo de resposta das consultas ao backend REST | < 2 segundos |
 | RNF-002 | Compressão de imagens antes do upload | Redução de 60-80% |
 | RNF-003 | Carregamento inicial da página | < 3 segundos |
-| RNF-004 | Atualização em tempo real do chat | Supabase Realtime (websocket) |
+| RNF-004 | Atualização do chat após envio | REST API com fetch imediato |
 | RNF-005 | Suporte a múltiplas requisições simultâneas | Sem bloqueio de UI |
 
 ### 2.2 Segurança
 
 | ID | Requisito | Implementação |
 |---|---|---|
-| RNF-006 | Senhas armazenadas com hash | bcrypt (via Supabase Auth) |
+| RNF-006 | Senhas armazenadas com hash | bcrypt (Spring Security) |
 | RNF-008 | Proteção contra XSS | Escape de HTML em mensagens |
 | RNF-009 | Validação de entrada em todos os formulários | Sanitização de inputs |
 | RNF-010 | Sessão expira ao fechar navegador | sessionStorage |
@@ -168,9 +174,10 @@
 
 | ID | Requisito | Estratégia |
 |---|---|---|
-| RNF-027 | Arquitetura baseada em Supabase | Escalabilidade automática |
+| RNF-027 | Arquitetura Spring Boot + PostgreSQL | Escalabilidade via deploy em nuvem |
 | RNF-028 | Limitação de resultados | Paginação implícita (top N) |
-| RNF-029 | Imagens em CDN | jsDelivr/Cloudflare |
+| RNF-029 | Imagens de anúncios em Base64 | Armazenadas no PostgreSQL |
+| RNF-030 | Thumbnails de conteúdo educativo via Supabase Storage | Upload direto com URL pública |
 
 ---
 
@@ -187,7 +194,7 @@
 | RN-006 | Idade máxima de 100 anos | Limite superior |
 | RN-007 | Email deve ter formato válido | Regex RFC 5322 simplificado |
 | RN-008 | Senha deve ter 8-16 caracteres, ao menos 1 letra maiúscula e 1 caractere especial | Length + Regex |
-| RN-011 | Email e CPF devem ser únicos no sistema | Verificação no Supabase |
+| RN-011 | Email e CPF devem ser únicos no sistema | Verificação no banco de dados |
 | RN-012 | CPF deve ser armazenado sem formatação | Apenas dígitos |
 
 ### 3.2 Anúncios
@@ -243,7 +250,10 @@
 | ID | Regra | Validação |
 |---|---|---|
 | RN-041 | Conteúdos são criados ativos por padrão e apenas os ativos aparecem na página inicial | ativo = true + filtro na query |
-| RN-043 | Categorias pré-definidas | Enum: reciclagem, curiosidades, dicas, impacto, legislação |
+| RN-043 | Categorias pré-definidas | Enum: vídeo, artigo (conteúdos educativos) e celulares, notebooks, TVs, tablets, áudio, videogames, eletrodomésticos, cabos, pilhas, periféricos, outros (anúncios) |
+| RN-051 | Link de vídeo é opcional e deve ser URL válida (YouTube) | Validação de formato URL |
+| RN-052 | Link original é opcional e deve ser URL válida | Validação de formato URL |
+| RN-053 | Thumbnail/imagem é opcional, máximo 5MB, enviada via Supabase Storage | Verificação de tamanho e upload |
 
 ### 3.7 Segurança e Acesso
 
@@ -267,9 +277,9 @@
 | Tipo | Quantidade |
 |------|------------|
 | Requisitos Funcionais | 50 |
-| Requisitos Não-Funcionais | 27 |
-| Regras de Negócio | 44 |
-| **Total** | **121** |
+| Requisitos Não-Funcionais | 28 |
+| Regras de Negócio | 47 |
+| **Total** | **125** |
 
 ---
 
@@ -280,3 +290,5 @@
 | 1.0 | Abril 2026 | Versão inicial com módulos de usuários, anúncios, chat, admin, denúncias e moderação |
 | 1.1 | Maio 2026 | Removida recuperação de senha (RF-005, RNF-007, RN-046); mesclados requisitos redundantes (-11 itens) |
 | 1.2 | Maio 2026 | Substituído polling por Supabase Realtime (websocket) para atualização do chat (RNF-004); adicionado autocomplete em campos de senha do perfil |
+| 1.3 | Maio 2026 | Migração documentada de Supabase para Spring Boot REST API (backend em Java + PostgreSQL); atualizadas categorias de anúncios (11 no total); ajustados campos de anúncio (marca e bairro); corrigidas referências de armazenamento de imagens (Base64 no banco) |
+| 1.4 | Maio 2026 | Removido RF-023 (notificação de aprovação/rejeição — não implementado); atualizadas categorias de conteúdo educativo para tipo (vídeo/artigo); adicionados RF-055/056 (página pública de conteúdos, thumbnail/link original); adicionados RN-051/052/053 (links e thumbnail de conteúdo); adicionado RNF-030 (Supabase Storage para thumbnails); ajustado RF-028 (foto de perfil no header do chat, não nas mensagens) |

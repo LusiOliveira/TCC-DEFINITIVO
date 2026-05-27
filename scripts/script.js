@@ -81,124 +81,69 @@ const ecoIcon = L.divIcon({
     popupAnchor: [0, -44],
 });
 
-// 2. Base de Dados (Array) dos Pontos de Coleta
-const pontosDeColeta = [
-    {
-        id: 1,
-        nome: 'Ecoponto Parque do Mindu',
-        endereco: 'Rua Gustavo Américo, Parque Dez',
-        tipo: 'Pilhas, Baterias e Portáteis',
-        zona: 'Zona Norte',
-        lat: -3.0850,
-        lng: -60.0050,
-    },
-    {
-        id: 2,
-        nome: 'Recicla Manaus Centro',
-        endereco: 'Av. Eduardo Ribeiro, Centro',
-        tipo: 'Eletrônicos de Grande Porte',
-        zona: 'Zona Leste',
-        lat: -3.1300,
-        lng: -60.0200,
-    },
-    {
-        id: 3,
-        nome: 'Galpão EcoColeta Leste',
-        endereco: 'Av. Autaz Mirim, Zona Leste',
-        tipo: 'TVs e Monitores',
-        zona: 'Zona Oeste',
-        lat: -3.0700,
-        lng: -59.9500,
-    },
-    {
-        id: 4,
-        nome: 'Ponto Verde UFAM',
-        endereco: 'Av. General Rodrigo Octavio, Coroado',
-        tipo: 'Informática e Celulares',
-        zona: 'Zona Sul',
-        lat: -3.0900,
-        lng: -59.9600,
-    },
-];
-
-// 3. Gerar Marcadores e Lista Dinamicamente (agrupados por Zona)
+// 2. Carregar pontos do backend e renderizar
 const listaPontosContainer = document.getElementById('lista-pontos');
 const marcadoresCriados = {};
 let pontoAtivoId = null;
 
-const zonas = ['Zona Norte', 'Zona Leste', 'Zona Oeste', 'Zona Sul'];
-const pontosPorZona = {};
-zonas.forEach(z => pontosPorZona[z] = []);
-pontosDeColeta.forEach(p => pontosPorZona[p.zona].push(p));
+function renderPonto(ponto) {
+    const lat = ponto.latitude != null ? ponto.latitude : ponto.lat;
+    const lng = ponto.longitude != null ? ponto.longitude : ponto.lng;
+    const tipoLabel = ponto.horario || ponto.tipo || 'Ponto de Coleta';
 
-zonas.forEach(zona => {
-    const grupo = document.createElement('div');
-    grupo.className = 'zona-grupo';
+    const marker = L.marker([lat, lng], { icon: ecoIcon }).addTo(map);
+    marker.bindPopup(`<b>${ponto.nome}</b><br>${ponto.endereco}<br><em>${tipoLabel}</em>`);
+    marcadoresCriados[ponto.id] = marker;
 
-    const header = document.createElement('button');
-    header.className = 'zona-header';
-    header.innerHTML = `<span><i class="fa-solid fa-map-location-dot"></i> ${zona}</span><i class="fa-solid fa-chevron-down zona-seta"></i>`;
+    const card = document.createElement('div');
+    card.className = 'ponto-card';
+    card.innerHTML = `
+        <h3>${ponto.nome}</h3>
+        <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
+        <span class="tag-tipo">${tipoLabel}</span>
+    `;
 
-    const lista = document.createElement('div');
-    lista.className = 'zona-lista';
+    const interagirComPonto = () => {
+        if (pontoAtivoId === ponto.id) {
+            map.flyTo([-3.1190, -60.0217], 12, { animate: true, duration: 1.5 });
+            marker.closePopup();
+            card.classList.remove('ativo');
+            pontoAtivoId = null;
+        } else {
+            document.querySelectorAll('.ponto-card').forEach((c) => c.classList.remove('ativo'));
+            card.classList.add('ativo');
+            map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
+            marker.openPopup();
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            pontoAtivoId = ponto.id;
+        }
+    };
 
-    header.addEventListener('click', () => {
-        const aberta = lista.classList.toggle('aberta');
-        header.querySelector('.zona-seta').style.transform = aberta ? 'rotate(180deg)' : '';
-    });
+    card.addEventListener('click', interagirComPonto);
+    marker.on('click', interagirComPonto);
 
-    pontosPorZona[zona].forEach(ponto => {
-        // A. Marcador no mapa
-        const marker = L.marker([ponto.lat, ponto.lng], { icon: ecoIcon }).addTo(map);
-        marker.bindPopup(`<b>${ponto.nome}</b><br>${ponto.endereco}<br><em>Recolhe: ${ponto.tipo}</em>`);
-        marcadoresCriados[ponto.id] = marker;
+    listaPontosContainer.appendChild(card);
+}
 
-        // B. Cartão na lista
-        const card = document.createElement('div');
-        card.className = 'ponto-card';
-        card.innerHTML = `
-            <h3>${ponto.nome}</h3>
-            <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
-            <span class="tag-tipo">${ponto.tipo}</span>
-        `;
+async function carregarPontosColeta() {
+    if (!listaPontosContainer) return;
+    try {
+        const pontos = await window.SupabaseService.getPontosColeta();
+        listaPontosContainer.innerHTML = '';
+        Object.values(marcadoresCriados).forEach(m => map.removeLayer(m));
+        (pontos || []).forEach(renderPonto);
+    } catch (e) {
+        console.error('Erro ao carregar pontos de coleta:', e);
+        listaPontosContainer.innerHTML = `<div class="empty-state" style="text-align:center;padding:2rem;color:#6B7280;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:#DC2626;"></i>
+            <p>Erro ao carregar pontos de coleta.</p>
+        </div>`;
+    }
+}
 
-        // C. Interação
-        const interagirComPonto = () => {
-            if (pontoAtivoId === ponto.id) {
-                map.flyTo([-3.1190, -60.0217], 12, { animate: true, duration: 1.5 });
-                marker.closePopup();
-                card.classList.remove('ativo');
-                pontoAtivoId = null;
-            } else {
-                document.querySelectorAll('.ponto-card').forEach((c) => c.classList.remove('ativo'));
-                card.classList.add('ativo');
-                map.flyTo([ponto.lat, ponto.lng], 16, { animate: true, duration: 1.5 });
-                marker.openPopup();
-                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                pontoAtivoId = ponto.id;
-            }
-        };
+carregarPontosColeta();
 
-        card.addEventListener('click', interagirComPonto);
-
-        // Clique no pino: abre o grupo se fechado, depois interage
-        marker.on('click', () => {
-            if (!lista.classList.contains('aberta')) {
-                lista.classList.add('aberta');
-                header.querySelector('.zona-seta').style.transform = 'rotate(180deg)';
-            }
-            interagirComPonto();
-        });
-
-        lista.appendChild(card);
-    });
-
-    grupo.appendChild(header);
-    grupo.appendChild(lista);
-    listaPontosContainer.appendChild(grupo);
-});
-
-// --- Lógica do Chatbot ---
+// --- Chatbot com Menu Interativo ---
 const chatbotToggle = document.getElementById('chatbot-toggle');
 const chatbotWindow = document.getElementById('chatbot-window');
 const chatbotClose = document.getElementById('chatbot-close');
@@ -206,49 +151,121 @@ const chatbotSend = document.getElementById('chatbot-send');
 const chatbotInputField = document.getElementById('chatbot-input-field');
 const chatbotMessages = document.getElementById('chatbot-messages');
 
-// Abrir e fechar a janela do chat
+function getSaudacao() {
+    const hora = new Date().getHours();
+    if (hora < 12) return 'Bom dia';
+    if (hora < 18) return 'Boa tarde';
+    return 'Boa noite';
+}
+
+function appendMessage(texto, tipo) {
+    const div = document.createElement('div');
+    div.className = 'message ' + tipo;
+    div.textContent = texto;
+    chatbotMessages.appendChild(div);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+}
+
+function appendBotoes(botoes) {
+    const wrap = document.createElement('div');
+    wrap.className = 'chatbot-botoes';
+    botoes.forEach(btn => {
+        const b = document.createElement('button');
+        b.className = 'chatbot-btn-opcao';
+        b.innerHTML = btn.icone ? `<i class="${btn.icone}"></i> ${btn.texto}` : btn.texto;
+        b.addEventListener('click', () => {
+            appendMessage(btn.texto, 'user');
+            setTimeout(() => {
+                if (btn.acao === 'menu') {
+                    mostrarMenuPrincipal();
+                } else {
+                    appendMessage(btn.resposta, 'bot');
+                    appendBotoes([{ texto: 'Voltar ao menu', icone: 'fa-solid fa-arrow-left', acao: 'menu' }]);
+                }
+            }, 400);
+        });
+        wrap.appendChild(b);
+    });
+    chatbotMessages.appendChild(wrap);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+}
+
+function mostrarMenuPrincipal() {
+    appendMessage(`${getSaudacao()}! Sou o Assistente EletroLight.`, 'bot');
+    const label = document.createElement('div');
+    label.className = 'chatbot-label';
+    label.textContent = 'Escolha um tema:';
+    chatbotMessages.appendChild(label);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+    appendBotoes([
+        { texto: 'Pontos de Coleta', icone: 'fa-solid fa-map-location-dot', resposta: 'Na EletroLight você encontra um mapa interativo com pontos de coleta em Manaus.\n\nCada ponto mostra:\n• Endereço completo\n• Tipos de material aceitos\n• Coordenadas para navegação\n\nRole a página inicial até a seção "Mapa de Pontos de Coleta".', acao: 'simples' },
+        { texto: 'Doar ou Trocar', icone: 'fa-solid fa-hand-holding-heart', resposta: 'Anunciar é simples:\n\n1. Cadastre-se na plataforma\n2. Clique em "Anunciar" no menu\n3. Preencha fotos, descrição e estado do item\n4. Escolha: Doar ou Trocar\n5. Publique!\n\nSeu anúncio será aprovado em breve.', acao: 'simples' },
+        { texto: 'Cadastro / Login', icone: 'fa-solid fa-user', resposta: 'Para usar todos os recursos, crie uma conta gratuita:\n\n• Clique em "Entrar" no topo da página\n• Depois em "Criar conta"\n• É necessário ter 18 anos ou mais\n\nEsqueceu a senha?\nFale com: eletrolightsuporte@gmail.com', acao: 'simples' },
+        { texto: 'Segurança', icone: 'fa-solid fa-shield-halved', resposta: 'Dicas de segurança nas trocas:\n\n• Encontre-se em locais públicos e movimentados\n• Leve alguém contigo\n• Verifique o item pessoalmente antes de trocar\n• Desconfie de ofertas muito abaixo do valor\n\nSe encontrar algo suspeito, denuncie!', acao: 'simples' },
+        { texto: 'Denúncias', icone: 'fa-solid fa-flag', resposta: 'Como denunciar:\n\n• No anúncio: clique em "Denunciar" e escolha o motivo\n• No chat: use o menu de 3 pontos e "Denunciar conversa"\n\nNossa equipe analisa em até 48h e pode aplicar restrições ou excluir contas.', acao: 'simples' },
+        { texto: 'E-lixo', icone: 'fa-solid fa-leaf', resposta: 'O e-lixo é um dos resíduos que mais cresce no mundo.\n\nDescartar incorretamente libera metais pesados no solo e rios.\n\nA EletroLight facilita:\n• Reutilização\n• Reparo\n• Reciclagem\n\nDoar ou trocar prolonga a vida útil dos aparelhos!', acao: 'simples' },
+        { texto: 'Sobre nós', icone: 'fa-solid fa-circle-info', resposta: 'A EletroLight é um projeto de extensão da UFAM focado em mitigação de e-lixo em Manaus.\n\nSomos uma plataforma digital sem fins lucrativos que conecta pessoas para doar e trocar eletrônicos usados, promovendo economia circular e consumo consciente.', acao: 'simples' },
+        { texto: 'Contato', icone: 'fa-solid fa-envelope', resposta: 'Fale conosco:\n\n📧 eletrolightsuporte@gmail.com\n\nRespondemos em até 48 horas úteis.', acao: 'simples' },
+    ]);
+}
+
 chatbotToggle.addEventListener('click', () => {
-    chatbotWindow.classList.toggle('hidden');
+    const isHidden = chatbotWindow.classList.toggle('hidden');
+    if (!isHidden && chatbotMessages.children.length === 0) {
+        mostrarMenuPrincipal();
+    }
 });
 
 chatbotClose.addEventListener('click', () => {
     chatbotWindow.classList.add('hidden');
 });
 
-// Função para enviar mensagem
-function sendMessage() {
-    const text = chatbotInputField.value.trim();
-    if (text !== '') {
-        // Cria o balão de mensagem do usuário
-        const userMsg = document.createElement('div');
-        userMsg.className = 'message user';
-        userMsg.textContent = text;
-        chatbotMessages.appendChild(userMsg);
-        
-        // Limpa a caixa de texto e rola para baixo
-        chatbotInputField.value = '';
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-
-        // Simula a IA "pensando" e respondendo após 1 segundo
-        setTimeout(() => {
-            const botMsg = document.createElement('div');
-            botMsg.className = 'message bot';
-            botMsg.textContent = 'Esta é uma versão de demonstração! No projeto final, eu poderei tirar dúvidas reais sobre reciclagem e pontos de coleta para você.';
-            chatbotMessages.appendChild(botMsg);
-            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-        }, 1000);
-    }
+// Fechar ao tocar fora do chatbot — somente em mobile/tablet
+if (window.matchMedia('(max-width: 768px)').matches) {
+    document.addEventListener('click', (e) => {
+        if (chatbotWindow.classList.contains('hidden')) return;
+        const wrapper = document.querySelector('.chatbot-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            chatbotWindow.classList.add('hidden');
+        }
+    });
 }
 
-// Enviar ao clicar no botão
-chatbotSend.addEventListener('click', sendMessage);
+function sendMessage() {
+    const text = chatbotInputField.value.trim();
+    if (!text) return;
+    appendMessage(text, 'user');
+    chatbotInputField.value = '';
 
-// Enviar ao apertar "Enter" no teclado
+    const p = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let resposta = 'Não entendi muito bem. Use os botões acima para navegar ou digite algo mais simples.';
+
+    if (p.includes('oi') || p.includes('ola') || p.includes('olá')) resposta = `${getSaudacao()}! Use os botões acima para navegar.`;
+    else if (p.includes('ponto') || p.includes('coleta') || p.includes('descartar')) resposta = 'Na EletroLight você encontra um mapa interativo com pontos de coleta em Manaus.';
+    else if (p.includes('doar') || p.includes('trocar') || p.includes('anunciar')) resposta = '1) Cadastre-se. 2) Clique em "Anunciar". 3) Preencha as informações. 4) Escolha Doar ou Trocar. 5) Publique!';
+    else if (p.includes('cadastrar') || p.includes('login') || p.includes('conta')) resposta = 'Clique em "Entrar" no topo e depois "Criar conta". É necessário ter 18 anos ou mais.';
+    else if (p.includes('seguranca') || p.includes('seguro') || p.includes('golpe')) resposta = 'Encontre-se em locais públicos, leve alguém contigo e verifique o item antes de trocar.';
+    else if (p.includes('denuncia')) resposta = 'Clique em "Denunciar" no anúncio ou no chat. Analisamos em até 48h.';
+    else if (p.includes('lixo') || p.includes('ambiente') || p.includes('reciclar')) resposta = 'O e-lixo é um dos resíduos que mais cresce. A EletroLight facilita reutilização e reciclagem em Manaus.';
+    else if (p.includes('sobre') || p.includes('quem') || p.includes('eletrolight')) resposta = 'Projeto da UFAM focado em mitigação de e-lixo em Manaus.';
+    else if (p.includes('contato') || p.includes('email') || p.includes('suporte')) resposta = 'eletrolightsuporte@gmail.com';
+    else if (p.includes('obrigado') || p.includes('tchau')) resposta = 'Por nada! Vamos juntos reduzir o e-lixo em Manaus! ♻️';
+
+    setTimeout(() => {
+        appendMessage(resposta, 'bot');
+        appendBotoes([{ texto: 'Voltar ao menu', icone: 'fa-solid fa-arrow-left', acao: 'menu' }]);
+    }, 400);
+}
+
+chatbotSend.addEventListener('click', sendMessage);
 chatbotInputField.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendMessage();
-    }
+    if (e.key === 'Enter') sendMessage();
 });
+
+if (!chatbotWindow.classList.contains('hidden') && chatbotMessages.children.length === 0) {
+    mostrarMenuPrincipal();
+}
 
 // --- ANÚNCIOS — RENDERIZAÇÃO DINÂMICA (index.html) ---
 const anunciosGrid = document.getElementById('anuncios-grid');

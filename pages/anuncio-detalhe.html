@@ -234,28 +234,6 @@
         }
         .chat-owner-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Modal de Denúncia */
-        .denuncia-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;
-        }
-        .denuncia-overlay.hidden { display: none; }
-        .denuncia-modal {
-            background: #fff; border-radius: 16px; padding: 1.8rem;
-            width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-        }
-        .denuncia-modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; color: #DC2626; }
-        .denuncia-modal .denuncia-sub { font-size: 0.83rem; color: #6B7280; margin-bottom: 1.2rem; }
-        .denuncia-modal label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #374151; }
-        .denuncia-modal select, .denuncia-modal textarea {
-            width: 100%; padding: 9px 12px; border: 1.5px solid #E5E7EB;
-            border-radius: 8px; font-size: 0.88rem; color: #1F2937;
-            outline: none; transition: border-color 0.2s; font-family: inherit;
-            margin-bottom: 1rem; background: #fff;
-        }
-        .denuncia-modal select:focus, .denuncia-modal textarea:focus { border-color: #DC2626; }
-        .denuncia-modal textarea { resize: vertical; min-height: 80px; }
-        .denuncia-modal-actions { display: flex; gap: 8px; }
         .btn-enviar-denuncia {
             flex: 1; background: #DC2626; color: white; border: none;
             border-radius: 8px; padding: 10px; font-size: 0.88rem;
@@ -476,10 +454,14 @@
             <img src="../assets/images/Logo.png" alt="" width="42" height="42" class="logo__img" />
             <span class="logo__text">EletroLight</span>
         </a>
-        <nav class="nav-links" aria-label="Seções do site">
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Abrir menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="nav-links" id="nav-links" aria-label="Seções do site">
             <a href="../index.html#inicio">Início</a>
             <a href="../index.html#mapa-coleta">Pontos de Coleta</a>
             <a href="../index.html#aprendizado">Canal de Conscientização</a>
+            <a href="./conteudos.html">Conteúdos</a>
             <a href="../index.html#economia">Serviços</a>
             <a href="../index.html#sobre-projeto">Sobre o Projeto</a>
         </nav>
@@ -673,31 +655,9 @@
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../scripts/supabase-client.js"></script>
-    <!-- Modal Denúncia -->
-    <div class="denuncia-overlay hidden" id="modal-denuncia">
-        <div class="denuncia-modal">
-            <h3><i class="fa-solid fa-flag"></i> Denunciar conversa</h3>
-            <p class="denuncia-sub">Sua denúncia será analisada pela equipe EletroLight.</p>
-            <label for="denuncia-motivo">Motivo</label>
-            <select id="denuncia-motivo">
-                <option value="Conteúdo inapropriado">Conteúdo inapropriado</option>
-                <option value="Spam ou golpe">Spam ou golpe</option>
-                <option value="Assédio ou ameaça">Assédio ou ameaça</option>
-                <option value="Anúncio falso">Anúncio falso</option>
-                <option value="Outro">Outro</option>
-            </select>
-            <label for="denuncia-descricao">Descrição (opcional)</label>
-            <textarea id="denuncia-descricao" placeholder="Descreva o ocorrido com mais detalhes…"></textarea>
-            <div class="denuncia-modal-actions">
-                <button class="btn-cancelar-denuncia" id="btn-cancelar-denuncia">Cancelar</button>
-                <button class="btn-enviar-denuncia" id="btn-enviar-denuncia">Enviar Denúncia</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="../scripts/supabase-service.js"></script>
+    <script src="../scripts/api-service.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script src="../scripts/anuncios-data.js"></script>
     <script>
         // ---- Header: perfil dropdown ----
@@ -763,6 +723,7 @@
         }
 
         function renderMessages(msgs, myEmail, containerEl) {
+            const atBottom = containerEl.scrollTop + containerEl.clientHeight >= containerEl.scrollHeight - 40;
             if (!msgs || msgs.length === 0) {
                 containerEl.innerHTML = `
                     <div class="chat-empty-state">
@@ -778,7 +739,7 @@
                     <span class="chat-hora">${isMine ? 'Você' : escapeHtml(m.remetente_nome || m.remetente_email)} · ${formatHora(m.created_at)}</span>
                 </div>`;
             }).join('');
-            containerEl.scrollTop = containerEl.scrollHeight;
+            if (atBottom) containerEl.scrollTop = containerEl.scrollHeight;
         }
 
         // ---- Main init ----
@@ -861,6 +822,12 @@
                 document.getElementById('modal-denuncia').classList.add('hidden');
             });
 
+            // Fechar modal ao clicar fora
+            document.getElementById('modal-denuncia').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modal-denuncia'))
+                    document.getElementById('modal-denuncia').classList.add('hidden');
+            });
+
             document.getElementById('btn-enviar-denuncia').addEventListener('click', async () => {
                 const btn = document.getElementById('btn-enviar-denuncia');
                 const tipo    = document.getElementById('den-tipo').value;
@@ -872,7 +839,6 @@
                     await window.SupabaseService.enviarDenuncia({
                         tipo,
                         alvo_email: ownerEmail,
-                        alvo_id: String(anuncioId),
                         alvo_titulo: anuncio.titulo,
                         motivo,
                         descricao: descricao || null,
@@ -937,45 +903,8 @@
                 document.addEventListener('click', () => menuDropdown.classList.add('hidden'));
                 document.getElementById('btn-denunciar-chat').addEventListener('click', () => {
                     menuDropdown.classList.add('hidden');
+                    document.getElementById('den-tipo').value = 'perfil';
                     document.getElementById('modal-denuncia').classList.remove('hidden');
-                });
-
-                document.getElementById('btn-cancelar-denuncia').addEventListener('click', () => {
-                    document.getElementById('modal-denuncia').classList.add('hidden');
-                });
-
-                document.getElementById('modal-denuncia').addEventListener('click', (e) => {
-                    if (e.target === document.getElementById('modal-denuncia'))
-                        document.getElementById('modal-denuncia').classList.add('hidden');
-                });
-
-                document.getElementById('btn-enviar-denuncia').addEventListener('click', async () => {
-                    const motivo   = document.getElementById('denuncia-motivo').value;
-                    const descricao = document.getElementById('denuncia-descricao').value.trim();
-                    const _sess = JSON.parse(sessionStorage.getItem('eletrolight_session') || 'null');
-                    if (!_sess) return;
-                    const btnD = document.getElementById('btn-enviar-denuncia');
-                    btnD.disabled = true;
-                    btnD.textContent = 'Enviando…';
-                    try {
-                        await window.SupabaseService.enviarDenuncia({
-                            tipo: 'anuncio',
-                            alvo_titulo: anuncio.titulo || '',
-                            alvo_email:  ownerEmail || '',
-                            motivo,
-                            descricao,
-                            denunciante_email: _sess.email,
-                            status: 'pendente'
-                        });
-                        document.getElementById('modal-denuncia').classList.add('hidden');
-                        document.getElementById('denuncia-descricao').value = '';
-                        alert('Denúncia enviada com sucesso. Nossa equipe irá analisar em breve. Obrigado!');
-                    } catch (_e) {
-                        alert('Erro ao enviar denúncia. Tente novamente.');
-                    } finally {
-                        btnD.disabled = false;
-                        btnD.textContent = 'Enviar Denúncia';
-                    }
                 });
 
                 await loadUserChat();
@@ -1057,22 +986,6 @@
 
                 const msgs = await window.SupabaseService.getMensagens(anuncioId, session.email, contactEmail);
                 renderMessages(msgs, session.email, msgBox);
-
-                // Cancela canal anterior e abre novo canal Realtime
-                if (ownerChannel) window.supabaseClient.removeChannel(ownerChannel);
-                ownerChannel = window.supabaseClient
-                    .channel(`chat-owner-${anuncioId}-${contactEmail}`)
-                    .on('postgres_changes', {
-                        event: 'INSERT',
-                        schema: 'public',
-                        table: 'mensagens',
-                        filter: `anuncio_id=eq.${anuncioId}`
-                    }, async () => {
-                        if (!activeContactEmail) return;
-                        const fresh = await window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail);
-                        renderMessages(fresh, session.email, document.getElementById('chat-messages-owner'));
-                    })
-                    .subscribe();
             }
 
             // Owner send
@@ -1113,19 +1026,6 @@
                 renderMessages(msgs, session.email, msgBox);
             }
 
-            // Canal Realtime para o lado do comprador/interessado
-            userChannel = window.supabaseClient
-                .channel(`chat-user-${anuncioId}-${session.email}`)
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'mensagens',
-                    filter: `anuncio_id=eq.${anuncioId}`
-                }, async () => {
-                    await loadUserChat();
-                })
-                .subscribe();
-
             document.getElementById('chat-send-user')?.addEventListener('click', () => sendUserMessage());
             document.getElementById('chat-input-user')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
@@ -1139,7 +1039,7 @@
                 btn.disabled = true;
                 try {
                     const _usr = await window.SupabaseService.findUserByEmail(session.email);
-                    if (_usr && _usr.bloqueio_chat) {
+                    if (_usr && _usr.bloqueioChat) {
                         alert('Sua conta está restrita de enviar mensagens. Entre em contato com o suporte.');
                         return;
                     }
@@ -1157,10 +1057,48 @@
                 }
             }
 
-            // Limpa canais ao sair da página
+            // ── Realtime: WebSocket nativo + Polling fallback ──
+            function refreshChat() {
+                if (isOwner && activeContactEmail) {
+                    window.SupabaseService.getMensagens(anuncioId, session.email, activeContactEmail)
+                        .then(msgs => renderMessages(msgs, session.email, document.getElementById('chat-messages-owner')))
+                        .catch(() => {});
+                } else if (!isOwner && ownerEmail) {
+                    loadUserChat().catch(() => {});
+                }
+            }
+
+            let pollInterval = null;
+            let stompClient = null;
+            let wsConnected = false;
+
+            try {
+                const wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws';
+                const wsRaw = new WebSocket(wsUrl);
+                stompClient = Stomp.over(wsRaw);
+                stompClient.debug = null;
+                stompClient.connect({}, function () {
+                    wsConnected = true;
+                    clearInterval(pollInterval);
+                    stompClient.subscribe('/topic/mensagens/' + anuncioId, refreshChat);
+                }, function (err) {
+                    console.warn('[WS] falhou, usando polling:', err);
+                    if (!pollInterval) pollInterval = setInterval(refreshChat, 3000);
+                });
+            } catch (e) {
+                console.warn('[WS] erro ao iniciar WebSocket:', e);
+            }
+
+            setTimeout(() => {
+                if (!wsConnected && !pollInterval) {
+                    console.info('[WS] timeout — iniciando polling de fallback');
+                    pollInterval = setInterval(refreshChat, 3000);
+                }
+            }, 5000);
+
             window.addEventListener('beforeunload', () => {
-                if (ownerChannel) window.supabaseClient.removeChannel(ownerChannel);
-                if (userChannel)  window.supabaseClient.removeChannel(userChannel);
+                clearInterval(pollInterval);
+                if (stompClient && stompClient.connected) stompClient.disconnect();
             });
 
         })(); // end init

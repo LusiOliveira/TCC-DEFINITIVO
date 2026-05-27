@@ -591,6 +591,20 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     pointer-events: none;
 }
 
+.toggle-mobile {
+    display: none;
+    margin-top: 18px;
+    font-size: 0.88rem;
+    color: var(--text-light);
+}
+
+.toggle-mobile a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* --- Responsivo --- */
 @media (max-width: 900px) {
     body {
@@ -619,50 +633,63 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 @media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
+    body {
+        align-items: flex-start;
+        min-height: auto;
+        padding-top: 70px;
+        padding-bottom: 24px;
+    }
+
     .container {
-        min-height: 840px;
-    }
-
-    .sign-in-container,
-    .sign-up-container,
-    .overlay-container {
         width: 100%;
+        min-height: auto;
+        height: auto;
+        overflow: visible;
+        border-radius: 20px;
     }
 
-    .overlay-container {
-        display: none;
+    .form-container {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        display: none !important;
+        padding: 32px 0;
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: all !important;
+        z-index: auto !important;
     }
 
-    .sign-in-container,
-    .sign-up-container {
-        left: 0;
-        width: 100%;
-    }
-
-    .container.right-panel-active .sign-in-container,
-    .container.right-panel-active .sign-up-container {
-        transform: translateX(0);
-    }
-
-    .sign-in-container {
-        opacity: 1;
-        z-index: 2;
-    }
-
-    .sign-up-container {
-        opacity: 0;
-        z-index: 1;
-        pointer-events: none;
+    .container:not(.right-panel-active) .sign-in-container {
+        display: flex !important;
     }
 
     .container.right-panel-active .sign-up-container {
-        opacity: 1;
-        z-index: 3;
-        pointer-events: all;
+        display: flex !important;
     }
 
-    .container.right-panel-active .sign-in-container {
-        opacity: 0;
-        pointer-events: none;
+    .overlay-container {
+        display: none !important;
+    }
+
+    .toggle-mobile {
+        display: block;
+    }
+
+    form {
+        height: auto;
+        padding: 0 20px;
+        max-width: 100%;
+    }
+
+    h2 {
+        font-size: 1.7rem;
     }
 }

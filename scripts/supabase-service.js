@@ -46,6 +46,7 @@ async function findUserByEmail(email) {
 }
 
 async function findUserByCPF(cpf) {
+    if (!cpf) return null;
     const cleanCPF = cpf.replace(/\D/g, '');
     const { data, error } = await supabaseInstance
         .from('users')
@@ -75,7 +76,7 @@ async function saveUser(user) {
         .from('users')
         .insert([{
             nome: user.nome,
-            cpf: user.cpf.replace(/\D/g, ''),
+            cpf: user.cpf ? user.cpf.replace(/\D/g, '') : null,
             nascimento: user.nascimento,
             email: user.email.toLowerCase(),
             senha: user.senha,
@@ -430,6 +431,24 @@ async function atualizarConteudo(id, updates) {
     return true;
 }
 
+// ============================================
+// UPLOAD DE IMAGEM (Supabase Storage)
+// ============================================
+
+async function uploadImagem(file, path = '') {
+    const bucket = 'imagens';
+    const ext = file.name.split('.').pop();
+    const fileName = `${path}${Date.now()}.${ext}`;
+    const { data, error } = await supabaseInstance.storage
+        .from(bucket)
+        .upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data: { publicUrl } } = supabaseInstance.storage
+        .from(bucket)
+        .getPublicUrl(fileName);
+    return publicUrl;
+}
+
 async function deletarConteudo(id) {
     const { error } = await supabaseInstance
         .from('conteudo_educativo')
@@ -519,6 +538,7 @@ window.SupabaseService = {
     adicionarConteudo,
     atualizarConteudo,
     deletarConteudo,
+    uploadImagem,
     aplicarPunicao,
     removerPunicao,
     excluirConta,

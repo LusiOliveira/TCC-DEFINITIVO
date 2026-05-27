@@ -49,14 +49,16 @@ function marcarErro(el) {
 // --- Preencher dados na tela ---
 async function carregarDados() {
     try {
+        console.log('DEBUG session:', session);
         const usuario = await window.SupabaseService.findUserByEmail(session.email);
+        console.log('DEBUG usuario por email:', usuario);
         if (!usuario) return;
 
         // Info fixa
         document.getElementById('info-nome').textContent       = usuario.nome;
         document.getElementById('info-cpf').textContent        = usuario.cpf;
-        document.getElementById('info-nascimento').textContent = usuario.nascimento
-            ? new Date(usuario.nascimento + 'T00:00:00').toLocaleDateString('pt-BR')
+        document.getElementById('info-nascimento').textContent = usuario.dataNascimento
+            ? new Date(usuario.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')
             : '—';
 
         // Campos editáveis
@@ -174,10 +176,10 @@ document.getElementById('perfil-form').addEventListener('submit', async (e) => {
     }
 
     try {
-        // Busca usuário atual no Supabase
+        // Busca usuário atual pelo email (ID da sessão pode estar desatualizado)
         const usuario = await window.SupabaseService.findUserByEmail(session.email);
         if (!usuario) {
-            mostrarToast('Usuário não encontrado.', 'erro');
+            mostrarToast('Sessão inválida. Faça login novamente.', 'erro');
             return;
         }
 
@@ -198,11 +200,6 @@ document.getElementById('perfil-form').addEventListener('submit', async (e) => {
 
         // Valida senha (somente se o usuário preencheu algum campo de senha)
         if (senhaAtual || senhaNova || senhaConfirma) {
-            if (senhaAtual !== usuario.senha) {
-                marcarErro(document.getElementById('perfil-senha-atual'));
-                mostrarToast('Senha atual incorreta.', 'erro');
-                return;
-            }
             if (senhaNova.length < 8 || senhaNova.length > 16) {
                 marcarErro(document.getElementById('perfil-senha-nova'));
                 mostrarToast('Nova senha: 8 a 16 caracteres.', 'erro');
@@ -223,7 +220,18 @@ document.getElementById('perfil-form').addEventListener('submit', async (e) => {
                 mostrarToast('As senhas não coincidem.', 'erro');
                 return;
             }
-            updates.senha = senhaNova;
+            try {
+                console.log('DEBUG alterarSenha email:', session.email);
+                await window.SupabaseService.alterarSenha(session.email, senhaAtual, senhaNova);
+            } catch (err) {
+                if (err.status === 404) {
+                    mostrarToast('Sessão inválida. Faça login novamente.', 'erro');
+                } else {
+                    marcarErro(document.getElementById('perfil-senha-atual'));
+                    mostrarToast('Senha atual incorreta.', 'erro');
+                }
+                return;
+            }
         }
 
         // Adiciona foto se for uma nova imagem
@@ -236,7 +244,12 @@ document.getElementById('perfil-form').addEventListener('submit', async (e) => {
 
         // Atualiza sessão se o email mudou
         if (novoEmail.toLowerCase() !== session.email.toLowerCase()) {
-            window.SupabaseService.setSession({ nome: usuario.nome, email: novoEmail });
+            window.SupabaseService.setSession({
+                id: session.id,
+                nome: usuario.nome,
+                email: novoEmail,
+                is_admin: session.is_admin
+            });
         }
 
         mostrarToast('Perfil atualizado com sucesso!', 'sucesso');

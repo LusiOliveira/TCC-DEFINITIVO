@@ -49,29 +49,29 @@ CREATE TABLE ponto_coleta (
 );
 
 -- ------------------------------------------------------------
--- 4. MENSAGEM
--- Chat entre usuarios interessados em um anuncio.
--- id_anuncio vincula a conversa ao anuncio especifico.
--- ON DELETE SET NULL: se anuncio for removido, mensagens permanecem sem referencia.
+-- 4. GRUPO
+-- Perfis de permissao (ex: Administrador, Usuario Comum).
+-- id_grupo eh chave manual (nao serial) para facilitar INSERT inicial.
 -- ------------------------------------------------------------
-CREATE TABLE mensagem (
-    id_mensagem BIGSERIAL PRIMARY KEY,
-    texto TEXT NOT NULL,
-    remetente_email VARCHAR(150) NOT NULL,
-    remetente_nome VARCHAR(100),
-    destinatario_email VARCHAR(150) NOT NULL,
-    destinatario_nome VARCHAR(100),
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    id_anuncio BIGINT,
-
-    CONSTRAINT fk_mensagem_anuncio
-    FOREIGN KEY (id_anuncio) REFERENCES anuncio(id_anuncio)
-    ON DELETE SET NULL
+CREATE TABLE grupo (
+    id_grupo INT PRIMARY KEY,
+    descricao VARCHAR(200)
 );
 
 -- ------------------------------------------------------------
--- 5. USUARIO
+-- 5. CATEGORIA
+-- Taxonomia dos anuncios (eletronicos).
+-- slug eh usado como FK em anuncio e deve ser unico.
+-- ------------------------------------------------------------
+CREATE TABLE categoria (
+    id_categoria INT PRIMARY KEY,
+    slug VARCHAR(50) UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    icone TEXT                        -- nome do icone/lib usada no frontend
+);
+
+-- ------------------------------------------------------------
+-- 6. USUARIO
 -- Credenciais e flags de autenticacao.
 -- Foto pode ser Base64 ou URL. Senha deve ser hasheada pelo backend.
 -- bloqueio_publicacao / bloqueio_chat: flags de punicao aplicadas pelo admin.
@@ -93,23 +93,13 @@ CREATE TABLE usuario (
 );
 
 -- ------------------------------------------------------------
--- 6. GRUPO
--- Perfis de permissao (ex: Administrador, Usuario Comum).
--- id_grupo eh chave manual (nao serial) para facilitar INSERT inicial.
--- ------------------------------------------------------------
-CREATE TABLE grupo (
-    id_grupo INT PRIMARY KEY,
-    descricao VARCHAR(200)
-);
-
--- ------------------------------------------------------------
 -- 7. USUARIO_GRUPO
 -- Relacionamento N:N entre usuario e grupo.
 -- Define se o usuario eh admin, comum, ou possui multiplos perfis.
 -- ON DELETE CASCADE: remove vinculo automaticamente se usuario for excluido.
 -- ------------------------------------------------------------
 CREATE TABLE usuario_grupo (
-    id_usuario_grupo INT PRIMARY KEY,
+    id_usuario_grupo BIGSERIAL PRIMARY KEY,
     id_grupo INT,
     id_usuario BIGINT,
 
@@ -122,19 +112,7 @@ CREATE TABLE usuario_grupo (
 );
 
 -- ------------------------------------------------------------
--- 8. CATEGORIA
--- Taxonomia dos anuncios (eletronicos).
--- slug eh usado como FK em anuncio e deve ser unico.
--- ------------------------------------------------------------
-CREATE TABLE categoria (
-    id_categoria INT PRIMARY KEY,
-    slug VARCHAR(50) UNIQUE,
-    nome VARCHAR(100) NOT NULL,
-    icone TEXT                        -- nome do icone/lib usada no frontend
-);
-
--- ------------------------------------------------------------
--- 9. ANUNCIO
+-- 8. ANUNCIO
 -- Card/doacao/troca de eletronicos publicados pelos usuarios.
 -- status: pendente -> aguardando aprovacao do admin
 --          aprovado -> visivel na listagem publica
@@ -164,6 +142,28 @@ CREATE TABLE anuncio (
 
     CONSTRAINT chk_status
     CHECK (status IN ('pendente', 'aprovado', 'rejeitado'))
+);
+
+-- ------------------------------------------------------------
+-- 9. MENSAGEM
+-- Chat entre usuarios interessados em um anuncio.
+-- id_anuncio vincula a conversa ao anuncio especifico.
+-- ON DELETE SET NULL: se anuncio for removido, mensagens permanecem sem referencia.
+-- ------------------------------------------------------------
+CREATE TABLE mensagem (
+    id_mensagem BIGSERIAL PRIMARY KEY,
+    texto TEXT NOT NULL,
+    remetente_email VARCHAR(150) NOT NULL,
+    remetente_nome VARCHAR(100),
+    destinatario_email VARCHAR(150) NOT NULL,
+    destinatario_nome VARCHAR(100),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    id_anuncio BIGINT,
+
+    CONSTRAINT fk_mensagem_anuncio
+    FOREIGN KEY (id_anuncio) REFERENCES anuncio(id_anuncio)
+    ON DELETE SET NULL
 );
 
 -- ------------------------------------------------------------
@@ -205,11 +205,14 @@ INSERT INTO grupo (id_grupo, descricao) VALUES
 
 -- Categorias de eletronicos disponiveis para anuncio
 INSERT INTO categoria (id_categoria, slug, nome, icone) VALUES
-(1, 'smartphones', 'Smartphones', 'smartphone'),
-(2, 'tablets', 'Tablets', 'tablet'),
-(3, 'notebooks', 'Notebooks', 'laptop'),
-(4, 'desktops', 'Desktops', 'desktop'),
-(5, 'monitores', 'Monitores', 'monitor'),
-(6, 'perifericos', 'Perifericos', 'mouse'),
-(7, 'acessorios', 'Acessorios', 'headset'),
-(8, 'outros', 'Outros', 'devices');
+(1, 'celulares', 'Celulares e Smartphones', 'smartphone'),
+(2, 'tablets', 'Tablets e E-readers', 'tablet'),
+(3, 'notebooks', 'Notebooks e Computadores', 'laptop'),
+(4, 'tvs', 'TVs e Monitores', 'monitor'),
+(5, 'audio', 'Audio e Video', 'headset'),
+(6, 'videogames', 'Videogames e Consoles', 'gamepad'),
+(7, 'eletrodomesticos', 'Eletrodomesticos', 'electrical_services'),
+(8, 'cabos', 'Cabos e Carregadores', 'cable'),
+(9, 'pilhas', 'Pilhas e Baterias', 'battery_4_bar'),
+(10, 'perifericos', 'Perifericos', 'mouse'),
+(11, 'outros', 'Outros', 'devices');
