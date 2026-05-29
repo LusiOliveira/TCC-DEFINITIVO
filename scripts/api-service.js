@@ -56,12 +56,11 @@ async function getUsers() {
 async function findUserByEmail(email) {
     try {
         const url = '/usuarios/email/' + encodeURIComponent(email.toLowerCase());
-        console.log('DEBUG apiFetch GET', url);
         const u = await apiFetch(url);
-        console.log('DEBUG apiFetch response', u);
         return normalizeUser(u);
     } catch (e) {
-        console.error('DEBUG apiFetch error', e);
+        if (e.status === 404) return null;
+        console.error('Erro ao buscar usuário por email:', e);
         return null;
     }
 }
@@ -85,8 +84,8 @@ async function findUserById(userId) {
 async function saveUser(user) {
     const payload = {
         nome: user.nome,
-        cpf: user.cpf ? user.cpf.replace(/\D/g, '') : null,
-        nascimento: user.nascimento,
+        cpf: user.cpf ? user.cpf.replace(/\D/g, '') : '',
+        dataNascimento: user.nascimento,
         email: user.email.toLowerCase(),
         senha: user.senha,
         whatsapp: user.whatsapp || null,

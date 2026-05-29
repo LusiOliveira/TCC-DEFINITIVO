@@ -55,10 +55,11 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | Seção | Descrição |
 |-------|-----------|
 | **Hero** | Carrossel de imagens com autoplay e navegação manual |
-| **Mapa de Coleta** | Mapa Leaflet com **pinos SVG customizados** (estilo moderno com círculo branco) e lista lateral agrupada por **zonas de Manaus** (Norte, Leste, Oeste, Sul) em acordeões |
+| **Mapa de Coleta** | Mapa Leaflet com **pinos SVG customizados** e lista lateral simples (sem zonas). Integrado com backend e fallback hardcoded de 12 pontos em Manaus |
 | **Canal de Aprendizado** | Abas com conteúdo educativo sobre e-lixo e curiosidades sobre o Brasil |
 | **Anúncios (Serviços)** | Grid de anúncios com filtro por múltiplas categorias (máx. 5 na home) e botão Editar para anúncios próprios |
-| **Chatbot** | Assistente virtual demonstrativo com respostas fixas |
+| **Chatbot** | Assistente virtual funcional com **menu interativo** (8 botões de temas), respostas formatadas, fechamento ao tocar fora em mobile |
+| **Termos de Uso** | Página com conteúdo completo e **download em PDF** via jsPDF |
 | **Sobre o Projeto** | Informações institucionais |
 
 ### 📢 Sistema de Anúncios
@@ -97,8 +98,10 @@ O EletroLight é uma aplicação web **full-stack** focada em:
 | **Anúncios Pendentes** | Lista anúncios com status `pendente` para aprovar ou rejeitar antes da publicação |
 | **Denúncias** | Visualiza denúncias de usuários com filtro por status (pendentes/resolvidas) |
 | **Tomar Ação** | Modal com 5 opções: sem punição, bloquear publicações, bloquear chat, bloquear ambos, excluir conta |
+| **Pontos de Coleta** | CRUD completo para gerenciar os pontos no mapa (adicionar, editar, excluir vinculado ao backend) |
 | **Conteúdo Educativo** | CRUD completo para gerenciar os textos exibidos no canal de aprendizado |
 | **Usuários Restritos** | Lista usuários bloqueados com opções de revogar restrições individualmente |
+| **Persistência de Aba** | Aba ativa do admin é preservada ao atualizar a página (via hash da URL) |
 
 ### 🔐 Sistema de Autenticação (login/)
 
@@ -131,6 +134,7 @@ EletroLight/
 │   ├── meus-anuncios.html     # Gerenciamento com notificações
 │   ├── perfil.html            # Edição de perfil do usuário
 │   ├── admin.html             # Painel administrativo (restrito)
+│   ├── termos-de-uso.html     # Termos de Uso com PDF download
 │   └── questionario-ux.html   # Questionário de avaliação de usabilidade
 │
 ├── styles/                    # Arquivos CSS
@@ -280,7 +284,16 @@ admin.html → Aba "Anúncios Pendentes" → GET /anuncios/pendentes
 → Admin clica Rejeitar → PATCH /anuncios/{id}/rejeitar → status = 'rejeitado' → anúncio removido
 ```
 
-### 10. Resolver Denúncia com Punição
+### 10. Gerenciar Pontos de Coleta (Admin)
+```
+admin.html → Aba "Pontos de Coleta" → GET /pontosColetas
+→ Admin preenche formulário (nome, endereço, horário/tipo, lat, lng) → POST /pontosColetas
+→ Edita ponto existente → PUT /pontosColetas/{id}
+→ Exclui ponto → DELETE /pontosColetas/{id}
+→ Mapa da home atualiza automaticamente (API com fallback hardcoded)
+```
+
+### 11. Resolver Denúncia com Punição
 ```
 Usuário logado → anuncio-detalhe.html → Clica "Denunciar"
 → Modal com tipo + motivo + descrição → POST /denuncias
@@ -295,7 +308,7 @@ admin.html → Aba "Denúncias" → GET /denuncias → Clica "Tomar Ação"
 → PATCH /denuncias/{id}/resolver → denúncia marcada como resolvida
 ```
 
-### 11. Gerenciar Restrições
+### 12. Gerenciar Restrições
 ```
 admin.html → Aba "Usuários Restritos" → GET /usuarios/bloqueados
 → Lista usuários com bloqueios ativos
@@ -564,4 +577,4 @@ Imagens de terceiros sujeitas às licenças dos respectivos provedores.
 
 **Desenvolvido com 💚 para a comunidade de Manaus**
 
-**Versão atualizada em Maio de 2026** — Inclui: Backend Java Spring Boot, REST API, PostgreSQL, Chat com Avatar e Notificações, Filtro por Múltiplas Categorias, Foto Obrigatória em Anúncios, Status Pendente/Rejeitado nos Cards, Pinos SVG no Mapa, Zonas de Manaus em Acordeão, Modal de Denúncia de Chat, Diagramas UML, Painel Administrativo, Sistema de Denúncias e Punições, Moderação de Anúncios
+**Versão atualizada em Maio de 2026** — Inclui: Backend Java Spring Boot, REST API, PostgreSQL, Chat com Avatar e Notificações, Filtro por Múltiplas Categorias, Foto Obrigatória em Anúncios, Status Pendente/Rejeitado nos Cards, Pinos SVG no Mapa, Lista Lateral de Pontos, Termos de Uso com PDF, Chatbot Interativo com Menu, CRUD de Pontos de Coleta no Admin, Persistência de Aba no Admin, Modal de Denúncia de Chat, Diagramas UML, Painel Administrativo, Sistema de Denúncias e Punições, Moderação de Anúncios

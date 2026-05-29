@@ -8,22 +8,51 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
     <link rel="stylesheet" href="../styles/style.css">
     <style>
-        .meus-main { padding-top: 80px; }
+        body { min-height: 100vh; display: flex; flex-direction: column; }
+        .meus-main { padding-top: 80px; flex: 1; }
 
         /* Hero */
         .meus-hero {
             background: linear-gradient(135deg, #059669 0%, #10B981 60%, #0077b6 100%);
-            padding: 3rem 5%;
+            padding: 3rem 5% 4.5rem;
             color: #fff;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+        .meus-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 22px 22px;
+            pointer-events: none;
+        }
+        .meus-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            clip-path: ellipse(52% 100% at 50% 100%);
+            pointer-events: none;
+        }
+        .meus-hero > * { position: relative; z-index: 1; }
         .meus-hero span {
-            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #d1fae5;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 2px;
-            color: rgba(255,255,255,0.75);
-            display: block;
-            margin-bottom: 0.4rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 0.75rem;
         }
         .meus-hero h1 {
             font-size: clamp(1.6rem, 3.5vw, 2.4rem);
@@ -534,19 +563,10 @@
         </div>
     </div>
 
-    <footer class="footer" style="margin-top:4rem;">
-        <div class="footer-container">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <img src="../assets/images/Logo.png" alt="EletroLight" width="32" height="32">
-                    <span>EletroLight</span>
-                </div>
-                <p>Conectando pessoas para um descarte consciente de eletrônicos em Manaus.</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 EletroLight. Todos os direitos reservados.</p>
-        </div>
+    <footer>
+        <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+        <p style="font-size: 0.85rem; opacity: 0.6; margin-top: 3px;">Contato: eletrolightsuporte@gmail.com</p>
     </footer>
 
     <script src="../scripts/api-service.js"></script>

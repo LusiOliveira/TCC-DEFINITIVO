@@ -1,6 +1,6 @@
 # 📋 EletroLight - Documento de Requisitos
 
-**Versão:** 1.4  
+**Versão:** 1.5  
 **Data:** Maio 2026  
 **Sistema:** Plataforma de Doação e Troca de Eletrônicos
 
@@ -84,6 +84,8 @@
 | RF-042 | O sistema deve permitir revogação de punições individualmente | Alta |
 | RF-043 | O sistema deve listar usuários com restrições ativas | Média |
 | RF-044 | O sistema deve permitir exclusão permanente de contas com confirmação | Alta |
+| RF-057 | O sistema deve permitir CRUD de pontos de coleta no painel administrativo | Alta |
+| RF-058 | O sistema deve manter a aba ativa do painel administrativo após recarregar a página | Média |
 
 ### 1.7 Módulo de Conteúdo Educativo
 
@@ -103,14 +105,22 @@
 | RF-051 | O sistema deve permitir navegação por clique nos pontos do mapa | Média |
 | RF-052 | O sistema deve sincronizar lista lateral com marcadores do mapa | Média |
 | RF-053 | O sistema deve exibir informações do ponto (nome, endereço, tipos aceitos) | Média |
+| RF-059 | O sistema deve exibir pontos de coleta de fallback em caso de indisponibilidade da API | Média |
 
-### 1.9 Módulo do Chatbot (Demonstrativo)
+### 1.9 Módulo do Chatbot (Funcional)
 
 | ID | Requisito | Prioridade |
 |---|---|---|
-| RF-054 | O sistema deve exibir chatbot flutuante com abertura/fechamento e resposta fixa de demonstração na página inicial | Baixa |
+| RF-054 | O sistema deve exibir chatbot flutuante com menu interativo por botões, respostas formatadas e fechamento ao clicar fora (somente em mobile) na página inicial | Média |
 
-### 1.10 Módulo de Conteúdo Educativo — Página Pública
+### 1.10 Módulo de Termos de Uso
+
+| ID | Requisito | Prioridade |
+|---|---|---|
+| RF-060 | O sistema deve exibir página de Termos de Uso com conteúdo explicativo sobre o projeto | Média |
+| RF-061 | O sistema deve permitir download do Termos de Uso em formato PDF | Baixa |
+
+### 1.11 Módulo de Conteúdo Educativo — Página Pública
 
 | ID | Requisito | Prioridade |
 |---|---|---|
@@ -152,6 +162,7 @@
 | RNF-016 | Navegação intuitiva | Menu fixo com âncoras |
 | RNF-018 | Contraste adequado | WCAG 2.1 AA |
 | RNF-019 | Carrossel com autoplay | 5 segundos entre slides |
+| RNF-031 | Chatbot fecha ao tocar fora da área em mobile | max-width: 768px |
 
 ### 2.4 Confiabilidade
 
@@ -269,6 +280,21 @@
 | RN-048 | Mapa centralizado em Manaus | Lat: -3.1190, Lng: -60.0217 |
 | RN-049 | Zoom padrão nível 12 | Balanced view |
 | RN-050 | Marcadores sincronizados com lista | Click em um destaca o outro |
+| RN-054 | Pontos de coleta são exibidos via API com fallback hardcoded de 12 ecopontos | Try/catch + array fallback |
+
+### 3.9 Chatbot
+
+| ID | Regra | Validação |
+|---|---|---|
+| RN-055 | Chatbot exibe menu principal com botões interativos e respostas formatadas | Botões dinâmicos |
+| RN-056 | Fechamento do chatbot ao clicar fora ocorre apenas em dispositivos mobile | matchMedia <=768px |
+
+### 3.10 Termos de Uso
+
+| ID | Regra | Validação |
+|---|---|---|
+| RN-057 | Termos de Uso são apresentados em página dedicada acessível sem login | Página pública |
+| RN-058 | Download do PDF requer geração dinâmica ou arquivo estático | Disponibilidade do arquivo |
 
 ---
 
@@ -276,10 +302,10 @@
 
 | Tipo | Quantidade |
 |------|------------|
-| Requisitos Funcionais | 50 |
-| Requisitos Não-Funcionais | 28 |
-| Regras de Negócio | 47 |
-| **Total** | **125** |
+| Requisitos Funcionais | 56 |
+| Requisitos Não-Funcionais | 29 |
+| Regras de Negócio | 51 |
+| **Total** | **136** |
 
 ---
 
@@ -292,3 +318,4 @@
 | 1.2 | Maio 2026 | Substituído polling por Supabase Realtime (websocket) para atualização do chat (RNF-004); adicionado autocomplete em campos de senha do perfil |
 | 1.3 | Maio 2026 | Migração documentada de Supabase para Spring Boot REST API (backend em Java + PostgreSQL); atualizadas categorias de anúncios (11 no total); ajustados campos de anúncio (marca e bairro); corrigidas referências de armazenamento de imagens (Base64 no banco) |
 | 1.4 | Maio 2026 | Removido RF-023 (notificação de aprovação/rejeição — não implementado); atualizadas categorias de conteúdo educativo para tipo (vídeo/artigo); adicionados RF-055/056 (página pública de conteúdos, thumbnail/link original); adicionados RN-051/052/053 (links e thumbnail de conteúdo); adicionado RNF-030 (Supabase Storage para thumbnails); ajustado RF-028 (foto de perfil no header do chat, não nas mensagens) |
+| 1.5 | Maio 2026 | Atualizado RF-054 (chatbot funcional com menu interativo e fechamento mobile); adicionados RF-057/058 (CRUD de pontos de coleta e persistência de aba no admin); adicionado RF-059 (fallback de pontos de coleta); adicionados RF-060/061 (Termos de Uso); adicionado RNF-031 (fechamento do chatbot em mobile); adicionadas RN-054 a RN-058 (regras de fallback, chatbot e Termos de Uso); versão e total atualizados |

@@ -125,19 +125,36 @@ function renderPonto(ponto) {
     listaPontosContainer.appendChild(card);
 }
 
+const PONTOS_COLETA_FALLBACK = [
+    { id: 'fb-1', nome: 'Ecoponto Parque do Mindu', latitude: -3.0850, longitude: -60.0050, endereco: 'Av. Perimetral, s/n - Parque 10 de Novembro, Manaus - AM', horario: 'Pilhas, Baterias e Portáteis' },
+    { id: 'fb-2', nome: 'Ecoponto Arena da Amazônia', latitude: -3.0758, longitude: -60.0264, endereco: 'Av. Constantino Nery, s/n - Flores, Manaus - AM', horario: 'Informática e Celulares' },
+    { id: 'fb-3', nome: 'Ecoponto Centro', latitude: -3.1317, longitude: -60.0231, endereco: 'R. dos Barés, 212 - Centro, Manaus - AM', horario: 'Pilhas, Baterias e Portáteis' },
+    { id: 'fb-4', nome: 'Ecoponto Praça da Saudade', latitude: -3.1010, longitude: -60.0120, endereco: 'Av. Andrés Araújo, s/n - Aleixo, Manaus - AM', horario: 'Eletrodomésticos de Grande Porte' },
+    { id: 'fb-5', nome: 'Ecoponto Cidade Nova', latitude: -3.0500, longitude: -60.0000, endereco: 'Av. Noel Nutels, s/n - Cidade Nova, Manaus - AM', horario: 'Informática e Celulares' },
+    { id: 'fb-6', nome: 'Ecoponto Compensa', latitude: -3.0950, longitude: -60.0400, endereco: 'Av. Torquato Tapajós, s/n - Compensa, Manaus - AM', horario: 'Pilhas, Baterias e Portáteis' },
+    { id: 'fb-7', nome: 'Ecoponto São Jorge', latitude: -3.0200, longitude: -60.0600, endereco: 'Av. Grande Circular, s/n - São Jorge, Manaus - AM', horario: 'Eletrodomésticos de Grande Porte' },
+    { id: 'fb-8', nome: 'Ecoponto Educandos', latitude: -3.1400, longitude: -60.0150, endereco: 'Av. 7 de Setembro, s/n - Educandos, Manaus - AM', horario: 'Informática e Celulares' },
+    { id: 'fb-9', nome: 'Ecoponto Tancredo Neves', latitude: -3.0600, longitude: -60.0200, endereco: 'Av. Tancredo Neves, s/n - Tancredo Neves, Manaus - AM', horario: 'Pilhas, Baterias e Portáteis' },
+    { id: 'fb-10', nome: 'Ecoponto Jorge Teixeira', latitude: -3.0300, longitude: -59.9800, endereco: 'Av. Cosme Ferreira, s/n - Jorge Teixeira, Manaus - AM', horario: 'Eletrodomésticos de Grande Porte' },
+    { id: 'fb-11', nome: 'Ecoponto Ponta Negra', latitude: -3.0700, longitude: -60.0800, endereco: 'Av. Cel. Teixeira, s/n - Ponta Negra, Manaus - AM', horario: 'Pilhas, Baterias e Portáteis' },
+    { id: 'fb-12', nome: 'Ecoponto Alvorada', latitude: -3.0900, longitude: -60.0500, endereco: 'Av. Mário Ypiranga, s/n - Alvorada, Manaus - AM', horario: 'Informática e Celulares' }
+];
+
 async function carregarPontosColeta() {
     if (!listaPontosContainer) return;
     try {
-        const pontos = await window.SupabaseService.getPontosColeta();
+        let pontos = await window.SupabaseService.getPontosColeta();
         listaPontosContainer.innerHTML = '';
         Object.values(marcadoresCriados).forEach(m => map.removeLayer(m));
-        (pontos || []).forEach(renderPonto);
+        if (!pontos || pontos.length === 0) {
+            pontos = PONTOS_COLETA_FALLBACK;
+        }
+        pontos.forEach(renderPonto);
     } catch (e) {
         console.error('Erro ao carregar pontos de coleta:', e);
-        listaPontosContainer.innerHTML = `<div class="empty-state" style="text-align:center;padding:2rem;color:#6B7280;">
-            <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:#DC2626;"></i>
-            <p>Erro ao carregar pontos de coleta.</p>
-        </div>`;
+        listaPontosContainer.innerHTML = '';
+        Object.values(marcadoresCriados).forEach(m => map.removeLayer(m));
+        PONTOS_COLETA_FALLBACK.forEach(renderPonto);
     }
 }
 
@@ -205,7 +222,7 @@ function mostrarMenuPrincipal() {
         { texto: 'Segurança', icone: 'fa-solid fa-shield-halved', resposta: 'Dicas de segurança nas trocas:\n\n• Encontre-se em locais públicos e movimentados\n• Leve alguém contigo\n• Verifique o item pessoalmente antes de trocar\n• Desconfie de ofertas muito abaixo do valor\n\nSe encontrar algo suspeito, denuncie!', acao: 'simples' },
         { texto: 'Denúncias', icone: 'fa-solid fa-flag', resposta: 'Como denunciar:\n\n• No anúncio: clique em "Denunciar" e escolha o motivo\n• No chat: use o menu de 3 pontos e "Denunciar conversa"\n\nNossa equipe analisa em até 48h e pode aplicar restrições ou excluir contas.', acao: 'simples' },
         { texto: 'E-lixo', icone: 'fa-solid fa-leaf', resposta: 'O e-lixo é um dos resíduos que mais cresce no mundo.\n\nDescartar incorretamente libera metais pesados no solo e rios.\n\nA EletroLight facilita:\n• Reutilização\n• Reparo\n• Reciclagem\n\nDoar ou trocar prolonga a vida útil dos aparelhos!', acao: 'simples' },
-        { texto: 'Sobre nós', icone: 'fa-solid fa-circle-info', resposta: 'A EletroLight é um projeto de extensão da UFAM focado em mitigação de e-lixo em Manaus.\n\nSomos uma plataforma digital sem fins lucrativos que conecta pessoas para doar e trocar eletrônicos usados, promovendo economia circular e consumo consciente.', acao: 'simples' },
+        { texto: 'Sobre nós', icone: 'fa-solid fa-circle-info', resposta: 'A EletroLight é um Trabalho de Conclusão de Curso focado em mitigação de e-lixo em Manaus.\n\nSomos uma plataforma digital sem fins lucrativos que conecta pessoas para doar e trocar eletrônicos usados, promovendo economia circular e consumo consciente.', acao: 'simples' },
         { texto: 'Contato', icone: 'fa-solid fa-envelope', resposta: 'Fale conosco:\n\n📧 eletrolightsuporte@gmail.com\n\nRespondemos em até 48 horas úteis.', acao: 'simples' },
     ]);
 }

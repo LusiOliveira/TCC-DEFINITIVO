@@ -12,17 +12,45 @@
 
         .todos-hero {
             background: linear-gradient(135deg, #059669 0%, #10B981 60%, #0077b6 100%);
-            padding: 3rem 5%;
+            padding: 3rem 5% 4.5rem;
             color: #fff;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+        .todos-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 22px 22px;
+            pointer-events: none;
+        }
+        .todos-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            clip-path: ellipse(52% 100% at 50% 100%);
+            pointer-events: none;
+        }
+        .todos-hero > * { position: relative; z-index: 1; }
         .todos-hero span {
-            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #d1fae5;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 2px;
-            color: rgba(255,255,255,0.75);
-            display: block;
-            margin-bottom: 0.4rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 0.75rem;
         }
         .todos-hero h1 {
             font-size: clamp(1.6rem, 3.5vw, 2.6rem);
@@ -125,6 +153,7 @@
             .busca-input-wrap { max-width: 100%; }
         }
     </style>
+    <style>body { min-height: 100vh; display: flex; flex-direction: column; } .todos-main { flex: 1; }</style>
 </head>
 <body>
 
@@ -197,6 +226,7 @@
     <footer>
         <p><i class="fa-solid fa-bolt"></i> Projeto EletroLight &copy; 2026</p>
         <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 5px;">Solução Digital para Consumo Consciente e Mitigação de E-Lixo.</p>
+        <p style="font-size: 0.85rem; opacity: 0.6; margin-top: 3px;">Contato: eletrolightsuporte@gmail.com</p>
     </footer>
 
     <script src="../scripts/api-service.js"></script>

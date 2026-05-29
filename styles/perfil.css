@@ -3,25 +3,55 @@
    ============================================= */
 
 .perfil-main {
-    padding-top: 80px;
+    padding-top: 0;
 }
 
 /* --- Hero --- */
 .perfil-hero {
-    background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%);
-    padding: 3rem 5%;
+    background: linear-gradient(135deg, #059669 0%, #10B981 60%, #0077b6 100%);
+    padding: calc(80px + 2.2rem) 5% 4rem;
     text-align: center;
     color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.perfil-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+}
+.perfil-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0; right: 0;
+    height: 60px;
+    background: #F9FAFB;
+    clip-path: ellipse(55% 100% at 50% 100%);
+    pointer-events: none;
+}
+.perfil-hero-content {
+    position: relative;
+    z-index: 1;
 }
 
 .perfil-hero-content .subtitle {
-    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #d1fae5;
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.8);
-    display: block;
-    margin-bottom: 0.5rem;
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
 }
 
 .perfil-hero-content h1 {
